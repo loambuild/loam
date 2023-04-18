@@ -1,0 +1,12 @@
+[package]
+name = "loam"
+version = "0.0.1"
+
+[workspace]
+resolver = "2"
+members = ["crates/*", "tests/soroban/*"]
+
+
+[workspace.dependencies]
+loam-sdk = { path = "./crates/loam-sdk" }
+macro-wrapper = { path = "./crates/macro-wrapper" }
