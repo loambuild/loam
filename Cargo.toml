@@ -1,0 +1,22 @@
+[workspace]
+resolver = "2"
+members = ["crates/*", "examples/soroban/*"]
+# exclude = ["examples/soroban/*"]
+
+
+[workspace.dependencies]
+loam-sdk = { path = "./crates/loam-sdk" }
+loam-sdk-core = { path = "./crates/loam-sdk-core" }
+loam-soroban-sdk = { path = "./crates/loam-soroban-sdk" }
+macro-wrapper = { path = "./crates/macro-wrapper" }
+
+[profile.test-wasms]
+inherits = "release"
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = true
+panic = "abort"
+codegen-units = 1
+lto = true
