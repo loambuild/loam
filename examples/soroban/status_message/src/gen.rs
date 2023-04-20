@@ -2,7 +2,7 @@ use loam_sdk::soroban_sdk::{
     self, contractimpl, get_env, log, set_env, Address, Env, Lazy, Map, String,
 };
 
-use crate::Messages;
+use crate::{Messages, Owner};
 
 pub struct SorobanContract;
 
@@ -27,5 +27,17 @@ impl SorobanContract {
         let mut this = Messages::get_lazy().unwrap_or_default();
         this.set(author, text);
         Messages::set_lazy(this);
+    }
+
+    pub fn owner_set(env: Env, owner: Address) {
+        set_env(env);
+        let mut this = Owner::get_lazy().unwrap_or_default();
+        this.set(owner);
+        Owner::set_lazy(this);
+    }
+    pub fn owner_get(env: Env) -> Option<Address> {
+        set_env(env);
+        let this = Owner::get_lazy().unwrap_or_default();
+        this.get()
     }
 }
