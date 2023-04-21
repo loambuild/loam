@@ -1,4 +1,8 @@
 [package]
-name = "loam-sdk-core"
+name = "loam-sdk-core-riffs"
 version = "0.1.0"
 edition = "2021"
+
+
+[dependencies]
+loam-sdk = { workspace = true, features = ["loam-soroban-sdk"] }

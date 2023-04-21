@@ -503,14 +503,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "loam-sdk-core"
+name = "loam-sdk-core-riffs"
 version = "0.1.0"
+dependencies = [
+ "loam-sdk",
+]
 
 [[package]]
 name = "loam-soroban-sdk"
 version = "0.1.0"
 dependencies = [
- "loam-sdk-core",
  "macro-wrapper",
  "soroban-sdk",
 ]

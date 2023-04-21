@@ -10,7 +10,6 @@ crate-type = ["rlib"]
 
 [dependencies]
 macro-wrapper = { workspace = true }
-loam-sdk-core = { workspace = true }
 
 [dependencies.soroban-sdk]
 version = "0.7.0"
