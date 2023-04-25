@@ -1,6 +1,7 @@
 #![no_std]
 // Currently need to import `self` because `contracttype` expects it in the namespace
 use loam_sdk::soroban_sdk::{self, contracttype, Address, IntoKey, Map, String};
+use loam_sdk_core_riffs::{owner::Owner, Ownable, Redeployable};
 
 pub mod gen;
 
@@ -19,3 +20,9 @@ impl Messages {
         self.0.set(author, text);
     }
 }
+
+impl Ownable for Messages {
+    type Impl = Owner;
+}
+
+impl Redeployable for Messages {}

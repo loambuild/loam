@@ -1,6 +1,7 @@
 use loam_sdk::soroban_sdk::{
-    self, contractimpl, get_env, log, set_env, Address, Env, Lazy, Map, String,
+    self, contractimpl, get_env, log, set_env, Address, BytesN, Env, Lazy, Map, String,
 };
+use loam_sdk_core_riffs::{Ownable, Redeployable};
 
 use crate::Messages;
 
@@ -27,5 +28,19 @@ impl SorobanContract {
         let mut this = Messages::get_lazy().unwrap_or_default();
         this.set(author, text);
         Messages::set_lazy(this);
+    }
+
+    pub fn owner_set(env: Env, owner: Address) {
+        set_env(env);
+        Messages::owner_set(owner);
+    }
+    pub fn owner_get(env: Env) -> Option<Address> {
+        set_env(env);
+        Messages::owner_get()
+    }
+
+    pub fn redeploy(env: Env, wasm_hash: BytesN<32>) {
+        set_env(env);
+        Messages::redeploy(wasm_hash)
     }
 }

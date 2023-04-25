@@ -1,5 +1,5 @@
-pub trait Lazy: Sized {
-    fn get_lazy() -> Option<Self>;
+pub mod owner;
+pub mod redeploy;
 
-    fn set_lazy(self);
-}
+pub use owner::Ownable;
+pub use redeploy::Redeployable;

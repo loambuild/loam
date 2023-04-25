@@ -1,4 +1,6 @@
 #![no_std]
+pub mod owner;
+
 pub use soroban_sdk::*;
 
 pub trait Lazy: Sized {

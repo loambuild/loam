@@ -6,11 +6,11 @@ members = ["crates/*", "examples/soroban/*"]
 
 [workspace.dependencies]
 loam-sdk = { path = "./crates/loam" }
-loam-sdk-core = { path = "./crates/loam-core" }
+loam-sdk-core-riffs = { path = "./crates/loam-core" }
 loam-soroban-sdk = { path = "./crates/loam-soroban" }
 macro-wrapper = { path = "./crates/macro-wrapper" }
 
-[profile.test-wasms]
+[profile.contracts]
 inherits = "release"
 opt-level = "z"
 overflow-checks = true

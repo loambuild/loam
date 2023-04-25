@@ -1,5 +1,6 @@
 [package]
-name = "example-status-message"
+name = "example-base"
+description = "Smallest Redeployable Contract"
 version = "0.0.0"
 authors = ["Stellar Development Foundation <info@stellar.org>"]
 license = "Apache-2.0"
