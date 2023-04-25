@@ -1,6 +1,7 @@
 #![no_std]
 // Currently need to import `self` because `contracttype` expects it in the namespace
 use loam_sdk::soroban_sdk::{self, contracttype, Address, IntoKey, Map, String};
+use loam_sdk_core_riffs::{owner::Owner, Ownable, Redeployable};
 
 pub mod gen;
 
@@ -20,31 +21,8 @@ impl Messages {
     }
 }
 
-#[contracttype]
-#[derive(IntoKey, Default)]
-pub struct Owner(OwnerKind);
-
-#[contracttype]
-#[derive(Default)]
-pub enum OwnerKind {
-    Address(Address),
-    #[default]
-    None,
+impl Ownable for Messages {
+    type Impl = Owner;
 }
 
-//#[loam]
-impl Owner {
-    pub fn get(&self) -> Option<Address> {
-        match &self.0 {
-            OwnerKind::Address(address) => Some(address.clone()),
-            OwnerKind::None => None,
-        }
-    }
-
-    pub fn set(&mut self, owner: Address) {
-        if let OwnerKind::Address(current_owner) = &self.0 {
-            current_owner.require_auth()
-        };
-        self.0 = OwnerKind::Address(owner);
-    }
-}
+impl Redeployable for Messages {}

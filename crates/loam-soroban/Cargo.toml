@@ -14,7 +14,7 @@ macro-wrapper = { workspace = true }
 [dependencies.soroban-sdk]
 version = "0.7.0"
 git = "https://github.com/stellar/rs-soroban-sdk"
-rev = "8abd3353c728f09ee1c8a2544f67a853e915afc2"
+rev = "d3c160e54430a37c795ed73618d6e084d6c0d8b6"
 features = ["alloc"]
 
 
