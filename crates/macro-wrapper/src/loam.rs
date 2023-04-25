@@ -22,6 +22,7 @@ pub fn generate(item: Item, attr: Option<AttributeArgs>) -> TokenStream {
     inner_generate(item, attr).unwrap_or_else(Into::into)
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn inner_generate(item: Item, _attr: Option<AttributeArgs>) -> Result<TokenStream, Error> {
     Ok(match &item {
         Item::Const(_) => todo!(),

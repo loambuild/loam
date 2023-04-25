@@ -4,6 +4,20 @@ A sdk and build tool for writting smart contracts in Rust on Wasm block chains.
 
 Currently the focus will be on Soroban, but the same ideas apply to other VMs.
 
+## Getting setup
+
+Need to install `just`
+
+```bash
+cargo install just
+```
+
+To see redeploy in action use
+
+```bash
+just redeploy
+```
+
 ## Contract Riff
 
 A contract riff (or mixin) is a type that implements the `IntoKey` trait which is used to lazyily load and store the type.
