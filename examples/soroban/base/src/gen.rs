@@ -18,6 +18,6 @@ impl SorobanContract {
 
     pub fn redeploy(env: Env, wasm_hash: BytesN<32>) {
         set_env(env);
-        Contract::redeploy(wasm_hash)
+        Contract::redeploy(wasm_hash);
     }
 }

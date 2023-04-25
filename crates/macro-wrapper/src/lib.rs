@@ -21,6 +21,5 @@ pub fn loam(attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn into_key(item: TokenStream) -> TokenStream {
     syn::parse::<Item>(item)
         .and_then(loam::into_key::from_item)
-        .map(Into::into)
-        .unwrap_or_else(|e| e.to_compile_error().into())
+        .map_or_else(|e| e.to_compile_error().into(), Into::into)
 }

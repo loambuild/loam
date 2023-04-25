@@ -37,7 +37,7 @@ where
     }
 
     fn set_lazy(self) {
-        get_env().storage().set(&Self::into_key(), &self)
+        get_env().storage().set(&Self::into_key(), &self);
     }
 }
 

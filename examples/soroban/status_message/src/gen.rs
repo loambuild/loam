@@ -41,6 +41,6 @@ impl SorobanContract {
 
     pub fn redeploy(env: Env, wasm_hash: BytesN<32>) {
         set_env(env);
-        Messages::redeploy(wasm_hash)
+        Messages::redeploy(wasm_hash);
     }
 }

@@ -2,12 +2,12 @@ use loam_sdk::soroban_sdk::{self, contracttype, Address, IntoKey, Lazy};
 
 #[contracttype]
 #[derive(IntoKey, Default)]
-pub struct Owner(OwnerKind);
+pub struct Owner(Kind);
 
 /// Work around not having `Option` in `contracttype`
 #[contracttype]
 #[derive(Default)]
-pub enum OwnerKind {
+pub enum Kind {
     Address(Address),
     #[default]
     None,
@@ -23,16 +23,13 @@ pub trait AnOwnable {
 impl AnOwnable for Owner {
     fn owner_get(&self) -> Option<Address> {
         match &self.0 {
-            OwnerKind::Address(address) => Some(address.clone()),
-            OwnerKind::None => None,
+            Kind::Address(address) => Some(address.clone()),
+            Kind::None => None,
         }
     }
 
     fn owner_set(&mut self, new_owner: Address) {
-        if let OwnerKind::Address(current_owner) = &self.0 {
-            current_owner.require_auth()
-        };
-        self.0 = OwnerKind::Address(new_owner);
+        self.0 = Kind::Address(new_owner);
     }
 }
 
@@ -47,6 +44,6 @@ pub trait Ownable {
             current_owner.require_auth();
         }
         impl_.owner_set(owner);
-        Self::Impl::set_lazy(impl_)
+        Self::Impl::set_lazy(impl_);
     }
 }
