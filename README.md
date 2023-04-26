@@ -190,6 +190,6 @@ impl SorobanContract {
 
 ```
 
-Since the two traits have default methods we only need to specify what the associated type is for `Ownable`. The reason this is not the default is so that it's possible to use a different implementation `AnOwner`.
+Since the two traits have default methods we only need to specify what the associated type is for `Ownable`. The reason this is not the default is so that it's possible to use a different implementation of `AnOwner`.
 
 Notice that the generated code calls `Contract::redeploy`, etc.  This ensures that the `Contract` type is redeployable, but also allows for extension since `Contract` could overwrite the default methods.
