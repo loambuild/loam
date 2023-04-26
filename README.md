@@ -12,6 +12,12 @@ Need to install `just`
 cargo install just
 ```
 
+Then setup:
+
+```bash
+just setup
+```
+
 To see redeploy in action use
 
 ```bash
