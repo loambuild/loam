@@ -15,11 +15,6 @@ pub enum Kind {
 
 //#[loam]
 
-pub trait AnOwnable {
-    fn owner_get(&self) -> Option<Address>;
-    fn owner_set(&mut self, new_owner: Address);
-}
-
 impl AnOwnable for Owner {
     fn owner_get(&self) -> Option<Address> {
         match &self.0 {
@@ -31,6 +26,11 @@ impl AnOwnable for Owner {
     fn owner_set(&mut self, new_owner: Address) {
         self.0 = Kind::Address(new_owner);
     }
+}
+
+pub trait AnOwnable {
+    fn owner_get(&self) -> Option<Address>;
+    fn owner_set(&mut self, new_owner: Address);
 }
 
 pub trait Ownable {
