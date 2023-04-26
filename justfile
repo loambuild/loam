@@ -16,7 +16,7 @@ setup:
 
 
 
-redeploy: build setup
+redeploy: build
     soroban config identity generate -d default --config-dir $CONFIG_DIR
     soroban contract deploy --id $DEFAULT_ID --wasm ./target/wasm32-unknown-unknown/contracts/example_base.wasm --config-dir $CONFIG_DIR
     soroban contract invoke --id $DEFAULT_ID --config-dir $CONFIG_DIR -- owner_set --owner default
