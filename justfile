@@ -5,7 +5,7 @@ export CONFIG_DIR := 'target/'
 hash := `soroban contract install --wasm ./target/wasm32-unknown-unknown/contracts/example_status_message.wasm --config-dir ./target`
 
 path:
-    echo ${PATH}
+    echo {{ if path_exists('target/bin/soroban') == "true" { "true" } else { "false" }  }}
 
 build:
     cargo build --package 'example*' --profile contracts --target wasm32-unknown-unknown

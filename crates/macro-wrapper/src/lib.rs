@@ -13,8 +13,8 @@ use syn::{AttributeArgs, Item};
 #[proc_macro_attribute]
 pub fn loam(attr: TokenStream, item: TokenStream) -> TokenStream {
     let attr: AttributeArgs = syn::parse_macro_input!(attr);
-    let item: Item = syn::parse(item).unwrap();
-    loam::generate(item, Some(attr)).into()
+    let parsed: Item = syn::parse(item).unwrap();
+    loam::generate(parsed, Some(attr)).into()
 }
 
 #[proc_macro_derive(IntoKey)]
