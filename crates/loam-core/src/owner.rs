@@ -1,4 +1,7 @@
-use loam_sdk::soroban_sdk::{self, contracttype, Address, IntoKey, Lazy};
+use loam_sdk::{
+    loam,
+    soroban_sdk::{self, contracttype, Address, IntoKey, Lazy},
+};
 
 #[contracttype]
 #[derive(IntoKey, Default)]
@@ -13,9 +16,7 @@ pub enum Kind {
     None,
 }
 
-//#[loam]
-
-impl AnOwnable for Owner {
+impl IsOwnable for Owner {
     fn owner_get(&self) -> Option<Address> {
         match &self.0 {
             Kind::Address(address) => Some(address.clone()),
@@ -28,22 +29,12 @@ impl AnOwnable for Owner {
     }
 }
 
-pub trait AnOwnable {
+#[loam]
+pub trait IsOwnable {
+    /// Get current owner
     fn owner_get(&self) -> Option<Address>;
+    /// Transfer ownership if already set.
+    /// Should be called in the same transaction as deploying the contract to ensure that
+    /// a different account doesn't claim ownership
     fn owner_set(&mut self, new_owner: Address);
-}
-
-pub trait Ownable {
-    type Impl: Lazy + AnOwnable + Default;
-    fn owner_get() -> Option<Address> {
-        Self::Impl::get_lazy()?.owner_get()
-    }
-    fn owner_set(owner: Address) {
-        let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
-        if let Some(current_owner) = impl_.owner_get() {
-            current_owner.require_auth();
-        }
-        impl_.owner_set(owner);
-        Self::Impl::set_lazy(impl_);
-    }
 }

@@ -1,3 +1,5 @@
+#![allow(clippy::semicolon_if_nothing_returned)]
+
 use loam_sdk::soroban_sdk::{self, contractimpl, set_env, Address, BytesN, Env};
 use loam_sdk_core_riffs::{Ownable, Redeployable};
 
@@ -9,7 +11,7 @@ pub struct SorobanContract;
 impl SorobanContract {
     pub fn owner_set(env: Env, owner: Address) {
         set_env(env);
-        Contract::owner_set(owner);
+        Contract::owner_set(owner)
     }
     pub fn owner_get(env: Env) -> Option<Address> {
         set_env(env);
@@ -18,6 +20,6 @@ impl SorobanContract {
 
     pub fn redeploy(env: Env, wasm_hash: BytesN<32>) {
         set_env(env);
-        Contract::redeploy(wasm_hash);
+        Contract::redeploy(wasm_hash)
     }
 }
