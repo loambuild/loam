@@ -1,0 +1,15 @@
+[package]
+name = "normal"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+loam-sdk = { path = "../../../loam" }
+riff-dep = { path = "../riff-dep" }
+other = { path = "../other" }
+macro-wrapper = { path = "../.." }
+loam-sdk-core-riffs = { path = "../../../loam-core" }

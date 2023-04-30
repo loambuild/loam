@@ -1,6 +1,6 @@
 use loam_sdk::{
     loam,
-    soroban_sdk::{self, contracttype, Address, IntoKey, Lazy},
+    soroban_sdk::{self, contracttype, get_env, Address, BytesN, IntoKey, Lazy},
 };
 
 #[contracttype]
@@ -27,14 +27,22 @@ impl IsOwnable for Owner {
     fn owner_set(&mut self, new_owner: Address) {
         self.0 = Kind::Address(new_owner);
     }
+
+    fn redeploy(&self, wasm_hash: BytesN<32>) {
+        self.owner_get().unwrap().require_auth();
+        get_env().update_current_contract_wasm(&wasm_hash);
+    }
 }
 
 #[loam]
 pub trait IsOwnable {
     /// Get current owner
-    fn owner_get(&self) -> Option<Address>;
+    fn owner_get(&self) -> Option<loam_sdk::soroban_sdk::Address>;
     /// Transfer ownership if already set.
     /// Should be called in the same transaction as deploying the contract to ensure that
     /// a different account doesn't claim ownership
-    fn owner_set(&mut self, new_owner: Address);
+    fn owner_set(&mut self, new_owner: loam_sdk::soroban_sdk::Address);
+
+    /// Owner can redepoly the contract with given hash.
+    fn redeploy(&self, wasm_hash: loam_sdk::soroban_sdk::BytesN<32>);
 }

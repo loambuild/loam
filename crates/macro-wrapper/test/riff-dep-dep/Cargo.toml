@@ -1,11 +1,13 @@
 [package]
-name = "loam-sdk-core-riffs"
+name = "riff-dep-dep"
 version = "0.1.0"
 edition = "2021"
+publish = false
 
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-loam-sdk = { workspace = true, features = ["loam-soroban-sdk"] }
 
 [package.metadata.riff]
 export = true

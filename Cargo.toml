@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "examples/soroban/*"]
-# exclude = ["examples/soroban/*"]
+members = ["crates/*", "examples/soroban/*", "crates/macro-wrapper/test/*"]
+exclude = ["crates/macro-wrapper/test/*"]
 
 
 [workspace.dependencies]

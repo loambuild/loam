@@ -2,10 +2,15 @@
 extern crate proc_macro;
 
 mod loam;
+mod util;
+
+use std::{env, path::PathBuf};
 
 use proc_macro::TokenStream;
 
 use syn::{AttributeArgs, Item};
+
+mod contract;
 
 /// The loam macro that generates interface needed for current target sdk.
 
@@ -22,4 +27,17 @@ pub fn into_key(item: TokenStream) -> TokenStream {
     syn::parse::<Item>(item)
         .and_then(loam::into_key::from_item)
         .map_or_else(|e| e.to_compile_error().into(), Into::into)
+}
+
+#[proc_macro]
+pub fn soroban_contract(_: TokenStream) -> TokenStream {
+    let dir = std::path::PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("Cargo.toml");
+    let deps = contract::get_loam_deps(&dir).unwrap();
+
+    let deps = deps
+        .iter()
+        .map(|i| PathBuf::from(i.0.to_string()))
+        .collect::<Vec<_>>();
+
+    contract::generate(&deps).into()
 }
