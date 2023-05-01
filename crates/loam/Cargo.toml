@@ -15,5 +15,5 @@ loam-soroban-sdk = { workspace = true, optional = true }
 
 [features]
 
-default = []
-soroban-sdk-testutils = ["loam-soroban-sdk", "loam-soroban-sdk/testutils"]
+default = ["loam-soroban-sdk"]
+soroban-sdk-testutils = ["loam-soroban-sdk/testutils"]

@@ -1,5 +1,5 @@
 [package]
-name = "loam-sdk-core-riff"
+name = "loam-sdk-ft"
 version = "0.1.0"
 edition = "2021"
 

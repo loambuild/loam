@@ -64,35 +64,25 @@ where
 Lastly the `Message` Riff can have external API:
 
 ```rust
-#[loam]
-impl Messages {
-    pub fn get(&self, author: Address) -> Option<String> {
-        self.0.get(author).transpose().unwrap()
-    }
+#[riff]
+pub trait IsPostable {
+    /// Documentation ends up in the contract's metadata and thus the CLI, etc
+    fn messages_get(&self, author: Address) -> Option<String>;
 
-    pub fn set(&mut self, author: Address, text: String) {
-        author.require_auth();
-        self.0.set(author, text);
-    }
+    /// Only the author can set the message
+    fn messages_set(&mut self, author: Address, text: String);
 }
 ```
 
-Generates to
-
 ```rust
-#[contractimpl]
-impl SorobanContract {
-    pub fn messages_get(env: Env, author: Address) -> Option<String> {
-        set_env(env);
-        let this = Messages::get_lazy()?;
-        this.get(author)
+impl IsPostable for Message {
+    fn messages_get(&self, author: Address) -> Option<String> {
+        self.0.get(author).transpose().unwrap()
     }
 
-    pub fn messages_set(env: Env, author: Address, text: String) {
-        set_env(env);
-        let mut this = Messages::get_lazy().unwrap_or_default();
-        this.set(author, text);
-        Messages::set_lazy(this);
+    fn messages_set(&mut self, author: Address, text: String) {
+        author.require_auth();
+        self.0.set(author, text);
     }
 }
 ```
@@ -102,79 +92,45 @@ impl SorobanContract {
 
 The minimum logic needed for a contract is for it to be redeployable; a contract should be able to be redeployed to a contract which can be redeployed.
 
-To be redeployed requires ownership since it would be bad for anyone to be able to redeploy the contract. Thus the two Riffs needed are `Ownable` and `Redeployable`
+To be redeployed requires ownership since it would be bad for account to be able to redeploy the contract.
 
-### `Ownable`
+### `CoreRiff`
 ```rust
 
 /// The trait that the instance riff must implement
-pub trait AnOwnable {
+pub trait IsCoreRiff {
     fn owner_get(&self) -> Option<Address>;
+    /// 
     fn owner_set(&mut self, new_owner: Address);
-}
-
-/// Contract level interface
-pub trait Ownable {
-    type Impl: Lazy + AnOwnable + Default;
-    // The associated type must be Lazy, to be loaded and set
-    // Must be `AnOwnable` so that the instance implements the needed methods
-    // Must implement default so that when setting the owner it can be constructed if not set
-
-    fn owner_get() -> Option<Address> {
-        Self::Impl::get_lazy()?.owner_get()
-    }
-    fn owner_set(owner: Address) {
-        let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
-        if let Some(current_owner) = impl_.owner_get() {
-            current_owner.require_auth();
-        }
-        impl_.owner_set(owner);
-        Self::Impl::set_lazy(impl_);
-    }
-}
-
-```
-
-### `Redeployable`
-
-The previous riff is stateful, however, the `Redeployable` is functional, though it depends on the contract being `Ownable`.
-
-```rust
-pub trait Redeployable: crate::Ownable {
-    fn redeploy(wasm_hash: BytesN<32>) {
-        /// Since `Self` is `Ownable` we can call `owner_get`
-        Self::owner_get().unwrap().require_auth();
-        get_env().update_current_contract_wasm(&wasm_hash);
-    }
+    /// Only the owne can redeploy the contract
+    fn redeploy(&mut self, wasm_hash: BytesN<32>);
 }
 ```
-
 
 ## Using the core riffs
 
-In the examples is the `base` contract, which just implements the base riffs. 
+In the examples is the `loam-sdk-core-riff` contract, which just implements the base riffs. 
 
 
 `lib.rs`:
 ```rust
 pub struct Contract;
 
-impl Ownable for Contract {
+impl CoreRiff for Contract {
     type Impl = Owner;
 }
 
-impl Redeployable for Contract {}
+
+soroban_contract!();
 ```
+generates:
 
-`gen.rs`
 ```rust
-use crate::Contract;
-
-pub struct SorobanContract;
+struct SorobanContract;
 
 #[contractimpl]
 impl SorobanContract {
-    pub fn owner_set(env: Env, owner: Address) {
+     pub fn owner_set(env: Env, owner: Address) {
         set_env(env);
         Contract::owner_set(owner);
     }
@@ -186,10 +142,13 @@ impl SorobanContract {
         set_env(env);
         Contract::redeploy(wasm_hash);
     }
+    // Riff methods would be inserted here.
+    // Contract must implement all Riffs and is the proxy for the contract calls.
+    // This is because the Riffs have default implementations which call the associated type
 }
 
 ```
 
-Since the two traits have default methods we only need to specify what the associated type is for `Ownable`. The reason this is not the default is so that it's possible to use a different implementation of `AnOwner`.
+Since the two traits have default methods we only need to specify what the associated type is for `CoreRiff`. The reason this is not the default is so that it's possible to use a different implementation of `IsCoreRiff`.
 
 Notice that the generated code calls `Contract::redeploy`, etc.  This ensures that the `Contract` type is redeployable, but also allows for extension since `Contract` could overwrite the default methods.

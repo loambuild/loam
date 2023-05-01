@@ -1,0 +1,14 @@
+[package]
+name = "riff-dep"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+riff-dep-dep = { path = "../riff-dep-dep" }
+
+[package.metadata.riff]
+export = true
