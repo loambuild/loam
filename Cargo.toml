@@ -6,9 +6,10 @@ exclude = ["crates/macro-wrapper/test/*"]
 
 [workspace.dependencies]
 loam-sdk = { path = "./crates/loam" }
-loam-sdk-core-riffs = { path = "./crates/loam-core" }
+loam-sdk-core-riff = { path = "./crates/loam-core" }
 loam-soroban-sdk = { path = "./crates/loam-soroban" }
 macro-wrapper = { path = "./crates/macro-wrapper" }
+loam-sdk-ft = { path = "./crates/loam-ft" }
 
 [profile.contracts]
 inherits = "release"

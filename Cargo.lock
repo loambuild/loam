@@ -402,7 +402,7 @@ name = "example-base"
 version = "0.0.0"
 dependencies = [
  "loam-sdk",
- "loam-sdk-core-riffs",
+ "loam-sdk-core-riff",
  "loam-soroban-sdk",
 ]
 
@@ -411,7 +411,16 @@ name = "example-calculator"
 version = "0.0.0"
 dependencies = [
  "loam-sdk",
- "loam-sdk-core-riffs",
+ "loam-sdk-core-riff",
+]
+
+[[package]]
+name = "example-ft"
+version = "0.0.0"
+dependencies = [
+ "loam-sdk",
+ "loam-sdk-core-riff",
+ "loam-sdk-ft",
 ]
 
 [[package]]
@@ -419,7 +428,7 @@ name = "example-status-message"
 version = "0.0.0"
 dependencies = [
  "loam-sdk",
- "loam-sdk-core-riffs",
+ "loam-sdk-core-riff",
 ]
 
 [[package]]
@@ -596,7 +605,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "loam-sdk-core-riffs"
+name = "loam-sdk-core-riff"
+version = "0.1.0"
+dependencies = [
+ "loam-sdk",
+]
+
+[[package]]
+name = "loam-sdk-ft"
 version = "0.1.0"
 dependencies = [
  "loam-sdk",
@@ -658,7 +674,7 @@ name = "normal"
 version = "0.1.0"
 dependencies = [
  "loam-sdk",
- "loam-sdk-core-riffs",
+ "loam-sdk-core-riff",
  "macro-wrapper",
  "other",
  "riff-dep",

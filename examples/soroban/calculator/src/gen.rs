@@ -1,5 +1,5 @@
 // use loam_sdk::soroban_sdk::{self, contractimpl, set_env, Address, BytesN, Env};
-// use loam_sdk_core_riffs::Ownable;
+// use loam_sdk_core_riff::Ownable;
 
 // use crate::{error::Error, Contract};
 

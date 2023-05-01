@@ -1,7 +1,7 @@
 // use loam_sdk::soroban_sdk::{
 //     self, contractimpl, get_env, log, set_env, Address, BytesN, Env, Lazy, Map, String,
 // };
-// use loam_sdk_core_riffs::{Ownable, Redeployable};
+// use loam_sdk_core_riff::{Ownable, Redeployable};
 
 // use crate::Messages;
 

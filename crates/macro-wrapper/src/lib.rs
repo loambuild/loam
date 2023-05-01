@@ -16,7 +16,7 @@ mod contract;
 
 /// ```
 #[proc_macro_attribute]
-pub fn loam(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn riff(attr: TokenStream, item: TokenStream) -> TokenStream {
     let attr: AttributeArgs = syn::parse_macro_input!(attr);
     let parsed: Item = syn::parse(item).unwrap();
     loam::generate(parsed, Some(attr)).into()

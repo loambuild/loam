@@ -12,4 +12,4 @@ loam-sdk = { path = "../../../loam" }
 riff-dep = { path = "../riff-dep" }
 other = { path = "../other" }
 macro-wrapper = { path = "../.." }
-loam-sdk-core-riffs = { path = "../../../loam-core" }
+loam-sdk-core-riff = { path = "../../../loam-core" }

@@ -82,7 +82,7 @@ pub fn get_deps(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     let stdout = output.stdout;
     let stdout_str = String::from_utf8(stdout).unwrap();
 
-    let res = stdout_str
+    let mut res = stdout_str
         .lines()
         .filter_map(|line| {
             let s: Vec<&str> = line.split(' ').collect();
@@ -96,6 +96,7 @@ pub fn get_deps(manifest_path: &Path) -> Result<Vec<Package>, Error> {
             res.map(Clone::clone)
         })
         .collect::<Vec<_>>();
+    res.push(p.clone());
     Ok(res)
 }
 
@@ -106,8 +107,9 @@ pub fn out_dir(target_dir: &Path, name: &str) -> PathBuf {
 pub fn get_loam_deps(manifest_path: &Path) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
     get_deps(manifest_path)?
         .into_iter()
-        .filter(Package::is_dep)
+        .filter(|p| p.is_dep() || p.manifest_path == manifest_path)
         .map(|p| {
+            println!("manifest {:?}, {}", manifest_path, p.name);
             let version = &p.version;
             let name = &p.name;
             let dir = PathBuf::from(format!("{name}{version}"));

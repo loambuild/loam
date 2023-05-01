@@ -1,2 +1,2 @@
 pub mod owner;
-pub use owner::Ownable;
+pub use owner::CoreRiff;

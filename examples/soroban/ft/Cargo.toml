@@ -1,5 +1,5 @@
 [package]
-name = "example-calculator"
+name = "example-ft"
 version = "0.0.0"
 authors = ["Stellar Development Foundation <info@stellar.org>"]
 license = "Apache-2.0"
@@ -13,6 +13,7 @@ doctest = false
 [dependencies]
 loam-sdk = { workspace = true, features = ["loam-soroban-sdk"] }
 loam-sdk-core-riff = { workspace = true }
+loam-sdk-ft = { workspace = true }
 
 
 [dev_dependencies]

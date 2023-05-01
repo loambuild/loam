@@ -1,5 +1,5 @@
 use loam_sdk::{
-    loam,
+    riff,
     soroban_sdk::{self, contracttype, get_env, Address, BytesN, IntoKey, Lazy},
 };
 
@@ -16,7 +16,7 @@ pub enum Kind {
     None,
 }
 
-impl IsOwnable for Owner {
+impl IsCoreRiff for Owner {
     fn owner_get(&self) -> Option<Address> {
         match &self.0 {
             Kind::Address(address) => Some(address.clone()),
@@ -25,6 +25,9 @@ impl IsOwnable for Owner {
     }
 
     fn owner_set(&mut self, new_owner: Address) {
+        if let Kind::Address(owner) = &self.0 {
+            owner.require_auth();
+        }
         self.0 = Kind::Address(new_owner);
     }
 
@@ -34,8 +37,8 @@ impl IsOwnable for Owner {
     }
 }
 
-#[loam]
-pub trait IsOwnable {
+#[riff]
+pub trait IsCoreRiff {
     /// Get current owner
     fn owner_get(&self) -> Option<loam_sdk::soroban_sdk::Address>;
     /// Transfer ownership if already set.

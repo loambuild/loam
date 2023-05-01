@@ -4,11 +4,11 @@ pub mod error;
 pub mod gen;
 
 use error::Error;
-use loam_sdk_core_riffs::{owner::Owner, Ownable};
+use loam_sdk_core_riff::{owner::Owner, CoreRiff};
 
 pub struct Contract;
 
-impl Ownable for Contract {
+impl CoreRiff for Contract {
     type Impl = Owner;
 }
 

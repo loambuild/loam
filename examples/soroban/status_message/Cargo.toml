@@ -12,7 +12,7 @@ doctest = false
 
 [dependencies]
 loam-sdk = { workspace = true, features = ["loam-soroban-sdk"] }
-loam-sdk-core-riffs = { workspace = true }
+loam-sdk-core-riff = { workspace = true }
 
 [dev_dependencies]
 loam-sdk = { workspace = true, features = ["soroban-sdk-testutils"] }
