@@ -87,7 +87,7 @@ pub trait IsFungible {
 
 #[riff]
 pub trait IsInitable {
-    /// Initialize ft token
+    /// Initialize ft Riff
     fn ft_init(
         &mut self,
         admin: loam_sdk::soroban_sdk::Address,

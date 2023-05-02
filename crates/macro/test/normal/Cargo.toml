@@ -11,5 +11,5 @@ crate-type = ["cdylib"]
 loam-sdk = { path = "../../../loam" }
 riff-dep = { path = "../riff-dep" }
 other = { path = "../other" }
-macro-wrapper = { path = "../.." }
+loam-sdk-macro = { path = "../.." }
 loam-sdk-core-riff = { path = "../../../loam-core" }

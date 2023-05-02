@@ -12,7 +12,7 @@ use syn::{AttributeArgs, Item};
 
 mod contract;
 
-/// The loam macro that generates interface needed for current target sdk.
+/// Generates a companion Trait which has a default type `Impl`, which implements this trait.
 
 /// ```
 #[proc_macro_attribute]
@@ -26,6 +26,13 @@ pub fn riff(attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn into_key(item: TokenStream) -> TokenStream {
     syn::parse::<Item>(item)
         .and_then(loam::into_key::from_item)
+        .map_or_else(|e| e.to_compile_error().into(), Into::into)
+}
+
+#[proc_macro_derive(Lazy)]
+pub fn lazy(item: TokenStream) -> TokenStream {
+    syn::parse::<Item>(item)
+        .and_then(loam::lazy::from_item)
         .map_or_else(|e| e.to_compile_error().into(), Into::into)
 }
 

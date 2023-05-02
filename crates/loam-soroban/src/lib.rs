@@ -41,4 +41,4 @@ where
     }
 }
 
-pub use macro_wrapper::IntoKey;
+pub use loam_sdk_macro::{IntoKey, Lazy};

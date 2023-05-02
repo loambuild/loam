@@ -2,16 +2,8 @@ use loam_sdk::{riff, soroban_sdk::Lazy};
 
 use crate::error::Error;
 
-#[derive(Default)]
+#[derive(Lazy, Default)]
 pub struct Calculator;
-
-impl Lazy for Calculator {
-    fn get_lazy() -> Option<Self> {
-        Some(Self)
-    }
-
-    fn set_lazy(self) {}
-}
 
 #[riff]
 pub trait IsCalc {

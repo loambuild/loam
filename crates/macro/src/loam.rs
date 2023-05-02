@@ -3,6 +3,7 @@ use quote::quote;
 use syn::{punctuated::Punctuated, Attribute, AttributeArgs, FnArg, Item, Signature, Token};
 
 pub mod into_key;
+pub mod lazy;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -190,9 +191,7 @@ fn inner_generate(item: Item, _attr: Option<AttributeArgs>) -> Result<TokenStrea
 #[cfg(test)]
 mod tests {
 
-    use std::{
-        io::{Read, Write},
-    };
+    use std::io::{Read, Write};
 
     /// Format the given snippet. The snippet is expected to be *complete* code.
     /// When we cannot parse the given snippet, this function returns `None`.
