@@ -1,5 +1,5 @@
 [package]
-name = "example-base"
+name = "example-core"
 description = "Smallest Redeployable Contract"
 version = "0.0.0"
 authors = ["Stellar Development Foundation <info@stellar.org>"]

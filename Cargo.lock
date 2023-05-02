@@ -398,20 +398,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0198b9d0078e0f30dedc7acbb21c974e838fc8fae3ee170128658a98cb2c1c04"
 
 [[package]]
-name = "example-base"
-version = "0.0.0"
-dependencies = [
- "loam-sdk",
- "loam-sdk-core-riff",
- "loam-soroban-sdk",
-]
-
-[[package]]
 name = "example-calculator"
 version = "0.0.0"
 dependencies = [
  "loam-sdk",
  "loam-sdk-core-riff",
+]
+
+[[package]]
+name = "example-core"
+version = "0.0.0"
+dependencies = [
+ "loam-sdk",
+ "loam-sdk-core-riff",
+ "loam-soroban-sdk",
 ]
 
 [[package]]

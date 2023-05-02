@@ -109,7 +109,6 @@ pub fn get_loam_deps(manifest_path: &Path) -> Result<Vec<(Utf8PathBuf, PathBuf)>
         .into_iter()
         .filter(|p| p.is_dep() || p.manifest_path == manifest_path)
         .map(|p| {
-            println!("manifest {:?}, {}", manifest_path, p.name);
             let version = &p.version;
             let name = &p.name;
             let dir = PathBuf::from(format!("{name}{version}"));

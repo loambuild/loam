@@ -1,32 +1,54 @@
-# Loam
+# Loam SDK
 
-A sdk and build tool for writting smart contracts in Rust on Wasm block chains.
+A Software Development Kit (SDK) and build tool for writing smart contracts in Rust on Wasm blockchains.
 
-Currently the focus will be on Soroban, but the same ideas apply to other VMs.
+Currently, the focus is on the Soroban VM, but the same ideas apply to other VMs.
 
-## Getting setup
+## Table of Contents
 
-Need to install `just`
+- [Getting Started](#getting-started)
+  - [Installation](#installation)
+  - [Setup](#setup)
+  - [Redeploy](#redeploy)
+- [Contract Riffs](#contract-riffs)
+  - [Creating Contract Riffs](#creating-contract-riffs)
+  - [External API](#external-api)
+- [CoreRiff](#coreriff)
+  - [Using the CoreRiff](#using-the-coreriff)
+
+## Getting Started
+
+### Installation
+
+To install `just`, run the following command:
 
 ```bash
 cargo install just
 ```
 
-Then setup:
+### Setup
+
+To set up the environment, run:
 
 ```bash
 just setup
 ```
 
-To see redeploy in action use
+### Redeploy
+
+To see redeployment in action, use:
 
 ```bash
 just redeploy
 ```
 
-## Contract Riff
+## Contract Riffs
 
-A contract riff (or mixin) is a type that implements the `IntoKey` trait which is used to lazyily load and store the type.
+A contract riff (or mixin) is a type that implements the `IntoKey` trait, which is used for lazily loading and storing the type.
+
+### Creating Contract Riffs
+
+Here's an example of how to create a contract riff:
 
 ```rust
 #[contracttype]
@@ -34,7 +56,7 @@ A contract riff (or mixin) is a type that implements the `IntoKey` trait which i
 pub struct Messages(Map<Address, String>);
 ```
 
-This will genereate 
+This generates the following implementation:
 
 ```rust
 impl IntoKey for Messages {
@@ -44,75 +66,26 @@ impl IntoKey for Messages {
     }
 ```
 
-Next since a `contracttype` implements the needed traits the following blanket implementation for the `Lazy` trait can implement:
+### External API
 
-```rust
-impl<T> Lazy for T
-where
-    T: IntoKey + TryFromVal<Env, RawVal> + IntoVal<Env, RawVal>,
-{
-    fn get_lazy() -> Option<Self> {
-        env().storage().get(&Self::into_key()).transpose().unwrap()
-    }
-
-    fn set_lazy(self) {
-        env().storage().set(&Self::into_key(), &self)
-    }
-}
-```
-
-Lastly the `Message` Riff can have external API:
+You can also create and implement external APIs for contract riffs:
 
 ```rust
 #[riff]
 pub trait IsPostable {
-    /// Documentation ends up in the contract's metadata and thus the CLI, etc
     fn messages_get(&self, author: Address) -> Option<String>;
-
-    /// Only the author can set the message
     fn messages_set(&mut self, author: Address, text: String);
 }
 ```
 
-```rust
-impl IsPostable for Message {
-    fn messages_get(&self, author: Address) -> Option<String> {
-        self.0.get(author).transpose().unwrap()
-    }
+## CoreRiff
 
-    fn messages_set(&mut self, author: Address, text: String) {
-        author.require_auth();
-        self.0.set(author, text);
-    }
-}
-```
+The `CoreRiff` trait provides the minimum logic needed for a contract to be redeployable. A contract should be able to be redeployed to another contract that can also be redeployed. Redeployment requires ownership, as it would be undesirable for an account to redeploy the contract without permission.
 
+### Using the CoreRiff
 
-## Core Riffs
+To use the core riff, create a `Contract` structure and implement the `CoreRiff` for it. The `Contract` type should be redeployable and allow for extensions.
 
-The minimum logic needed for a contract is for it to be redeployable; a contract should be able to be redeployed to a contract which can be redeployed.
-
-To be redeployed requires ownership since it would be bad for account to be able to redeploy the contract.
-
-### `CoreRiff`
-```rust
-
-/// The trait that the instance riff must implement
-pub trait IsCoreRiff {
-    fn owner_get(&self) -> Option<Address>;
-    /// 
-    fn owner_set(&mut self, new_owner: Address);
-    /// Only the owne can redeploy the contract
-    fn redeploy(&mut self, wasm_hash: BytesN<32>);
-}
-```
-
-## Using the core riffs
-
-In the examples is the `loam-sdk-core-riff` contract, which just implements the base riffs. 
-
-
-`lib.rs`:
 ```rust
 pub struct Contract;
 
@@ -120,10 +93,10 @@ impl CoreRiff for Contract {
     type Impl = Owner;
 }
 
-
 soroban_contract!();
 ```
-generates:
+
+This code generates the following implementation:
 
 ```rust
 struct SorobanContract;
@@ -146,9 +119,8 @@ impl SorobanContract {
     // Contract must implement all Riffs and is the proxy for the contract calls.
     // This is because the Riffs have default implementations which call the associated type
 }
-
 ```
 
-Since the two traits have default methods we only need to specify what the associated type is for `CoreRiff`. The reason this is not the default is so that it's possible to use a different implementation of `IsCoreRiff`.
+By specifying the associated type for `CoreRiff`, you enable the default methods to be used. However, you can also provide a different implementation of `IsCoreRiff` if needed.
 
-Notice that the generated code calls `Contract::redeploy`, etc.  This ensures that the `Contract` type is redeployable, but also allows for extension since `Contract` could overwrite the default methods.
+Notice that the generated code calls `Contract::redeploy` and other methods. This ensures that the `Contract` type is redeployable, while also allowing for extensions, as `Contract` can overwrite the default methods.

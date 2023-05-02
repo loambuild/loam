@@ -1,10 +1,12 @@
 #![no_std]
+use loam_sdk::{soroban_contract, soroban_sdk};
+use loam_sdk_core_riff::{owner::Owner, CoreRiff};
 
 pub mod error;
-pub mod gen;
+pub mod riff;
 
 use error::Error;
-use loam_sdk_core_riff::{owner::Owner, CoreRiff};
+use riff::{Calc, Calculator};
 
 pub struct Contract;
 
@@ -12,9 +14,8 @@ impl CoreRiff for Contract {
     type Impl = Owner;
 }
 
-//#[loam]
-impl Contract {
-    pub fn add_u32(a: u32, b: u32) -> Result<u32, Error> {
-        a.checked_add(b).ok_or(error::Error::Overflow)
-    }
+impl Calc for Contract {
+    type Impl = Calculator;
 }
+
+soroban_contract!();
