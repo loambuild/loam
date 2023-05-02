@@ -14,7 +14,7 @@ loam-sdk-macro = { workspace = true }
 [dependencies.soroban-sdk]
 version = "0.7.0"
 git = "https://github.com/stellar/rs-soroban-sdk"
-rev = "d3c160e54430a37c795ed73618d6e084d6c0d8b6"
+rev = "5d40b4c85660d918339e58aca43036e495a36280"
 features = ["alloc"]
 
 
