@@ -1,14 +1,14 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "examples/soroban/*", "crates/macro-wrapper/test/*"]
-exclude = ["crates/macro-wrapper/test/*"]
+members = ["crates/*", "examples/soroban/*", "crates/macro/test/*"]
+exclude = ["crates/macro/test/*"]
 
 
 [workspace.dependencies]
 loam-sdk = { path = "./crates/loam" }
 loam-sdk-core-riff = { path = "./crates/loam-core" }
 loam-soroban-sdk = { path = "./crates/loam-soroban" }
-macro-wrapper = { path = "./crates/macro-wrapper" }
+loam-sdk-macro = { path = "./crates/macro" }
 loam-sdk-ft = { path = "./crates/loam-ft" }
 
 [profile.contracts]

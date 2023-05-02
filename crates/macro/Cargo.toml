@@ -1,5 +1,5 @@
 [package]
-name = "macro-wrapper"
+name = "loam-sdk-macro"
 version = "0.0.1"
 edition = "2021"
 
@@ -14,4 +14,8 @@ Inflector = { version = "0.11.4", default-features = false, features = [] }
 thiserror = "1.0.38"
 syn-file-expand = "0.2.0"
 cargo_metadata = "0.15.4"
+
+[dev-dependencies]
+assert_fs = "1.0.13"
+
 # rustfmt = { package = "rustfmt-nightly", git = "https://github.com/rust-lang/rustfmt.git", version = "1.5.1" }

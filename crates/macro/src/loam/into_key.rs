@@ -1,12 +1,18 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::Item;
+use syn::{Fields, Item};
 
 pub(crate) fn from_item(item: Item) -> Result<TokenStream, syn::Error> {
+    let mut is_unit = false;
     let (name, generics) = match item {
         Item::Union(union_) => (union_.ident, union_.generics),
         Item::Enum(item) => (item.ident, item.generics),
-        Item::Struct(item) => (item.ident, item.generics),
+        Item::Struct(item) => {
+            if let Fields::Unit = item.fields {
+                is_unit = true;
+            }
+            (item.ident, item.generics)
+        }
         _ => {
             return Err(syn::Error::new(
                 Span::call_site(),
@@ -16,7 +22,13 @@ pub(crate) fn from_item(item: Item) -> Result<TokenStream, syn::Error> {
     };
     let name_str = name.to_string();
     let string = quote! { loam_sdk::soroban_sdk::String};
-    let body = quote! { #string::from_slice(loam_sdk::soroban_sdk::get_env(), #name_str)};
+    let body = if is_unit {
+        quote!{
+            
+        }
+    } else {
+        quote! { #string::from_slice(loam_sdk::soroban_sdk::get_env(), #name_str)}
+    };
 
     let (impl_generics, ty_generics, _) = generics.split_for_impl();
     Ok(quote! {
