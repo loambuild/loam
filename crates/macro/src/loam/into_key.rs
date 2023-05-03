@@ -23,11 +23,9 @@ pub(crate) fn from_item(item: Item) -> Result<TokenStream, syn::Error> {
     let name_str = name.to_string();
     let string = quote! { loam_sdk::soroban_sdk::String};
     let body = if is_unit {
-        quote!{
-            
-        }
+        quote! {}
     } else {
-        quote! { #string::from_slice(loam_sdk::soroban_sdk::get_env(), #name_str)}
+        quote! { #string::from_slice(loam_sdk::soroban_sdk::env(), #name_str)}
     };
 
     let (impl_generics, ty_generics, _) = generics.split_for_impl();

@@ -1,5 +1,5 @@
 use loam_sdk::{
-    soroban_sdk::{self, contracttype, get_env, Address, Bytes, Lazy, Map},
+    soroban_sdk::{self, contracttype, env, Address, Bytes, Lazy, Map},
     IntoKey,
 };
 use loam_sdk_core_riff::CoreRiff;
@@ -22,9 +22,9 @@ pub struct MyFungibleToken {
 impl MyFungibleToken {
     pub fn new(admin: Address, name: Bytes, symbol: Bytes, decimals: u32) -> Self {
         MyFungibleToken {
-            balances: Map::new(get_env()),
-            allowances: Map::new(get_env()),
-            authorized: Map::new(get_env()),
+            balances: Map::new(env()),
+            allowances: Map::new(env()),
+            authorized: Map::new(env()),
             admin,
             name,
             symbol,
@@ -35,9 +35,9 @@ impl MyFungibleToken {
 impl Default for MyFungibleToken {
     fn default() -> Self {
         Self::new(
-            get_env().current_contract_address(),
-            Bytes::new(get_env()),
-            Bytes::new(get_env()),
+            env().current_contract_address(),
+            Bytes::new(env()),
+            Bytes::new(env()),
             0,
         )
     }
