@@ -84,9 +84,12 @@ The `CoreRiff` trait provides the minimum logic needed for a contract to be rede
 
 ### Using the CoreRiff
 
-To use the core riff, create a `Contract` structure and implement the `CoreRiff` for it. The `Contract` type should be redeployable and allow for extensions.
+To use the core riff, create a `Contract` structure and implement the `CoreRiff` for it. The `Contract` will be redeployable and will be able to implement other Riffs.
 
 ```rust
+use loam_sdk::{soroban_contract, soroban_sdk};
+use loam_sdk_core_riff::{owner::Owner, CoreRiff};
+
 pub struct Contract;
 
 impl CoreRiff for Contract {
@@ -121,6 +124,6 @@ impl SorobanContract {
 }
 ```
 
-By specifying the associated type for `CoreRiff`, you enable the default methods to be used. However, you can also provide a different implementation of `IsCoreRiff` if needed.
+By specifying the associated `Impl` type for `CoreRiff`, you enable the default `Owner` methods to be used (`owner_set`, `owner_get`, `redeploy`). However, you can also provide a different implementation if needed by replacing `Owner` with a different struct/enum that also implements [IsCoreRiff](https://github.com/loambuild/loam-sdk/blob/5473bb20fb3c818e7c30652fadf66647760a408d/crates/loam-core/src/owner.rs#L41-L51).
 
 Notice that the generated code calls `Contract::redeploy` and other methods. This ensures that the `Contract` type is redeployable, while also allowing for extensions, as `Contract` can overwrite the default methods.
