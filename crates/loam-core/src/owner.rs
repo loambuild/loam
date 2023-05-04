@@ -1,6 +1,6 @@
 use loam_sdk::{
     riff,
-    soroban_sdk::{self, contracttype, get_env, Address, BytesN, IntoKey, Lazy},
+    soroban_sdk::{self, contracttype, env, Address, BytesN, IntoKey, Lazy},
 };
 
 #[contracttype]
@@ -33,7 +33,7 @@ impl IsCoreRiff for Owner {
 
     fn redeploy(&self, wasm_hash: BytesN<32>) {
         self.owner_get().unwrap().require_auth();
-        get_env().update_current_contract_wasm(&wasm_hash);
+        env().update_current_contract_wasm(&wasm_hash);
     }
 }
 

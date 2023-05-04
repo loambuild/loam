@@ -76,7 +76,7 @@ fn generate_method(
 ) -> TokenStream {
     let output = &sig.output;
     let inputs = sig.inputs.iter().skip(1);
-    let args_without_self = crate::loam::get_args_without_self(&sig.inputs);
+    let args_without_self = crate::riff::get_args_without_self(&sig.inputs);
     quote! {
         #(#attrs)*
         pub fn #name(env: loam_sdk::soroban_sdk::Env, #(#inputs),*) #output {
