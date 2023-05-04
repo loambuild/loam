@@ -164,23 +164,6 @@ fn inner_generate(item: Item, _attr: Option<AttributeArgs>) -> Result<TokenStrea
 
         };
         Ok(output)
-    } else if let Item::Struct(_) = &item {
-        let res = quote! {
-                #item
-                #[macro_export]
-        macro_rules! soroban_contract {
-            ($( $macr:tt )*) => {
-                struct SorobanContract;
-                #[soroban_sdk::contractimpl]
-                impl SorobanContract {
-                    paste::item! {
-                        $( $macr )*
-                    }
-                }
-            };
-        }
-            };
-        Ok(res)
     } else {
         Err(Error::Stream(
             quote! { compile_error!("Input must be a trait"); },
