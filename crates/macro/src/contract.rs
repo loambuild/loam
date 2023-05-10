@@ -51,7 +51,7 @@ pub fn generate(paths: &[PathBuf]) -> TokenStream {
         })
         .collect::<Vec<_>>();
     quote! {
-    struct SorobanContract;
+    pub struct SorobanContract;
     #[soroban_sdk::contractimpl]
     impl SorobanContract {
             #(#methods)*
