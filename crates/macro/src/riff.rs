@@ -1,6 +1,6 @@
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use syn::{punctuated::Punctuated, Attribute, AttributeArgs, FnArg, Item, Signature, Token};
+use syn::{punctuated::Punctuated, Attribute, FnArg, Item, Signature, Token};
 
 pub mod into_key;
 pub mod lazy;
@@ -19,8 +19,8 @@ impl From<Error> for TokenStream {
     }
 }
 
-pub fn generate(item: Item, attr: Option<AttributeArgs>) -> TokenStream {
-    inner_generate(item, attr).unwrap_or_else(Into::into)
+pub fn generate(item: Item) -> TokenStream {
+    inner_generate(item).unwrap_or_else(Into::into)
 }
 fn is_result_type(output: &syn::ReturnType) -> bool {
     if let syn::ReturnType::Type(_, ty) = output {
@@ -34,7 +34,7 @@ fn is_result_type(output: &syn::ReturnType) -> bool {
     false
 }
 fn generate_method(trait_item: &syn::TraitItem) -> Option<TokenStream> {
-    if let syn::TraitItem::Method(method) = trait_item {
+    if let syn::TraitItem::Fn(method) = trait_item {
         let sig = &method.sig;
         let name = &sig.ident;
         let output = &sig.output;
@@ -135,7 +135,7 @@ fn generate_mutable_method(
     }
 }
 
-fn inner_generate(item: Item, _attr: Option<AttributeArgs>) -> Result<TokenStream, Error> {
+fn inner_generate(item: Item) -> Result<TokenStream, Error> {
     if let Item::Trait(input_trait) = &item {
         let generated_methods = input_trait
             .items
@@ -215,54 +215,38 @@ mod tests {
                 fn owner_set_two(&mut self, new_owner: Address);
             }
         };
-        let result = generate(input, None);
+        let result = generate(input);
         println!("{}", format_snippet(&result.to_string()));
 
         let output = quote! {
-                    pub trait IsOwnable {
-                        /// Get current owner
-                        fn owner_get(&self) -> Option<Address>;
-                        fn owner_set(&mut self, new_owner: Address) -> Result<(), Error>;
-                        fn owner_set_two(&mut self, new_owner: Address);
-                    }
-                    pub trait Ownable {
-                        type Impl: Lazy + IsOwnable + Default;
-                        /// Get current owner
-                        fn owner_get() -> Option<Address> {
-                            Self::Impl::get_lazy().unwrap_or_default().owner_get()
-                        }
-                        fn owner_set(new_owner: Address) -> Result<(), Error> {
-                            let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
-                            let res = impl_.owner_set(new_owner)?;
-                            Self::Impl::set_lazy(impl_);
-                            Ok(res)
-                        }
-                        fn owner_set_two(new_owner: Address) {
-                            let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
-                            let res = impl_.owner_set_two(new_owner);
-                            Self::Impl::set_lazy(impl_);
-                            res
-                        }
-                    }
-                    #[macro_export]
-                    macro_rules! create_hello_world_function {
-                        ($contract_name:ident) => {
-                            pub fn owner_get(env: loam_sdk::soroban_sdk::Env) -> Option<Address> {
-                                set_env(env);
-                                $contract_name::owner_get()
-                            }
-                            pub fn owner_set(env: loam_sdk::soroban_sdk::Env, new_owner: Address) -> Result<(), Error>{
-                                set_env(env);
-                                $contract_name::owner_set(new_owner)
-                            }
-                            pub fn owner_set_two(env: loam_sdk::soroban_sdk::Env, new_owner: Address) {
-                                set_env(env);
-                                $contract_name::owner_set_two(new_owner)
-                            }
-                        };
-        }
+            pub trait IsOwnable {
+                /// Get current owner
+                fn owner_get(&self) -> Option<Address>;
+                fn owner_set(&mut self, new_owner: Address) -> Result<(), Error>;
+                fn owner_set_two(&mut self, new_owner: Address);
+            }
+            pub trait Ownable {
+                /// Type that implments the instance type
+                type Impl: Lazy + IsOwnable + Default;
+                /// Get current owner
+                fn owner_get() -> Option<Address> {
+                    Self::Impl::get_lazy().unwrap_or_default().owner_get()
+                }
+                fn owner_set(new_owner: Address) -> Result<(), Error> {
+                    let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
+                    let res = impl_.owner_set(new_owner)?;
+                    Self::Impl::set_lazy(impl_);
+                    Ok(res)
+                }
+                fn owner_set_two(new_owner: Address) {
+                    let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
+                    let res = impl_.owner_set_two(new_owner);
+                    Self::Impl::set_lazy(impl_);
+                    res
+                }
+            }
 
-                };
+        };
         equal_tokens(&output, &result);
         // let impl_ = syn::parse_str::<ItemImpl>(result.as_str()).unwrap();
         // println!("{impl_:#?}");
@@ -273,59 +257,43 @@ mod tests {
         let input: Item = syn::parse_quote! {
             pub trait IsRiff {
                 /// Get current owner
-                fn riff_get(&self) -> String;
+                fn riff_get(&self) -> Option<String>;
                 fn riff_set(&mut self, new_riff: Address) -> Result<(), Error>;
                 fn riff_set_two(&mut self, new_riff: Address);
             }
         };
-        let result = generate(input, None);
+        let result = generate(input);
         println!("{}", format_snippet(&result.to_string()));
 
         let output = quote! {
-                    pub trait IsRiff {
-                        /// Get current owner
-                        fn owner_get(&self) -> Option<Address>;
-                        fn owner_set(&mut self, new_owner: Address) -> Result<(), Error>;
-                        fn owner_set_two(&mut self, new_owner: Address);
-                    }
-                    pub trait Riff {
-                        type Impl: Lazy + IsRiff + Default;
-                        /// Get current owner
-                        fn owner_get() -> Option<Address> {
-                            Self::Impl::get_lazy().unwrap_or_default().owner_get()
-                        }
-                        fn owner_set(new_owner: Address) -> Result<(), Error> {
-                            let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
-                            let res = impl_.owner_set(new_owner)?;
-                            Self::Impl::set_lazy(impl_);
-                            Ok(res)
-                        }
-                        fn owner_set_two(new_owner: Address) {
-                            let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
-                            let res = impl_.owner_set_two(new_owner);
-                            Self::Impl::set_lazy(impl_);
-                            res
-                        }
-                    }
-                    #[macro_export]
-                    macro_rules! Riff_macro {
-                        ($contract_name:ident) => {
-                            pub fn owner_get(env: loam_sdk::soroban_sdk::Env) -> Option<Address> {
-                                set_env(env);
-                                $contract_name::owner_get()
-                            }
-                            pub fn owner_set(env: loam_sdk::soroban_sdk::Env, new_owner: Address) -> Result<(), Error>{
-                                set_env(env);
-                                $contract_name::owner_set(new_owner)
-                            }
-                            pub fn owner_set_two(env: loam_sdk::soroban_sdk::Env, new_owner: Address) {
-                                set_env(env);
-                                $contract_name::owner_set_two(new_owner)
-                            }
-                        };
-        }
+            pub trait IsRiff {
+                /// Get current owner
+                fn riff_get(&self) -> Option<String>;
+                fn riff_set(&mut self, new_riff: Address) -> Result<(), Error>;
+                fn riff_set_two(&mut self, new_riff: Address);
+            }
+            pub trait Riff {
+                /// Type that implments the instance type
+                type Impl: Lazy + IsRiff + Default;
+                /// Get current owner
+                fn riff_get() -> Option<String> {
+                    Self::Impl::get_lazy().unwrap_or_default().riff_get()
+                }
+                fn riff_set(new_riff: Address) -> Result<(), Error> {
+                    let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
+                    let res = impl_.riff_set(new_riff)?;
+                    Self::Impl::set_lazy(impl_);
+                    Ok(res)
+                }
+                fn riff_set_two(new_riff: Address) {
+                    let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
+                    let res = impl_.riff_set_two(new_riff);
+                    Self::Impl::set_lazy(impl_);
+                    res
+                }
+            }
 
-                };
+        };
         equal_tokens(&output, &result);
         // let impl_ = syn::parse_str::<ItemImpl>(result.as_str()).unwrap();
         // println!("{impl_:#?}");

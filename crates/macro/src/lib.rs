@@ -8,7 +8,7 @@ use std::{env, path::PathBuf};
 
 use proc_macro::TokenStream;
 
-use syn::{AttributeArgs, Item};
+use syn::Item;
 
 mod contract;
 
@@ -16,10 +16,9 @@ mod contract;
 
 /// ```
 #[proc_macro_attribute]
-pub fn riff(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let attr: AttributeArgs = syn::parse_macro_input!(attr);
+pub fn riff(_: TokenStream, item: TokenStream) -> TokenStream {
     let parsed: Item = syn::parse(item).unwrap();
-    riff::generate(parsed, Some(attr)).into()
+    riff::generate(parsed).into()
 }
 
 #[proc_macro_derive(IntoKey)]
