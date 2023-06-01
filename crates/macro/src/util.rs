@@ -1,14 +1,16 @@
 use std::path::Path;
 
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{File, ItemTrait};
 use syn_file_expand::read_full_crate_source_code;
 
 /// Read a crate starting from a single file then parse into a file
 pub fn parse_crate_as_file(path: &Path) -> Option<File> {
     if let Ok(file) = read_full_crate_source_code(path, |_| Ok(false)) {
-        Some(file)
+        let mut tokens = TokenStream::new();
+        file.to_tokens(&mut tokens);
+        syn::parse(tokens.into()).ok()
     } else {
         None
     }
@@ -16,7 +18,7 @@ pub fn parse_crate_as_file(path: &Path) -> Option<File> {
 
 pub fn has_macro(attrs: &[syn::Attribute], macro_name: &str) -> bool {
     for attr in attrs.iter() {
-        if format!("{:#?}", attr.path).contains(macro_name) {
+        if format!("{:#?}", attr.path()).contains(macro_name) {
             return true;
         }
     }
@@ -57,7 +59,7 @@ fn generate_methods(item: &ItemTrait) -> Vec<TokenStream> {
     item.items
         .iter()
         .filter_map(|item| {
-            if let syn::TraitItem::Method(method) = item {
+            if let syn::TraitItem::Fn(method) = item {
                 let sig = &method.sig;
                 let name = &sig.ident;
                 let attrs = &method.attrs;
