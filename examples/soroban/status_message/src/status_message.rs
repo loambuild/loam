@@ -25,7 +25,7 @@ pub trait IsPostable {
 
 impl IsPostable for StatusMessage {
     fn messages_get(&self, author: Address) -> Option<String> {
-        self.0.get(author).transpose().unwrap()
+        self.0.get(author)
     }
 
     fn messages_set(&mut self, author: Address, text: String) {

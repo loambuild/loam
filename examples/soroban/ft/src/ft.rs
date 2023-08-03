@@ -8,10 +8,13 @@ use loam_sdk_ft::{IsFungible, IsInitable};
 use crate::Contract;
 
 #[contracttype]
+pub struct Txn(Address,Address);
+
+#[contracttype]
 #[derive(IntoKey)]
 pub struct MyFungibleToken {
     balances: Map<Address, i128>,
-    allowances: Map<(Address, Address), i128>,
+    allowances: Map<Txn, i128>,
     authorized: Map<Address, bool>,
     admin: Address,
     name: Bytes,
@@ -53,23 +56,22 @@ impl IsInitable for MyFungibleToken {
 impl IsFungible for MyFungibleToken {
     fn allowance(&self, from: Address, spender: Address) -> i128 {
         self.allowances
-            .get((from, spender))
-            .unwrap()
-            .unwrap_or(0i128)
+            .get(Txn(from, spender))
+            .unwrap_or_default()
     }
 
     fn increase_allowance(&mut self, from: Address, spender: Address, amount: i128) {
         let new_allowance = self.allowance(from.clone(), spender.clone()) + amount;
-        self.allowances.set((from, spender), new_allowance);
+        self.allowances.set(Txn(from, spender), new_allowance);
     }
 
     fn decrease_allowance(&mut self, from: Address, spender: Address, amount: i128) {
         let new_allowance = self.allowance(from.clone(), spender.clone()) - amount;
-        self.allowances.set((from, spender), new_allowance);
+        self.allowances.set(Txn(from, spender), new_allowance);
     }
 
     fn balance(&self, id: Address) -> i128 {
-        self.balances.get(id).unwrap().unwrap_or(0)
+        self.balances.get(id).unwrap_or_default()
     }
 
     fn spendable_balance(&self, id: Address) -> i128 {
@@ -77,7 +79,7 @@ impl IsFungible for MyFungibleToken {
     }
 
     fn authorized(&self, id: Address) -> bool {
-        self.authorized.get(id).unwrap().unwrap_or(false)
+        self.authorized.get(id).unwrap_or_default()
     }
 
     fn transfer(&mut self, from: Address, to: Address, amount: i128) {

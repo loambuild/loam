@@ -23,14 +23,14 @@ pub fn env() -> &'static Env {
 
 impl<T> Lazy for T
 where
-    T: IntoKey + TryFromVal<Env, RawVal> + IntoVal<Env, RawVal>,
+    T: IntoKey + TryFromVal<Env, Val> + IntoVal<Env, Val>,
 {
     fn get_lazy() -> Option<Self> {
-        env().storage().get(&Self::into_key()).transpose().unwrap()
+        env().storage().persistent().get(&Self::into_key())
     }
 
     fn set_lazy(self) {
-        env().storage().set(&Self::into_key(), &self);
+        env().storage().persistent().set(&Self::into_key(), &self);
     }
 }
 
