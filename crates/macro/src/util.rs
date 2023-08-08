@@ -2,7 +2,7 @@ use std::path::Path;
 
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{File, ItemTrait};
+use syn::{File, ItemTrait, TraitItemFn};
 use syn_file_expand::read_full_crate_source_code;
 
 /// Read a crate starting from a single file then parse into a file
@@ -59,10 +59,8 @@ fn generate_methods(item: &ItemTrait) -> Vec<TokenStream> {
     item.items
         .iter()
         .filter_map(|item| {
-            if let syn::TraitItem::Fn(method) = item {
-                let sig = &method.sig;
+            if let syn::TraitItem::Fn(TraitItemFn{ sig, attrs, ..}) = item {
                 let name = &sig.ident;
-                let attrs = &method.attrs;
                 Some(generate_method(sig, attrs, name))
             } else {
                 None

@@ -10,5 +10,6 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 riff-dep-dep = { path = "../riff-dep-dep" }
 
-[package.metadata.riff]
-export = true
+
+[package.metadata.loam]
+riff = true

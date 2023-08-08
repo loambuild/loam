@@ -8,8 +8,12 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-loam-sdk = { path = "../../../loam" }
 riff-dep = { path = "../riff-dep" }
 other = { path = "../other" }
-loam-sdk-macro = { path = "../.." }
-loam-sdk-core-riff = { path = "../../../loam-core" }
+
+loam-sdk = { workspace = true }
+loam-sdk-macro = { workspace = true }
+loam-sdk-core-riff = { workspace = true }
+
+[package.metadata.loam]
+contract = true
