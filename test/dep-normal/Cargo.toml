@@ -1,0 +1,18 @@
+[package]
+name = "dep-normal"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+normal-dep = { path = "../normal-dep" }
+
+loam-sdk = { workspace = true }
+loam-sdk-macro = { workspace = true }
+loam-sdk-core-riff = { workspace = true }
+
+[package.metadata.loam]
+contract = true

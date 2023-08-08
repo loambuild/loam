@@ -12,9 +12,9 @@ crate-type = ["rlib"]
 loam-sdk-macro = { workspace = true }
 
 [dependencies.soroban-sdk]
-version = "0.8.4"
+version = "0.9.1"
 git = "https://github.com/stellar/rs-soroban-sdk"
-rev = "b983d06ba03f4066886735f7840c9c38d2d71ca9"
+rev = "b1cec10b79cee3c1ecf63079b1088ce97b32c68a"
 features = ["alloc"]
 
 

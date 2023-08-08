@@ -9,5 +9,5 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 
-[package.metadata.riff]
-export = true
+[package.metadata.loam]
+riff = true

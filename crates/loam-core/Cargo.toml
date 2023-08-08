@@ -7,5 +7,5 @@ edition = "2021"
 [dependencies]
 loam-sdk = { workspace = true, features = ["loam-soroban-sdk"] }
 
-[package.metadata.riff]
-export = true
+[package.metadata.loam]
+riff = true

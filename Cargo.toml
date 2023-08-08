@@ -1,15 +1,19 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "examples/soroban/*", "crates/macro/test/*"]
-exclude = ["crates/macro/test/*"]
+members = ["crates/*", "examples/soroban/*", "test/*"]
+exclude = ["test/*"]
 
 
 [workspace.dependencies]
 loam-sdk = { path = "./crates/loam" }
+loam-build = { path = "./crates/loam-build" }
 loam-sdk-core-riff = { path = "./crates/loam-core" }
 loam-soroban-sdk = { path = "./crates/loam-soroban" }
 loam-sdk-macro = { path = "./crates/macro" }
 loam-sdk-ft = { path = "./crates/loam-ft" }
+
+cargo_metadata = "0.15.4"
+thiserror = "1.0.38"
 
 [profile.contracts]
 inherits = "release"

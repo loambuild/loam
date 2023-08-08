@@ -38,7 +38,7 @@ pub fn lazy(item: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn soroban_contract(_: TokenStream) -> TokenStream {
     let dir = std::path::PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("Cargo.toml");
-    let deps = contract::get_loam_deps(&dir).unwrap();
+    let deps = loam_build::deps::get_riff_deps(&dir).unwrap();
 
     let deps = deps
         .iter()
