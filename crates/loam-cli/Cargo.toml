@@ -1,8 +1,8 @@
 [package]
 name = "loam-cli"
-description = "Soroban CLI"
-homepage = "https://github.com/stellar/soroban-cli"
-repository = "https://github.com/stellar/soroban-cli"
+description = "Loam CLI"
+homepage = "https://github.com/loambuild/loam-sdk"
+repository = "https://github.com/loambuild/loam-sdk"
 authors = ["Willem Wyndham <willem@ahalabs.dev>"]
 license = "Apache-2.0"
 readme = "README.md"
