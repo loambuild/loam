@@ -1,3 +1,4 @@
+#![allow(clippy::struct_excessive_bools)]
 use clap::Parser;
 use itertools::Itertools;
 use std::{
@@ -23,6 +24,9 @@ use cargo_metadata::{Metadata, MetadataCommand, Package};
 /// --print-commands-only option.
 #[derive(Parser, Debug, Clone)]
 pub struct Cmd {
+    /// List package names
+    #[arg(long, visible_alias = "ls")]
+    pub list: bool,
     /// Path to Cargo.toml
     #[arg(long, default_value = "Cargo.toml")]
     pub manifest_path: std::path::PathBuf,
@@ -88,6 +92,12 @@ impl Cmd {
         let metadata = self.metadata()?;
         let packages = self.packages(&metadata);
         let packages = loam_build::deps::get_workspace(&packages)?;
+        if self.list {
+            for p in packages {
+                println!("{}", p.name);
+            }
+            return Ok(());
+        }
         let target_dir = &metadata.target_directory;
 
         if let Some(package) = &self.package {
