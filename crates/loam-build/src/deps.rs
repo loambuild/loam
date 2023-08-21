@@ -1,13 +1,22 @@
 use std::{
     collections::{HashMap, HashSet},
     fmt::Display,
-    hash::{Hash, Hasher},
     path::{Path, PathBuf},
     process::Command,
 };
 
 use cargo_metadata::{camino::Utf8PathBuf, Package, PackageId};
 use topological_sort::TopologicalSort;
+
+pub fn get_target_dir(manifest_path: &Path) -> Result<PathBuf, cargo_metadata::Error> {
+    Ok(cargo_metadata::MetadataCommand::new()
+        .manifest_path(manifest_path)
+        .exec()?
+        .target_directory
+        .to_path_buf()
+        .into_std_path_buf()
+        .join("loam"))
+}
 
 pub trait PackageExt {
     fn is_dep(&self, key: &DepKind) -> bool;
@@ -39,7 +48,7 @@ pub enum Error {
     Metadata(#[from] cargo_metadata::Error),
 }
 
-pub fn get_deps(manifest_path: &Path) -> Result<Vec<Package>, Error> {
+pub fn all(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     let metadata = cargo_metadata::MetadataCommand::new()
         .manifest_path(manifest_path)
         .exec()?;
@@ -101,11 +110,8 @@ impl Display for DepKind {
     }
 }
 
-pub fn get_loam_deps(
-    manifest_path: &Path,
-    kind: DepKind,
-) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
-    get_deps(manifest_path)?
+pub fn loam(manifest_path: &Path, kind: DepKind) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
+    all(manifest_path)?
         .into_iter()
         .filter(|p| p.is_dep(&kind) || p.manifest_path == manifest_path)
         .map(|p| {
@@ -128,30 +134,21 @@ pub fn get_loam_deps(
         .map(Iterator::collect::<Vec<_>>)
 }
 
-pub fn get_riff_deps(manifest_path: &Path) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
-    get_loam_deps(manifest_path, DepKind::Riff)
+pub fn riff(manifest_path: &Path) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
+    loam(manifest_path, DepKind::Riff)
 }
 
-pub fn get_contract_deps(manifest_path: &Path) -> Result<Vec<Package>, Error> {
-    Ok(get_deps(manifest_path)?
+pub fn contract(manifest_path: &Path) -> Result<Vec<Package>, Error> {
+    Ok(all(manifest_path)?
         .into_iter()
         .filter(|p| p.is_dep(&DepKind::Contract) && p.manifest_path != manifest_path)
         .collect())
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct HashablePackage(Package);
-
-impl Hash for HashablePackage {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.manifest_path.hash(state);
-    }
-}
-
 pub fn get_workspace(packages: &[Package]) -> Result<Vec<Package>, Error> {
     let mut graph: TopologicalSort<PackageId> = TopologicalSort::new();
     for p in packages {
-        let contract_deps = get_contract_deps(&p.manifest_path.clone().into_std_path_buf())?;
+        let contract_deps = contract(&p.manifest_path.clone().into_std_path_buf())?;
         for dep in contract_deps {
             graph.add_dependency(dep.id.clone(), p.id.clone());
         }
@@ -180,9 +177,9 @@ mod tests {
         let metadata = c.exec().unwrap();
         let normal = metadata.root_package().unwrap();
         println!("{normal:#?}{}", normal.name);
-        let deps = get_deps(&manifest_path).unwrap();
+        let deps = all(&manifest_path).unwrap();
         println!("{deps:#?}\n{}", deps.len());
-        let deps = get_riff_deps(&manifest_path).unwrap();
+        let deps = riff(&manifest_path).unwrap();
         println!("{deps:#?}\n{}", deps.len());
     }
 }
