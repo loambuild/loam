@@ -27,7 +27,7 @@ path = "src/lib.rs"
 doctest = false
 
 [dependencies]
-loam-build = { workspace = true, version = "0.1.0" }
+loam-build = { workspace = true, version = "*" }
 clap = { version = "4.1.8", features = [
     "derive",
     "env",
