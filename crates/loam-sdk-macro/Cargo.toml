@@ -1,6 +1,6 @@
 [package]
 name = "loam-sdk-macro"
-version = "0.0.1"
+version.workspace = true
 edition = "2021"
 description = "Macros needed by loam-sdk"
 license = "Apache-2.0"
@@ -10,12 +10,12 @@ license = "Apache-2.0"
 proc-macro = true
 
 [dependencies]
-loam-build = { workspace = true }
+loam-build = { workspace = true, version = "*" }
 proc-macro2 = "1.0"
 syn = { version = "2", features = ["full", "fold", "extra-traits", "visit"] }
 quote = "1.0"
 Inflector = { version = "0.11.4", default-features = false, features = [] }
-thiserror = {workspace = true}
+thiserror = { workspace = true }
 syn-file-expand = "0.2.0"
 cargo_metadata = { workspace = true }
 
