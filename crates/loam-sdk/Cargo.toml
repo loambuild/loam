@@ -12,8 +12,8 @@ crate-type = ["rlib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-loam-sdk-macro = { workspace = true, version = "*" }
-loam-soroban-sdk = { workspace = true, optional = true, version = "*" }
+loam-sdk-macro = { workspace = true, version = "0.6.2" }
+loam-soroban-sdk = { workspace = true, optional = true, version = "0.6.2" }
 
 
 [features]
