@@ -6,6 +6,7 @@ publish = false
 
 [lib]
 crate-type = ["cdylib"]
+doctest = false
 
 [dependencies]
 riff-dep = { path = "../riff-dep" }

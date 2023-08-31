@@ -1,13 +1,15 @@
 [package]
 name = "loam-sdk-ft"
-version = "0.1.0"
+version.workspace = true
 edition = "2021"
 description = "A Riff for a fungible token"
 license = "Apache-2.0"
 
 
 [dependencies]
-loam-sdk = { workspace = true, features = ["loam-soroban-sdk"] }
+loam-sdk = { workspace = true, features = [
+    "loam-soroban-sdk",
+], version = "0.1.0" }
 
 [package.metadata.loam]
 riff = true

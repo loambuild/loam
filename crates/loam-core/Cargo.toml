@@ -1,13 +1,15 @@
 [package]
 name = "loam-sdk-core-riff"
-version = "0.1.0"
+version.workspace = true
 edition = "2021"
 description = "Core Riff for redeployable contracts"
 license = "Apache-2.0"
 
 
 [dependencies]
-loam-sdk = { workspace = true, features = ["loam-soroban-sdk"] }
+loam-sdk = { workspace = true, features = [
+    "loam-soroban-sdk",
+], version = "0.1.0" }
 
 [package.metadata.loam]
 riff = true
