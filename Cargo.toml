@@ -8,12 +8,12 @@ version = "0.6.2"
 
 
 [workspace.dependencies]
-loam-sdk = { path = "./crates/loam-sdk" }
-loam-build = { path = "./crates/loam-build" }
-loam-sdk-core-riff = { path = "./crates/loam-core" }
-loam-soroban-sdk = { path = "./crates/loam-soroban" }
-loam-sdk-macro = { path = "./crates/loam-sdk-macro" }
-loam-sdk-ft = { path = "./crates/loam-ft" }
+loam-sdk = { path = "./crates/loam-sdk", version = "*" }
+loam-build = { path = "./crates/loam-build", version = "*"}
+loam-sdk-core-riff = { path = "./crates/loam-core", version = "*" }
+loam-soroban-sdk = { path = "./crates/loam-soroban", version = "*"}
+loam-sdk-macro = { path = "./crates/loam-sdk-macro", version = "*"}
+loam-sdk-ft = { path = "./crates/loam-ft", version = "*"}
 
 cargo_metadata = "0.15.4"
 thiserror = "1.0.38"

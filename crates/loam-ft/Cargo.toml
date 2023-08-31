@@ -9,7 +9,7 @@ license = "Apache-2.0"
 [dependencies]
 loam-sdk = { workspace = true, features = [
     "loam-soroban-sdk",
-], version = "0.6.2" }
+] }
 
 [package.metadata.loam]
 riff = true
