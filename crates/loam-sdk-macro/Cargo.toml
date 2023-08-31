@@ -2,6 +2,9 @@
 name = "loam-sdk-macro"
 version = "0.0.1"
 edition = "2021"
+description = "Macros needed by loam-sdk"
+license = "Apache-2.0"
+
 
 [lib]
 proc-macro = true
