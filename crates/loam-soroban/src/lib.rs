@@ -5,6 +5,7 @@ pub mod into_key;
 
 pub use into_key::IntoKey;
 
+/// Trait for loading and setting a singleton type
 pub trait Lazy: Sized {
     fn get_lazy() -> Option<Self>;
 
