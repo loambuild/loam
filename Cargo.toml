@@ -4,7 +4,7 @@ members = ["crates/*", "examples/soroban/*", "test/*"]
 exclude = ["test/*"]
 
 [workspace.package]
-version = "0.6.2"
+version = "0.6.3"
 
 
 [workspace.dependencies]

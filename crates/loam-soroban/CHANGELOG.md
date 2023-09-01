@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3](https://github.com/loambuild/loam-sdk/compare/loam-soroban-sdk-v0.6.2...loam-soroban-sdk-v0.6.3) - 2023-09-01
+
+### Fixed
+- comment to trigger publishing ([#23](https://github.com/loambuild/loam-sdk/pull/23))
+- use alloc feature for soroban_sdk ([#21](https://github.com/loambuild/loam-sdk/pull/21))
+
+### Other
+- release ([#15](https://github.com/loambuild/loam-sdk/pull/15))
+
 ## [0.6.2](https://github.com/loambuild/loam-sdk/releases/tag/loam-soroban-sdk-v0.6.2) - 2023-08-31
 
 ### Added
