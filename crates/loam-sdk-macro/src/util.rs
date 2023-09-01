@@ -17,7 +17,7 @@ pub fn parse_crate_as_file(path: &Path) -> Option<File> {
 }
 
 pub fn has_macro(attrs: &[syn::Attribute], macro_name: &str) -> bool {
-    for attr in attrs.iter() {
+    for attr in attrs {
         if format!("{:#?}", attr.path()).contains(macro_name) {
             return true;
         }
