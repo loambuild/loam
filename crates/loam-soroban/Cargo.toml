@@ -16,6 +16,7 @@ loam-sdk-macro = { workspace = true }
 
 [dependencies.soroban-sdk]
 version = "0.9.2"
+features = ["alloc"]
 
 
 
