@@ -1,6 +1,6 @@
 [package]
 name = "loam-sdk-ft"
-version = "0.6.3"
+version = "0.6.4"
 edition = "2021"
 description = "A Riff for a fungible token"
 license = "Apache-2.0"
