@@ -10,7 +10,7 @@ license = "Apache-2.0"
 proc-macro = true
 
 [dependencies]
-loam-build = { workspace = true, version = "0.6.4" }
+loam-build = { path = "../loam-build", version = "0.6.5" }
 proc-macro2 = "1.0"
 syn = { version = "2", features = ["full", "fold", "extra-traits", "visit"] }
 quote = "1.0"

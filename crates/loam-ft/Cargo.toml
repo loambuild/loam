@@ -7,7 +7,7 @@ license = "Apache-2.0"
 
 
 [dependencies]
-loam-sdk = { workspace = true, version = "0.6.3", features = [
+loam-sdk = { path = "../loam-sdk", version = "0.6.3", features = [
     "loam-soroban-sdk",
 ] }
 
