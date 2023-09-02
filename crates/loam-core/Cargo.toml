@@ -1,6 +1,6 @@
 [package]
 name = "loam-sdk-core-riff"
-version.workspace = true
+version = "0.6.3"
 edition = "2021"
 description = "Core Riff for redeployable contracts"
 license = "Apache-2.0"
