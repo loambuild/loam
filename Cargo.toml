@@ -3,10 +3,6 @@ resolver = "2"
 members = ["crates/*", "examples/soroban/*", "test/*"]
 exclude = ["test/*"]
 
-[workspace.package]
-version = "0.6.4"
-
-
 [workspace.dependencies]
 loam-sdk = { path = "./crates/loam-sdk" }
 loam-build = { path = "./crates/loam-build"}
