@@ -13,11 +13,7 @@ crate-type = ["rlib"]
 
 [dependencies]
 loam-sdk-macro = { path = "../loam-sdk-macro", version = "0.6.4" }
-
-[dependencies.soroban-sdk]
-version = "0.9.2"
-features = ["alloc"]
-
+soroban-sdk = { version = "20.0.0-rc1", features = ["alloc"] }
 
 
 [features]

@@ -15,10 +15,7 @@ build_contract p:
 
 # build contracts
 build:
-    just build_contract example-core
-    just build_contract example-ft
-    just build_contract example-calculator
-    just build_contract example-status-message
+    cargo run -- build
 
 # Setup the project to use a pinned version of the CLI
 setup:
