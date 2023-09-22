@@ -1160,7 +1160,7 @@ dependencies = [
 
 [[package]]
 name = "loam-sdk"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "loam-sdk-macro",
  "loam-soroban-sdk",
@@ -1168,14 +1168,14 @@ dependencies = [
 
 [[package]]
 name = "loam-sdk-core-riff"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "loam-sdk",
 ]
 
 [[package]]
 name = "loam-sdk-ft"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "loam-sdk",
 ]
@@ -1197,7 +1197,7 @@ dependencies = [
 
 [[package]]
 name = "loam-soroban-sdk"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "loam-sdk-macro",
  "soroban-sdk",
