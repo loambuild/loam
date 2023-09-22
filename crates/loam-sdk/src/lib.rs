@@ -1,3 +1,4 @@
+#![no_std]
 pub use loam_sdk_macro::*;
 
 #[cfg(feature = "loam-soroban-sdk")]
