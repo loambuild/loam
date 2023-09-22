@@ -8,7 +8,7 @@ use loam_sdk::{
 pub struct Owner(Kind);
 
 fn owner_key() -> Symbol {
-    symbol_short!("owner")
+    symbol_short!("OWNER")
 }
 
 impl Lazy for Owner {
