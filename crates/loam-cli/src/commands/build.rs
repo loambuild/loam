@@ -88,9 +88,8 @@ pub enum Error {
 impl Cmd {
     pub fn run(&self) -> Result<(), Error> {
         let working_dir = env::current_dir().map_err(Error::GettingCurrentDir)?;
-
         let metadata = self.metadata()?;
-        let packages = self.packages(&metadata);
+        let packages = self.packages(&metadata)?;
         let packages = loam_build::deps::get_workspace(&packages)?;
         if self.list {
             for p in packages {
@@ -176,23 +175,32 @@ impl Cmd {
             .map(|f| f.split(&[',', ' ']).map(String::from).collect())
     }
 
-    fn packages(&self, metadata: &Metadata) -> Vec<Package> {
-        metadata
+    fn packages(&self, metadata: &Metadata) -> Result<Vec<Package>, Error> {
+        if let Some(package) = &self.package {
+            let package = metadata
+                .packages
+                .iter()
+                .find(|p| p.name == *package)
+                .ok_or_else(|| Error::PackageNotFound {
+                    package: package.clone(),
+                })?
+                .clone();
+            let manifest_path = package.manifest_path.clone().into_std_path_buf();
+            let mut contracts = loam_build::deps::contract(&manifest_path)?;
+            contracts.push(package);
+            return Ok(contracts);
+        }
+        Ok(metadata
             .packages
             .iter()
-            .filter(|p|
-                // Filter by the package name if one is provided.
-                self.package.is_none() || Some(&p.name) == self.package.as_ref())
             .filter(|p| {
-                // Filter crates by those that build to cdylib (wasm), unless a
-                // package is provided.
-                self.package.is_some()
-                    || p.targets
-                        .iter()
-                        .any(|t| t.crate_types.iter().any(|c| c == "cdylib"))
+                // Filter crates by those that build to cdylib (wasm)
+                p.targets
+                    .iter()
+                    .any(|t| t.crate_types.iter().any(|c| c == "cdylib"))
             })
             .cloned()
-            .collect()
+            .collect())
     }
 
     fn metadata(&self) -> Result<Metadata, cargo_metadata::Error> {
