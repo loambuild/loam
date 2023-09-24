@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.5](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.6.4...loam-cli-v0.6.5) - 2023-09-24
+
+### Fixed
+- ensure that deps of --package are built before specified package ([#31](https://github.com/loambuild/loam-sdk/pull/31))
+
 ## [0.6.4](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.6.3...loam-cli-v0.6.4) - 2023-09-01
 
 ### Fixed
