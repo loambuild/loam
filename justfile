@@ -19,8 +19,13 @@ build:
 
 # Setup the project to use a pinned version of the CLI
 setup:
-    -cargo install --root ./target soroban-cli --debug --version 0.8.0 soroban-cli
+    -cargo install --root ./target soroban-cli --debug --version 20.1.1 soroban-cli
 
+test: build
+    cargo test
+
+
+# # Builds contracts. Deploys core riff and then redep
 
 # # Builds contracts. Deploys core riff and then redeploys to status message.
 # redeploy: build
