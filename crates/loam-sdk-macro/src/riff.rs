@@ -209,10 +209,10 @@ mod tests {
     fn first() {
         let input: Item = syn::parse_quote! {
             pub trait IsOwnable {
-                /// Get current owner
-                fn owner_get(&self) -> Option<Address>;
-                fn owner_set(&mut self, new_owner: Address) -> Result<(), Error>;
-                fn owner_set_two(&mut self, new_owner: Address);
+                /// Get current admin
+                fn admin_get(&self) -> Option<Address>;
+                fn admin_set(&mut self, new_admin: Address) -> Result<(), Error>;
+                fn admin_set_two(&mut self, new_admin: Address);
             }
         };
         let result = generate(input);
@@ -220,27 +220,27 @@ mod tests {
 
         let output = quote! {
             pub trait IsOwnable {
-                /// Get current owner
-                fn owner_get(&self) -> Option<Address>;
-                fn owner_set(&mut self, new_owner: Address) -> Result<(), Error>;
-                fn owner_set_two(&mut self, new_owner: Address);
+                /// Get current admin
+                fn admin_get(&self) -> Option<Address>;
+                fn admin_set(&mut self, new_admin: Address) -> Result<(), Error>;
+                fn admin_set_two(&mut self, new_admin: Address);
             }
             pub trait Ownable {
                 /// Type that implments the instance type
                 type Impl: Lazy + IsOwnable + Default;
-                /// Get current owner
-                fn owner_get() -> Option<Address> {
-                    Self::Impl::get_lazy().unwrap_or_default().owner_get()
+                /// Get current admin
+                fn admin_get() -> Option<Address> {
+                    Self::Impl::get_lazy().unwrap_or_default().admin_get()
                 }
-                fn owner_set(new_owner: Address) -> Result<(), Error> {
+                fn admin_set(new_admin: Address) -> Result<(), Error> {
                     let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
-                    let res = impl_.owner_set(new_owner)?;
+                    let res = impl_.admin_set(new_admin)?;
                     Self::Impl::set_lazy(impl_);
                     Ok(res)
                 }
-                fn owner_set_two(new_owner: Address) {
+                fn admin_set_two(new_admin: Address) {
                     let mut impl_ = Self::Impl::get_lazy().unwrap_or_default();
-                    let res = impl_.owner_set_two(new_owner);
+                    let res = impl_.admin_set_two(new_admin);
                     Self::Impl::set_lazy(impl_);
                     res
                 }
@@ -256,7 +256,7 @@ mod tests {
     fn second() {
         let input: Item = syn::parse_quote! {
             pub trait IsRiff {
-                /// Get current owner
+                /// Get current admin
                 fn riff_get(&self) -> Option<String>;
                 fn riff_set(&mut self, new_riff: Address) -> Result<(), Error>;
                 fn riff_set_two(&mut self, new_riff: Address);
@@ -267,7 +267,7 @@ mod tests {
 
         let output = quote! {
             pub trait IsRiff {
-                /// Get current owner
+                /// Get current admin
                 fn riff_get(&self) -> Option<String>;
                 fn riff_set(&mut self, new_riff: Address) -> Result<(), Error>;
                 fn riff_set_two(&mut self, new_riff: Address);
@@ -275,7 +275,7 @@ mod tests {
             pub trait Riff {
                 /// Type that implments the instance type
                 type Impl: Lazy + IsRiff + Default;
-                /// Get current owner
+                /// Get current admin
                 fn riff_get() -> Option<String> {
                     Self::Impl::get_lazy().unwrap_or_default().riff_get()
                 }
