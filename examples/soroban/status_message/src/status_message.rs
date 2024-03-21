@@ -17,10 +17,10 @@ impl Default for StatusMessage {
 #[riff]
 pub trait IsPostable {
     /// Documentation ends up in the contract's metadata and thus the CLI, etc
-    fn messages_get(&self, author: soroban_sdk::Address) -> Option<soroban_sdk::String>;
+    fn messages_get(&self, author: loam_sdk::soroban_sdk::Address) -> Option<loam_sdk::soroban_sdk::String>;
 
     /// Only the author can set the message
-    fn messages_set(&mut self, author: soroban_sdk::Address, text: soroban_sdk::String);
+    fn messages_set(&mut self, author: loam_sdk::soroban_sdk::Address, text: loam_sdk::soroban_sdk::String);
 }
 
 impl IsPostable for StatusMessage {
