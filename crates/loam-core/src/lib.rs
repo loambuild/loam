@@ -1,3 +1,3 @@
 #![no_std]
-pub mod owner;
-pub use owner::CoreRiff;
+pub mod admin;
+pub use admin::CoreRiff;

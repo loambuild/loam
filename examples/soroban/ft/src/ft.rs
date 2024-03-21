@@ -48,7 +48,7 @@ impl Default for MyFungibleToken {
 
 impl IsInitable for MyFungibleToken {
     fn ft_init(&mut self, admin: Address, name: Bytes, symbol: Bytes, decimals: u32) {
-        Contract::owner_get().unwrap().require_auth();
+        Contract::admin_get().unwrap().require_auth();
         MyFungibleToken::set_lazy(MyFungibleToken::new(admin, name, symbol, decimals));
     }
 }
