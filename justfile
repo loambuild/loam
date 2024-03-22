@@ -41,6 +41,7 @@ create: build
 # # Builds contracts. Deploys core riff and then redep
 
 # # Builds contracts. Deploys core riff and then redeploys to status message.
+
 redeploy:
     soroban contract invoke -- admin_set --new_admin default
     soroban contract invoke -- --help
