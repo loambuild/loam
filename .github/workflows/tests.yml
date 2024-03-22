@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
         SOROBAN_RPC_URL: http://localhost:8000/soroban/rpc
+        SOROBAN_NETWORK_PASSPHRASE: "Standalone Network ; February 2017"
         SOROBAN_ACCOUNT: default
     services:
       rpc:
@@ -42,7 +43,7 @@ jobs:
     - uses: taiki-e/install-action@just
     - uses: cargo-bins/cargo-binstall@main
     - run: just setup
-    - run: just create
+    - run: just build
     # - run: cat .env
     # - run: just redeploy
     # - run: just test
