@@ -4,35 +4,45 @@ export PATH := './target/bin:' + env_var('PATH')
 export CONFIG_DIR := 'target/'
 # hash := `soroban contract install --wasm ./target/wasm32-unknown-unknown/contracts/example_status_message.wasm`
 
-export SOROBAN_CONTRACT_ID := '0'
+
 
 [private]
 path:
     just --list
+
+loam +args:
+    cargo run -- {{args}}
+
+s +args:
+    @soroban {{args}}
+
+soroban +args:
+    @soroban {{args}}
 
 build_contract p:
     soroban contract build --profile contracts --package {{p}}
 
 # build contracts
 build:
-    cargo run -- build
+    cargo run -- build --profile contracts --out-dir ./target/loam
 
 # Setup the project to use a pinned version of the CLI
 setup:
-    -cargo install --root ./target soroban-cli --debug --version 20.1.1 soroban-cli
+    -cargo binstall -y --install-path ./target/bin soroban-cli --version 20.3.1
 
 test: build
     cargo test
 
+create: build
+    rm -rf .soroban
+    soroban keys generate default
+    just soroban contract deploy --wasm ./target/loam/example_core.wasm | just loam update-env --name SOROBAN_CONTRACT_ID
 
 # # Builds contracts. Deploys core riff and then redep
 
 # # Builds contracts. Deploys core riff and then redeploys to status message.
-# redeploy: build
-#     rm -rf .soroban
-#     soroban config identity generate -d default
-#     soroban contract deploy --wasm ./target/wasm32-unknown-unknown/contracts/example_core.wasm
-#     soroban contract invoke -- owner_set --new_owner default
-#     soroban contract invoke -- --help
-#     soroban contract invoke -- redeploy --wasm_hash {{hash}}
-#     soroban contract invoke -- --help
+redeploy:
+    soroban contract invoke -- admin_set --new_admin default
+    soroban contract invoke -- --help
+    soroban contract invoke -- redeploy --wasm_hash $(soroban contract install --wasm ./target/loam/example_status_message.wasm)
+    soroban contract invoke -- --help

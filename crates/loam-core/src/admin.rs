@@ -5,19 +5,19 @@ use loam_sdk::{
 
 #[contracttype(export = false)]
 #[derive(Default)]
-pub struct Owner(Kind);
+pub struct Admin(Kind);
 
-fn owner_key() -> Symbol {
-    symbol_short!("OWNER")
+fn admin_key() -> Symbol {
+    symbol_short!("ADMIN")
 }
 
-impl Lazy for Owner {
+impl Lazy for Admin {
     fn get_lazy() -> Option<Self> {
-        env().storage().instance().get(&owner_key())
+        env().storage().instance().get(&admin_key())
     }
 
     fn set_lazy(self) {
-        env().storage().instance().set(&owner_key(), &self);
+        env().storage().instance().set(&admin_key(), &self);
     }
 }
 
@@ -30,36 +30,36 @@ pub enum Kind {
     None,
 }
 
-impl IsCoreRiff for Owner {
-    fn owner_get(&self) -> Option<Address> {
+impl IsCoreRiff for Admin {
+    fn admin_get(&self) -> Option<Address> {
         match &self.0 {
             Kind::Address(address) => Some(address.clone()),
             Kind::None => None,
         }
     }
 
-    fn owner_set(&mut self, new_owner: Address) {
-        if let Kind::Address(owner) = &self.0 {
-            owner.require_auth();
+    fn admin_set(&mut self, new_admin: Address) {
+        if let Admin(Kind::Address(admin)) = &self {
+            admin.require_auth();
         }
-        self.0 = Kind::Address(new_owner);
+        self.0 = Kind::Address(new_admin);
     }
 
     fn redeploy(&self, wasm_hash: BytesN<32>) {
-        self.owner_get().unwrap().require_auth();
+        self.admin_get().unwrap().require_auth();
         env().deployer().update_current_contract_wasm(wasm_hash);
     }
 }
 
 #[riff]
 pub trait IsCoreRiff {
-    /// Get current owner
-    fn owner_get(&self) -> Option<loam_sdk::soroban_sdk::Address>;
-    /// Transfer ownership if already set.
+    /// Get current admin
+    fn admin_get(&self) -> Option<loam_sdk::soroban_sdk::Address>;
+    /// Transfer to new admin
     /// Should be called in the same transaction as deploying the contract to ensure that
-    /// a different account doesn't claim ownership
-    fn owner_set(&mut self, new_owner: loam_sdk::soroban_sdk::Address);
+    /// a different account try to become admin
+    fn admin_set(&mut self, new_admin: loam_sdk::soroban_sdk::Address);
 
-    /// Owner can redepoly the contract with given hash.
+    /// Admin can redepoly the contract with given hash.
     fn redeploy(&self, wasm_hash: loam_sdk::soroban_sdk::BytesN<32>);
 }
