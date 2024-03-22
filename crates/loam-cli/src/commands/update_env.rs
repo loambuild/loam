@@ -26,7 +26,13 @@ pub enum Error {
 
 impl Cmd {
     pub fn run(&self) -> Result<(), Error> {
-        let env_file = fs::read_to_string(&self.env_file)?;
+        let file = &self.env_file;
+        let env_file = if file.exists() {
+            fs::read_to_string(file)?
+        } else {
+            String::new()
+        };
+
         let value = self.value.clone().unwrap_or_else(|| {
             // read from stdin
             std::io::stdin()
