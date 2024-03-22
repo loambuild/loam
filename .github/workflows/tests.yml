@@ -43,8 +43,8 @@ jobs:
     - uses: taiki-e/install-action@just
     - uses: cargo-bins/cargo-binstall@main
     - run: just setup
-    - run: just build
-    # - run: cat .env
-    # - run: just redeploy
-    # - run: just test
+    - run: just create
+    - run: cat .env
+    - run: just redeploy
+    - run: just test
 
