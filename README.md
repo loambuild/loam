@@ -6,15 +6,17 @@ Currently, the focus is on the Soroban VM, but the same ideas apply to other VMs
 
 ## Table of Contents
 
-- [Getting Started](#getting-started)
-  - [Installation](#installation)
-  - [Setup](#setup)
-  - [Redeploy](#redeploy)
-- [Contract Riffs](#contract-riffs)
-  - [Creating Contract Riffs](#creating-contract-riffs)
-  - [External API](#external-api)
-- [CoreRiff](#coreriff)
-  - [Using the CoreRiff](#using-the-coreriff)
+- [Loam SDK](#loam-sdk)
+  - [Table of Contents](#table-of-contents)
+  - [Getting Started](#getting-started)
+    - [Installation](#installation)
+    - [Setup](#setup)
+    - [Redeploy](#redeploy)
+  - [Contract Riffs](#contract-riffs)
+    - [Creating Contract Riffs](#creating-contract-riffs)
+    - [External API](#external-api)
+  - [CoreRiff](#coreriff)
+    - [Using the CoreRiff](#using-the-coreriff)
 
 ## Getting Started
 
@@ -80,7 +82,7 @@ pub trait IsPostable {
 
 ## CoreRiff
 
-The `CoreRiff` trait provides the minimum logic needed for a contract to be redeployable. A contract should be able to be redeployed to another contract that can also be redeployed. Redeployment requires ownership, as it would be undesirable for an account to redeploy the contract without permission.
+The `CoreRiff` trait provides the minimum logic needed for a contract to be redeployable. A contract should be able to be redeployed to another wasm binary that can also be redeployed. Redeployment requires the contract to have an admin, as it would be undesirable for any account to redeploy the contract.
 
 ### Using the CoreRiff
 
@@ -88,12 +90,12 @@ To use the core riff, create a `Contract` structure and implement the `CoreRiff`
 
 ```rust
 use loam_sdk::{soroban_contract, soroban_sdk};
-use loam_sdk_core_riff::{owner::Owner, CoreRiff};
+use loam_sdk_core_riff::{admin::Admin, CoreRiff};
 
 pub struct Contract;
 
 impl CoreRiff for Contract {
-    type Impl = Owner;
+    type Impl = Admin;
 }
 
 soroban_contract!();
@@ -106,13 +108,13 @@ struct SorobanContract;
 
 #[contractimpl]
 impl SorobanContract {
-     pub fn owner_set(env: Env, owner: Address) {
+     pub fn admin_set(env: Env, admin: Address) {
         set_env(env);
-        Contract::owner_set(owner);
+        Contract::admin_set(admin);
     }
-    pub fn owner_get(env: Env) -> Option<Address> {
+    pub fn admin_get(env: Env) -> Option<Address> {
         set_env(env);
-        Contract::owner_get()
+        Contract::admin_get()
     }
     pub fn redeploy(env: Env, wasm_hash: BytesN<32>) {
         set_env(env);
@@ -124,6 +126,6 @@ impl SorobanContract {
 }
 ```
 
-By specifying the associated `Impl` type for `CoreRiff`, you enable the default `Owner` methods to be used (`owner_set`, `owner_get`, `redeploy`). However, you can also provide a different implementation if needed by replacing `Owner` with a different struct/enum that also implements [IsCoreRiff](https://github.com/loambuild/loam-sdk/blob/5473bb20fb3c818e7c30652fadf66647760a408d/crates/loam-core/src/owner.rs#L41-L51).
+By specifying the associated `Impl` type for `CoreRiff`, you enable the default `Admin` methods to be used (`admin_set`, `admin_get`, `redeploy`). However, you can also provide a different implementation if needed by replacing `Admin` with a different struct/enum that also implements [IsCoreRiff](https://github.com/loambuild/loam-sdk/blob/5473bb20fb3c818e7c30652fadf66647760a408d/crates/loam-core/src/admin.rs#L41-L51).
 
 Notice that the generated code calls `Contract::redeploy` and other methods. This ensures that the `Contract` type is redeployable, while also allowing for extensions, as `Contract` can overwrite the default methods.

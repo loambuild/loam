@@ -32,7 +32,7 @@ test: build
 #     rm -rf .soroban
 #     soroban config identity generate -d default
 #     soroban contract deploy --wasm ./target/wasm32-unknown-unknown/contracts/example_core.wasm
-#     soroban contract invoke -- owner_set --new_owner default
+#     soroban contract invoke -- admin_set --new_admin default
 #     soroban contract invoke -- --help
 #     soroban contract invoke -- redeploy --wasm_hash {{hash}}
 #     soroban contract invoke -- --help
