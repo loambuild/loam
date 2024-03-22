@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0](https://github.com/loambuild/loam-sdk/compare/loam-sdk-core-riff-v0.6.5...loam-sdk-core-riff-v0.7.0) - 2024-03-22
+
+### Added
+- [**breaking**] rename Owner to Admin ([#37](https://github.com/loambuild/loam-sdk/pull/37))
+
+### Other
+- release
+
 ## [0.6.5](https://github.com/loambuild/loam-sdk/compare/loam-sdk-core-riff-v0.6.4...loam-sdk-core-riff-v0.6.5) - 2023-09-22
 
 ### Added
