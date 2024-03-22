@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0](https://github.com/loambuild/loam-sdk/compare/loam-sdk-macro-v0.6.4...loam-sdk-macro-v0.7.0) - 2024-03-22
+
+### Added
+- [**breaking**] rename Owner to Admin ([#37](https://github.com/loambuild/loam-sdk/pull/37))
+- use crate_path to use `loam_sdk::soroban_sdk` ([#38](https://github.com/loambuild/loam-sdk/pull/38))
+
 ## [0.6.4](https://github.com/loambuild/loam-sdk/compare/loam-sdk-macro-v0.6.3...loam-sdk-macro-v0.6.4) - 2023-09-01
 
 ### Fixed
