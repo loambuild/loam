@@ -46,4 +46,4 @@ redeploy:
     soroban contract invoke -- admin_set --new_admin default
     soroban contract invoke -- --help
     soroban contract invoke -- redeploy --wasm_hash $(soroban contract install --wasm ./target/loam/example_status_message.wasm)
-    soroban contract invoke -- --help
+    soroban contract invoke -- --help | grep messages_get || exit 1
