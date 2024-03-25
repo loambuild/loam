@@ -9,7 +9,7 @@ async fn main() {
         e.format(&mut cmd).exit();
     });
 
-    if let Err(e) = root.run() {
+    if let Err(e) = root.run().await {
         eprintln!("error: {e}");
         std::process::exit(1);
     }
