@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     name: test RPC
-    runs-on: self-hosted
+    runs-on: moss
     env:
         SOROBAN_RPC_URL: http://localhost:8000/soroban/rpc
         SOROBAN_NETWORK_PASSPHRASE: "Standalone Network ; February 2017"
