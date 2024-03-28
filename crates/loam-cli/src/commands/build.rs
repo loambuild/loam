@@ -57,7 +57,7 @@ pub struct Cmd {
     /// If provided, wasm files can be found in the cargo target directory, and
     /// the specified directory.
     ///
-    /// If ommitted, wasm files are written only to the cargo target directory.
+    /// If ommitted, wasm files are written only to `target/loam`.
     #[arg(long)]
     pub out_dir: Option<std::path::PathBuf>,
     /// Print commands to build without executing them
@@ -152,17 +152,19 @@ impl Cmd {
                     return Err(Error::Exit(status));
                 }
 
-                if let Some(out_dir) = &self.out_dir {
-                    fs::create_dir_all(out_dir).map_err(Error::CreatingOutDir)?;
+                let out_dir = self
+                    .out_dir
+                    .clone()
+                    .unwrap_or_else(|| Path::new(target_dir).join("loam"));
 
-                    let file = format!("{}.wasm", p.name.replace('-', "_"));
-                    let target_file_path = Path::new(target_dir)
-                        .join("wasm32-unknown-unknown")
-                        .join(&self.profile)
-                        .join(&file);
-                    let out_file_path = Path::new(out_dir).join(&file);
-                    fs::copy(target_file_path, out_file_path).map_err(Error::CopyingWasmFile)?;
-                }
+                fs::create_dir_all(&out_dir).map_err(Error::CreatingOutDir)?;
+                let file = format!("{}.wasm", p.name.replace('-', "_"));
+                let target_file_path = Path::new(target_dir)
+                    .join("wasm32-unknown-unknown")
+                    .join(&self.profile)
+                    .join(&file);
+                let out_file_path = out_dir.join(&file);
+                fs::copy(target_file_path, out_file_path).map_err(Error::CopyingWasmFile)?;
             }
         }
 
