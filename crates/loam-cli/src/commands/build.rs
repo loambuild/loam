@@ -164,7 +164,10 @@ impl Cmd {
                     .join(&self.profile)
                     .join(&file);
                 let out_file_path = out_dir.join(&file);
-                fs::copy(target_file_path, out_file_path).map_err(Error::CopyingWasmFile)?;
+                if !out_file_path.exists() {
+                    symlink::symlink_file(target_file_path, out_file_path)
+                        .map_err(Error::CopyingWasmFile)?;
+                }
             }
         }
 
