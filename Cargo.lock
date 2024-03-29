@@ -785,6 +785,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "example-dao"
+version = "0.0.0"
+dependencies = [
+ "loam-sdk",
+ "loam-sdk-core-riff",
+]
+
+[[package]]
 name = "example-ft"
 version = "0.0.0"
 dependencies = [
