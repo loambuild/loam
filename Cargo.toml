@@ -5,8 +5,8 @@ exclude = ["test/*"]
 
 [workspace.dependencies]
 loam-sdk = { path = "./crates/loam-sdk" }
-loam-build = { path = "./crates/loam-build" }
 loam-sdk-core-riff = { path = "./crates/loam-core" }
+loam-sdk-core-admins-riff = { path = "./crates/loam-core-admins" }
 loam-soroban-sdk = { path = "./crates/loam-soroban-sdk" }
 loam-sdk-macro = { path = "./crates/loam-sdk-macro" }
 loam-sdk-ft = { path = "./crates/loam-ft" }
