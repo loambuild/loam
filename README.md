@@ -1,129 +1,28 @@
-# Loam SDK
+# Loam
 
-A Software Development Kit (SDK) and build tool for writing smart contracts in Rust on Wasm blockchains.
+Loam is a set of tools:
+  1. Loam SDK - Create Smart Contracts for Soroban using smaller, more flexible building blocks called "Subcontracts".
+  2. Loam Frontend - Modern frontend tooling paired with a declarative environment configurations to help with local, test, and live blockchain networks.
+  3. Loam CLI - Build and deploy Loam Frontend to work with Smart Contracts.
 
-Currently, the focus is on the Soroban VM, but the same ideas apply to other VMs.
+This project is a mono repo containing code primarily for the Loam SDK but also for the Loam CLI, both of which share build code created because Smart contracts built with Loam often cannot be built correctly with a standard cargo build. They may have complex subcontract interdependencies that need to be resolved in the correct order. So, `loam-build` guarantees that subcontracts get compiled in the correct order. 
 
-## Table of Contents
+This readme primarily serves to direct you to more specific readme's.
 
-- [Getting Started](#getting-started)
-  - [Installation](#installation)
-  - [Setup](#setup)
-  - [Redeploy](#redeploy)
-- [Contract Riffs](#contract-riffs)
-  - [Creating Contract Riffs](#creating-contract-riffs)
-  - [External API](#external-api)
-- [CoreRiff](#coreriff)
-  - [Using the CoreRiff](#using-the-coreriff)
+# What is Loam SDK and what is Loam CLI?
 
-## Getting Started
+The Software Development Kit (SDK) and build tool is for writing smart contracts, using the concept  in Rust on Wasm blockchains. Currently, the focus is on the Soroban VM, but the same ideas apply to other VMs.
 
-### Installation
+The Command Line Interface (CLI) is for creating, developing, and deploying a loam project with a frontend using a file that defines network settings, accounts, and contracts.
 
-To install `just`, run the following command:
 
-```bash
-cargo install just
-```
+# Loam SDK and Loam CLI in Depth
+- [Loam SDK](crates/loam-sdk/README.md)
+  - [loam-subcontract-core](./crates/loam-subcontract-core) - The most basic form of a subcontract, creating an admin/ownsership trait.
+  - [loam-sdk-macro](crates/loam-sdk-macro/README.md)
+- [Loam CLI](crates/loam-cli/README.md)
+- [Loam Build](crates/loam-build/README.md)
 
-### Setup
-
-To set up the environment, run:
-
-```bash
-just setup
-```
-
-### Redeploy
-
-To see redeployment in action, use:
-
-```bash
-just redeploy
-```
-
-## Contract Riffs
-
-A contract riff (or mixin) is a type that implements the `IntoKey` trait, which is used for lazily loading and storing the type.
-
-### Creating Contract Riffs
-
-Here's an example of how to create a contract riff:
-
-```rust
-#[contracttype]
-#[derive(IntoKey)]
-pub struct Messages(Map<Address, String>);
-```
-
-This generates the following implementation:
-
-```rust
-impl IntoKey for Messages {
-    type Key = IntoVal<Env, RawVal>;
-    fn into_key() -> Self::Key {
-      String::from_slice("messages")
-    }
-```
-
-### External API
-
-You can also create and implement external APIs for contract riffs:
-
-```rust
-#[riff]
-pub trait IsPostable {
-    fn messages_get(&self, author: Address) -> Option<String>;
-    fn messages_set(&mut self, author: Address, text: String);
-}
-```
-
-## CoreRiff
-
-The `CoreRiff` trait provides the minimum logic needed for a contract to be redeployable. A contract should be able to be redeployed to another contract that can also be redeployed. Redeployment requires ownership, as it would be undesirable for an account to redeploy the contract without permission.
-
-### Using the CoreRiff
-
-To use the core riff, create a `Contract` structure and implement the `CoreRiff` for it. The `Contract` will be redeployable and will be able to implement other Riffs.
-
-```rust
-use loam_sdk::{soroban_contract, soroban_sdk};
-use loam_sdk_core_riff::{owner::Owner, CoreRiff};
-
-pub struct Contract;
-
-impl CoreRiff for Contract {
-    type Impl = Owner;
-}
-
-soroban_contract!();
-```
-
-This code generates the following implementation:
-
-```rust
-struct SorobanContract;
-
-#[contractimpl]
-impl SorobanContract {
-     pub fn owner_set(env: Env, owner: Address) {
-        set_env(env);
-        Contract::owner_set(owner);
-    }
-    pub fn owner_get(env: Env) -> Option<Address> {
-        set_env(env);
-        Contract::owner_get()
-    }
-    pub fn redeploy(env: Env, wasm_hash: BytesN<32>) {
-        set_env(env);
-        Contract::redeploy(wasm_hash);
-    }
-    // Riff methods would be inserted here.
-    // Contract must implement all Riffs and is the proxy for the contract calls.
-    // This is because the Riffs have default implementations which call the associated type
-}
-```
-
-By specifying the associated `Impl` type for `CoreRiff`, you enable the default `Owner` methods to be used (`owner_set`, `owner_get`, `redeploy`). However, you can also provide a different implementation if needed by replacing `Owner` with a different struct/enum that also implements [IsCoreRiff](https://github.com/loambuild/loam-sdk/blob/5473bb20fb3c818e7c30652fadf66647760a408d/crates/loam-core/src/owner.rs#L41-L51).
-
-Notice that the generated code calls `Contract::redeploy` and other methods. This ensures that the `Contract` type is redeployable, while also allowing for extensions, as `Contract` can overwrite the default methods.
+# Examples of Loam SDK Created Subcontracts
+- [Core Subcontract](examples/soroban/core) - This is required for the creation of all other subcontracts and can be seen in the other examples within [`examples/`](examples)
+- [Fungible Tokens Subcontract](examples/soroban/ft) - This contains the implementation of a Fungible Token Subcontract interface. Find the interface inside of [`crates/loam-subcontract-ft`](crates/loam-subcontract-ft)
