@@ -8,7 +8,7 @@ use loam_sdk_ft::{IsFungible, IsInitable};
 use crate::Contract;
 
 #[contracttype]
-pub struct Txn(Address,Address);
+pub struct Txn(Address, Address);
 
 #[contracttype]
 #[derive(IntoKey)]
@@ -55,9 +55,7 @@ impl IsInitable for MyFungibleToken {
 
 impl IsFungible for MyFungibleToken {
     fn allowance(&self, from: Address, spender: Address) -> i128 {
-        self.allowances
-            .get(Txn(from, spender))
-            .unwrap_or_default()
+        self.allowances.get(Txn(from, spender)).unwrap_or_default()
     }
 
     fn increase_allowance(&mut self, from: Address, spender: Address, amount: i128) {

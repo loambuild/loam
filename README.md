@@ -120,7 +120,7 @@ impl SorobanContract {
         set_env(env);
         Contract::redeploy(wasm_hash);
     }
-    // Riff methods would be inserted here.
+    // Other Subcontract methods would be inserted here.
     // Contract must implement all Riffs and is the proxy for the contract calls.
     // This is because the Riffs have default implementations which call the associated type
 }

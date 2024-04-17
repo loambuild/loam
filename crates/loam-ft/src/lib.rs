@@ -1,5 +1,5 @@
 #![no_std]
-use loam_sdk::{subcontract, soroban_sdk::Lazy};
+use loam_sdk::{soroban_sdk::Lazy, subcontract};
 /// The `IsFungible` trait defines methods for implementing a fungible token on the Soroban blockchain.
 /// Fungible tokens are assets that can be exchanged for one another, like a standard currency.
 #[subcontract]

@@ -42,7 +42,7 @@ impl TraitVisitor {
 
 impl<'ast> Visit<'ast> for TraitVisitor {
     fn visit_item_trait(&mut self, item: &'ast syn::ItemTrait) {
-        if has_macro(&item.attrs, "riff") {
+        if has_macro(&item.attrs, "subcontract") {
             self.functions.extend(generate_methods(item));
         }
     }
@@ -50,6 +50,7 @@ impl<'ast> Visit<'ast> for TraitVisitor {
 
 pub fn generate_soroban(file: &syn::File) -> TokenStream {
     let methods = TraitVisitor::find_items_in_file(file);
+    println!("methods: {methods:?}");
     quote! {
         #(#methods)*
     }
@@ -59,7 +60,7 @@ fn generate_methods(item: &ItemTrait) -> Vec<TokenStream> {
     item.items
         .iter()
         .filter_map(|item| {
-            if let syn::TraitItem::Fn(TraitItemFn{ sig, attrs, ..}) = item {
+            if let syn::TraitItem::Fn(TraitItemFn { sig, attrs, .. }) = item {
                 let name = &sig.ident;
                 Some(generate_method(sig, attrs, name))
             } else {

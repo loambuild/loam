@@ -5,8 +5,6 @@ use clap::{command, CommandFactory, FromArgMatches, Parser};
 pub mod build;
 pub mod update_env;
 
-
-
 const ABOUT: &str = "Build contracts and generate front ends";
 
 // long_about is shown when someone uses `--help`; short help when using `-h`
@@ -22,7 +20,6 @@ const LONG_ABOUT: &str = "";
 pub struct Root {
     // #[clap(flatten)]
     // pub global_args: global::Args,
-
     #[command(subcommand)]
     pub cmd: Cmd,
 }
@@ -63,7 +60,6 @@ pub enum Cmd {
     Build(build::Cmd),
     /// Update an environment variable in a .env file
     UpdateEnv(update_env::Cmd),
-    
 }
 
 #[derive(thiserror::Error, Debug)]

@@ -1,6 +1,9 @@
-use proc_macro2::{Ident, TokenStream};
+use itertools::Itertools;
+use proc_macro2::{Group, Ident, TokenStream, TokenTree};
 use quote::quote;
 use syn::{punctuated::Punctuated, Attribute, FnArg, Item, Signature, Token};
+
+use crate::contract;
 
 pub mod into_key;
 pub mod lazy;
@@ -171,6 +174,55 @@ fn inner_generate(item: Item) -> Result<TokenStream, Error> {
     }
 }
 
+pub fn derive_contract_impl(
+    args: TokenStream,
+    trait_impls: Item,
+    methods: &[TokenStream],
+) -> TokenStream {
+    let Item::Struct(strukt) = trait_impls else {
+        panic!("Expected a struct")
+    };
+    let mut impls = TokenStream::new();
+    let idents: Vec<(Ident, Ident)> = parse_idents(args);
+    println!("{idents:#?}");
+
+    for (first, second) in idents {
+        impls.extend(quote! {
+            impl #first for Contract {
+                type Impl = #second;
+            }
+        });
+    }
+    let outer_impl = contract::generate_boilerplate(strukt.ident.clone(), methods);
+    quote! {
+        #outer_impl
+        #impls
+    }
+}
+fn parse_idents(item: TokenStream) -> Vec<(Ident, Ident)> {
+    item.into_iter()
+        .filter_map(extract_ident)
+        .tuples()
+        .collect()
+}
+
+pub fn extract_ident(tt: TokenTree) -> Option<Ident> {
+    match tt {
+        TokenTree::Group(g) => Some(group_to_ident(&g)),
+        TokenTree::Ident(ident) => Some(ident),
+        _ => None,
+    }
+}
+
+fn group_to_ident(g: &Group) -> Ident {
+    let mut iter = g.stream().into_iter();
+    if let Some(TokenTree::Ident(ident)) = iter.next() {
+        ident
+    } else {
+        panic!("Expected an ident")
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -194,6 +246,7 @@ mod tests {
         child.wait().unwrap();
         let mut buf = String::new();
         child.stdout.unwrap().read_to_string(&mut buf).unwrap();
+        println!("\n\n\n{buf}\n\n\n");
         buf
     }
     use super::*;
@@ -301,5 +354,31 @@ mod tests {
     fn p_e(e: std::io::Error) -> std::io::Error {
         eprintln!("{e:#?}");
         e
+    }
+
+    #[test]
+    fn derive_contract() {
+        // let input: Item = syn::parse_quote! {
+        //     #[derive_contract(Core(Admin), Postable(StatusMessage))]
+        //     pub struct Contract;
+        // };
+        // println!("{input:#?}");
+        // let methods: [TokenStream; 0] = [];
+        // let result = derive_contract_impl(input, &methods);
+        // println!("{}", format_snippet(&result.to_string()));
+
+        // let output = quote! {
+        //     pub struct Contract;
+        //     impl Postable for Contract {
+        //         type Impl = StatusMessage;
+        //     }
+        //     impl Core for Contract {
+        //         type Impl = Admin;
+        //     }
+
+        // };
+        // equal_tokens(&output, &result);
+        // let impl_ = syn::parse_str::<ItemImpl>(result.as_str()).unwrap();
+        // println!("{impl_:#?}");
     }
 }

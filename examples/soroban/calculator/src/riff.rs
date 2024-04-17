@@ -1,7 +1,6 @@
 use loam_sdk::{
-    subcontract,
     soroban_sdk::{self, Lazy},
-    vec,
+    subcontract, vec,
 };
 
 use crate::error::Error;
