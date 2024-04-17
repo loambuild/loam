@@ -7,28 +7,28 @@ use quote::quote;
 use syn::Item;
 
 mod contract;
-mod riff;
+mod subcontract;
 mod util;
 
 /// Generates a companion Trait which has a default type `Impl`, which implements this trait.
 ///
 #[proc_macro_attribute]
-pub fn riff(_: TokenStream, item: TokenStream) -> TokenStream {
+pub fn subcontract(_: TokenStream, item: TokenStream) -> TokenStream {
     let parsed: Item = syn::parse(item).unwrap();
-    riff::generate(parsed).into()
+    subcontract::generate(parsed).into()
 }
 
 #[proc_macro_derive(IntoKey)]
 pub fn into_key(item: TokenStream) -> TokenStream {
     syn::parse::<Item>(item)
-        .and_then(riff::into_key::from_item)
+        .and_then(subcontract::into_key::from_item)
         .map_or_else(|e| e.to_compile_error().into(), Into::into)
 }
 
 #[proc_macro_derive(Lazy)]
 pub fn lazy(item: TokenStream) -> TokenStream {
     syn::parse::<Item>(item)
-        .and_then(riff::lazy::from_item)
+        .and_then(subcontract::lazy::from_item)
         .map_or_else(|e| e.to_compile_error().into(), Into::into)
 }
 

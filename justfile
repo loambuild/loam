@@ -11,7 +11,7 @@ path:
     just --list
 
 loam +args:
-    cargo run -- {{args}}
+    @cargo r -- {{args}}
 
 s +args:
     @soroban {{args}}
@@ -24,7 +24,7 @@ build_contract p:
 
 # build contracts
 build:
-    cargo run -- build --profile contracts --out-dir ./target/loam
+    just loam build --profile contracts --out-dir ./target/loam
 
 # Setup the project to use a pinned version of the CLI
 setup:

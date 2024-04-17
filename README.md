@@ -12,11 +12,11 @@ Currently, the focus is on the Soroban VM, but the same ideas apply to other VMs
     - [Installation](#installation)
     - [Setup](#setup)
     - [Redeploy](#redeploy)
-  - [Contract Riffs](#contract-riffs)
-    - [Creating Contract Riffs](#creating-contract-riffs)
+  - [Subcontracts](#subcontracts)
+    - [Creating SubContracts](#creating-subcontracts)
     - [External API](#external-api)
-  - [Core](#coreriff)
-    - [Using the Core](#using-the-coreriff)
+  - [Core](#core)
+    - [Using the Core](#using-the-core)
 
 ## Getting Started
 
@@ -44,11 +44,11 @@ To see redeployment in action, use:
 just redeploy
 ```
 
-## Contract Riffs
+## Subcontracts
 
-A contract riff (or mixin) is a type that implements the `IntoKey` trait, which is used for lazily loading and storing the type.
+A subcontract peice of a contract which is responsible for a subset of the contracts API.
 
-### Creating Contract Riffs
+### Creating SubContracts
 
 Here's an example of how to create a contract riff:
 
@@ -73,7 +73,7 @@ impl IntoKey for Messages {
 You can also create and implement external APIs for contract riffs:
 
 ```rust
-#[riff]
+#[subcontract]
 pub trait IsPostable {
     fn messages_get(&self, author: Address) -> Option<String>;
     fn messages_set(&mut self, author: Address, text: String);

@@ -1,5 +1,5 @@
 use loam_sdk::{
-    riff,
+    subcontract,
     soroban_sdk::{self, contracttype, env, symbol_short, Address, BytesN, Lazy, Symbol},
 };
 
@@ -51,7 +51,7 @@ impl IsCore for Admin {
     }
 }
 
-#[riff]
+#[subcontract]
 pub trait IsCore {
     /// Get current admin
     fn admin_get(&self) -> Option<loam_sdk::soroban_sdk::Address>;

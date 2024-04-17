@@ -7,10 +7,10 @@ pub mod update_env;
 
 
 
-const ABOUT: &str = "Build contracts";
+const ABOUT: &str = "Build contracts and generate front ends";
 
 // long_about is shown when someone uses `--help`; short help when using `-h`
-const LONG_ABOUT: &str = "LONG ABOUT";
+const LONG_ABOUT: &str = "";
 
 #[derive(Parser, Debug)]
 #[command(
