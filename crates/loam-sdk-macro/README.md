@@ -1,7 +1,6 @@
 # loam-sdk-macro
 
-This crate only contains macros. Macros generate the code necessary for a user to implement a Subcontract. Ultimately, this means a user
-only writes a few lines of code to create a Core Subcontract, allowing them to instead focus on other Subcontracts they'd like to create.
+This crate only contains macros. Macros generate the code necessary for a user to implement a Subcontract. Ultimately, this means a user only writes a few lines of code to create a Core Subcontract, allowing them to instead focus on other Subcontracts they'd like to create.
 
 These macros implement the key methods of a Core Subcontract, `subcontract`, `into_key`, `lazy`.
 
