@@ -1,5 +1,5 @@
 [package]
-name = "loam-sdk-subcontract-core"
+name = "loam-subcontract-core"
 version = "0.7.0"
 edition = "2021"
 description = "Core Subcontract for redeployable contracts"

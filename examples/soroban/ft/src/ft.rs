@@ -2,8 +2,8 @@ use loam_sdk::{
     soroban_sdk::{self, contracttype, env, Address, Bytes, Lazy, Map},
     IntoKey,
 };
-use loam_sdk_subcontract_core::Core;
-use loam_sdk_ft::{IsFungible, IsInitable};
+use loam_subcontract_core::Core;
+use loam_subcontract_ft::{IsFungible, IsInitable};
 
 use crate::Contract;
 

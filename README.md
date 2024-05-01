@@ -90,7 +90,7 @@ To use the core subcontract, create a `Contract` structure and implement the `Co
 
 ```rust
 use loam_sdk::{soroban_contract, soroban_sdk};
-use loam_sdk_subcontract_core::{admin::Admin, Core};
+use loam_subcontract_core::{admin::Admin, Core};
 
 pub struct Contract;
 

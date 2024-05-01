@@ -15,7 +15,7 @@ other = { path = "../other" }
 
 loam-sdk = { workspace = true }
 loam-sdk-macro = { workspace = true }
-loam-sdk-subcontract-core = { workspace = true }
+loam-subcontract-core = { workspace = true }
 
 [package.metadata.loam]
 contract = true

@@ -1,5 +1,5 @@
 [package]
-name = "loam-sdk-ft"
+name = "loam-subcontract-ft"
 version = "0.6.6"
 edition = "2021"
 description = "A Subcontract for a fungible token"
