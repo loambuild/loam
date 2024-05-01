@@ -13,4 +13,4 @@ riff-dep-dep = { path = "../riff-dep-dep" }
 
 
 [package.metadata.loam]
-riff = true
+subcontract = true

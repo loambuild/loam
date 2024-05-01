@@ -1,5 +1,5 @@
 use loam_sdk::{
-    riff,
+    subcontract,
     soroban_sdk::{self, contracttype, env, symbol_short, Address, BytesN, Lazy, Symbol},
 };
 
@@ -30,7 +30,7 @@ pub enum Kind {
     None,
 }
 
-impl IsCoreRiff for Admin {
+impl IsCore for Admin {
     fn admin_get(&self) -> Option<Address> {
         match &self.0 {
             Kind::Address(address) => Some(address.clone()),
@@ -51,8 +51,8 @@ impl IsCoreRiff for Admin {
     }
 }
 
-#[riff]
-pub trait IsCoreRiff {
+#[subcontract]
+pub trait IsCore {
     /// Get current admin
     fn admin_get(&self) -> Option<loam_sdk::soroban_sdk::Address>;
     /// Transfer to new admin

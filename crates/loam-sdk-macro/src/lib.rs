@@ -7,38 +7,38 @@ use quote::quote;
 use syn::Item;
 
 mod contract;
-mod riff;
+mod subcontract;
 mod util;
 
 /// Generates a companion Trait which has a default type `Impl`, which implements this trait.
 ///
 #[proc_macro_attribute]
-pub fn riff(_: TokenStream, item: TokenStream) -> TokenStream {
+pub fn subcontract(_: TokenStream, item: TokenStream) -> TokenStream {
     let parsed: Item = syn::parse(item).unwrap();
-    riff::generate(parsed).into()
+    subcontract::generate(parsed).into()
 }
 
 #[proc_macro_derive(IntoKey)]
 pub fn into_key(item: TokenStream) -> TokenStream {
     syn::parse::<Item>(item)
-        .and_then(riff::into_key::from_item)
+        .and_then(subcontract::into_key::from_item)
         .map_or_else(|e| e.to_compile_error().into(), Into::into)
 }
 
 #[proc_macro_derive(Lazy)]
 pub fn lazy(item: TokenStream) -> TokenStream {
     syn::parse::<Item>(item)
-        .and_then(riff::lazy::from_item)
+        .and_then(subcontract::lazy::from_item)
         .map_or_else(|e| e.to_compile_error().into(), Into::into)
 }
 
-/// Generates the soroban contract code combining all Riffs
+/// Generates the soroban contract code combining all Subcontracts
 #[proc_macro]
 pub fn soroban_contract(_: TokenStream) -> TokenStream {
     let cargo_file = manifest();
-    let riffs = loam_build::deps::riff(&cargo_file).unwrap();
+    let subcontract = loam_build::deps::subcontract(&cargo_file).unwrap();
 
-    let deps = riffs
+    let deps = subcontract
         .iter()
         .map(|i| i.0.to_path_buf().into_std_path_buf())
         .collect::<Vec<_>>();

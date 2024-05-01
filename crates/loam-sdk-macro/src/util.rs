@@ -42,7 +42,7 @@ impl TraitVisitor {
 
 impl<'ast> Visit<'ast> for TraitVisitor {
     fn visit_item_trait(&mut self, item: &'ast syn::ItemTrait) {
-        if has_macro(&item.attrs, "riff") {
+        if has_macro(&item.attrs, "subcontract") {
             self.functions.extend(generate_methods(item));
         }
     }
@@ -76,7 +76,7 @@ fn generate_method(
 ) -> TokenStream {
     let output = &sig.output;
     let inputs = sig.inputs.iter().skip(1);
-    let args_without_self = crate::riff::get_args_without_self(&sig.inputs);
+    let args_without_self = crate::subcontract::get_args_without_self(&sig.inputs);
     quote! {
         #(#attrs)*
         pub fn #name(env: loam_sdk::soroban_sdk::Env, #(#inputs),*) #output {

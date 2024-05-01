@@ -1,8 +1,8 @@
 #![no_std]
-use loam_sdk::{riff, soroban_sdk::Lazy};
+use loam_sdk::{subcontract, soroban_sdk::Lazy};
 /// The `IsFungible` trait defines methods for implementing a fungible token on the Soroban blockchain.
 /// Fungible tokens are assets that can be exchanged for one another, like a standard currency.
-#[riff]
+#[subcontract]
 pub trait IsFungible {
     /// Determines the amount of tokens that one address is allowed to spend on behalf of another address.
     fn allowance(
@@ -86,9 +86,9 @@ pub trait IsFungible {
     fn symbol(&self) -> loam_sdk::soroban_sdk::Bytes;
 }
 
-#[riff]
+#[subcontract]
 pub trait IsInitable {
-    /// Initialize ft Riff
+    /// Initialize ft Subcontract
     fn ft_init(
         &mut self,
         admin: loam_sdk::soroban_sdk::Address,

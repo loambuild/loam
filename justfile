@@ -11,7 +11,7 @@ path:
     just --list
 
 loam +args:
-    cargo run -- {{args}}
+    @cargo r -- {{args}}
 
 s +args:
     @soroban {{args}}
@@ -24,7 +24,7 @@ build_contract p:
 
 # build contracts
 build:
-    cargo run -- build --profile contracts --out-dir ./target/loam
+    just loam build --profile contracts --out-dir ./target/loam
 
 # Setup the project to use a pinned version of the CLI
 setup:
@@ -38,9 +38,9 @@ create: build
     soroban keys generate default
     just soroban contract deploy --wasm ./target/loam/example_core.wasm | just loam update-env --name SOROBAN_CONTRACT_ID
 
-# # Builds contracts. Deploys core riff and then redep
+# # Builds contracts. Deploys core subcontract and then redep
 
-# # Builds contracts. Deploys core riff and then redeploys to status message.
+# # Builds contracts. Deploys core subcontract and then redeploys to status message.
 
 redeploy:
     soroban contract invoke -- admin_set --new_admin default

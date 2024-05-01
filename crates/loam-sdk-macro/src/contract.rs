@@ -18,7 +18,7 @@ impl From<Error> for TokenStream {
     }
 }
 
-/// Find all riff deps then use `syn_file_expand` to generate the needed functions from each dep
+/// Find all subcontract deps then use `syn_file_expand` to generate the needed functions from each dep
 pub fn generate(paths: &[PathBuf]) -> TokenStream {
     let methods = paths
         .iter()

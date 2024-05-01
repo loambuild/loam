@@ -13,7 +13,7 @@ normal = { path = "../normal" }
 
 loam-sdk = { workspace = true }
 loam-sdk-macro = { workspace = true }
-loam-sdk-core-riff = { workspace = true }
+loam-sdk-subcontract-core = { workspace = true }
 
 [package.metadata.loam]
 contract = true
