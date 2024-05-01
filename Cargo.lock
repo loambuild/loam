@@ -783,8 +783,8 @@ name = "example-ft"
 version = "0.0.0"
 dependencies = [
  "loam-sdk",
- "loam-sdk-ft",
  "loam-subcontract-core",
+ "loam-subcontract-ft",
 ]
 
 [[package]]
@@ -1200,13 +1200,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "loam-sdk-ft"
-version = "0.6.6"
-dependencies = [
- "loam-sdk",
-]
-
-[[package]]
 name = "loam-sdk-macro"
 version = "0.7.0"
 dependencies = [
@@ -1232,6 +1225,13 @@ dependencies = [
 [[package]]
 name = "loam-subcontract-core"
 version = "0.7.0"
+dependencies = [
+ "loam-sdk",
+]
+
+[[package]]
+name = "loam-subcontract-ft"
+version = "0.6.6"
 dependencies = [
  "loam-sdk",
 ]

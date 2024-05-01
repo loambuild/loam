@@ -1,7 +1,7 @@
 #![no_std]
 use loam_sdk::soroban_contract;
 use loam_subcontract_core::{admin::Admin, Core};
-use loam_sdk_ft::{Fungible, Initable};
+use loam_subcontract_ft::{Fungible, Initable};
 
 pub mod ft;
 
