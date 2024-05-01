@@ -50,7 +50,7 @@ A subcontract peice of a contract which is responsible for a subset of the contr
 
 ### Creating SubContracts
 
-Here's an example of how to create a contract riff:
+Here's an example of how to create a subcontract:
 
 ```rust
 #[contracttype]
@@ -70,7 +70,7 @@ impl IntoKey for Messages {
 
 ### External API
 
-You can also create and implement external APIs for contract riffs:
+You can also create and implement external APIs for subcontracts:
 
 ```rust
 #[subcontract]
@@ -86,11 +86,11 @@ The `Core` trait provides the minimum logic needed for a contract to be redeploy
 
 ### Using the Core
 
-To use the core riff, create a `Contract` structure and implement the `Core` for it. The `Contract` will be redeployable and will be able to implement other Riffs.
+To use the core subcontract, create a `Contract` structure and implement the `Core` for it. The `Contract` will be redeployable and will be able to implement other Subcontracts.
 
 ```rust
 use loam_sdk::{soroban_contract, soroban_sdk};
-use loam_sdk_core_riff::{admin::Admin, Core};
+use loam_sdk_subcontract_core::{admin::Admin, Core};
 
 pub struct Contract;
 
@@ -120,9 +120,9 @@ impl SorobanContract {
         set_env(env);
         Contract::redeploy(wasm_hash);
     }
-    // Riff methods would be inserted here.
-    // Contract must implement all Riffs and is the proxy for the contract calls.
-    // This is because the Riffs have default implementations which call the associated type
+    // Subcontract methods would be inserted here.
+    // Contract must implement all Subcontracts and is the proxy for the contract calls.
+    // This is because the Subcontracts have default implementations which call the associated type
 }
 ```
 

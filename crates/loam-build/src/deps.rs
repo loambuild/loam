@@ -29,8 +29,8 @@ impl PackageExt for Package {
         self.metadata
             .as_object()
             .and_then(|metadata| metadata.get("loam"))
-            .and_then(|riff| riff.as_object())
-            .and_then(|riff_object| riff_object.get(&key.to_string()))
+            .and_then(|subcontract| subcontract.as_object())
+            .and_then(|subcontract_object| subcontract_object.get(&key.to_string()))
             .and_then(|export| export.as_bool())
             .unwrap_or_default()
     }
@@ -85,7 +85,7 @@ pub fn all(manifest_path: &Path) -> Result<Vec<Package>, Error> {
                     return None;
                 }
             }
-            res.map(Clone::clone)
+            res.cloned()
         })
         .collect::<Vec<_>>();
     res.push(p.clone());
@@ -97,14 +97,14 @@ pub fn out_dir(target_dir: &Path, name: &str) -> PathBuf {
 }
 
 pub enum DepKind {
-    Riff,
+    Subcontract,
     Contract,
 }
 
 impl Display for DepKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            DepKind::Riff => write!(f, "riff"),
+            DepKind::Subcontract => write!(f, "subcontract"),
             DepKind::Contract => write!(f, "contract"),
         }
     }
@@ -134,8 +134,8 @@ pub fn loam(manifest_path: &Path, kind: DepKind) -> Result<Vec<(Utf8PathBuf, Pat
         .map(Iterator::collect::<Vec<_>>)
 }
 
-pub fn riff(manifest_path: &Path) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
-    loam(manifest_path, DepKind::Riff)
+pub fn subcontract(manifest_path: &Path) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
+    loam(manifest_path, DepKind::Subcontract)
 }
 
 pub fn contract(manifest_path: &Path) -> Result<Vec<Package>, Error> {
@@ -179,7 +179,7 @@ mod tests {
         println!("{normal:#?}{}", normal.name);
         let deps = all(&manifest_path).unwrap();
         println!("{deps:#?}\n{}", deps.len());
-        let deps = riff(&manifest_path).unwrap();
+        let deps = subcontract(&manifest_path).unwrap();
         println!("{deps:#?}\n{}", deps.len());
     }
 }

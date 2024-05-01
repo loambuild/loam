@@ -255,7 +255,7 @@ mod tests {
     #[test]
     fn second() {
         let input: Item = syn::parse_quote! {
-            pub trait IsRiff {
+            pub trait IsSubcontract {
                 /// Get current admin
                 fn riff_get(&self) -> Option<String>;
                 fn riff_set(&mut self, new_riff: Address) -> Result<(), Error>;
@@ -266,15 +266,15 @@ mod tests {
         println!("{}", format_snippet(&result.to_string()));
 
         let output = quote! {
-            pub trait IsRiff {
+            pub trait IsSubcontract {
                 /// Get current admin
                 fn riff_get(&self) -> Option<String>;
                 fn riff_set(&mut self, new_riff: Address) -> Result<(), Error>;
                 fn riff_set_two(&mut self, new_riff: Address);
             }
-            pub trait Riff {
+            pub trait Subcontract {
                 /// Type that implments the instance type
-                type Impl: Lazy + IsRiff + Default;
+                type Impl: Lazy + IsSubcontract + Default;
                 /// Get current admin
                 fn riff_get() -> Option<String> {
                     Self::Impl::get_lazy().unwrap_or_default().riff_get()

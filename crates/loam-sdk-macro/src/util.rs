@@ -42,7 +42,7 @@ impl TraitVisitor {
 
 impl<'ast> Visit<'ast> for TraitVisitor {
     fn visit_item_trait(&mut self, item: &'ast syn::ItemTrait) {
-        if has_macro(&item.attrs, "riff") {
+        if has_macro(&item.attrs, "subcontract") {
             self.functions.extend(generate_methods(item));
         }
     }

@@ -32,13 +32,13 @@ pub fn lazy(item: TokenStream) -> TokenStream {
         .map_or_else(|e| e.to_compile_error().into(), Into::into)
 }
 
-/// Generates the soroban contract code combining all Riffs
+/// Generates the soroban contract code combining all Subcontracts
 #[proc_macro]
 pub fn soroban_contract(_: TokenStream) -> TokenStream {
     let cargo_file = manifest();
-    let riffs = loam_build::deps::riff(&cargo_file).unwrap();
+    let subcontract = loam_build::deps::subcontract(&cargo_file).unwrap();
 
-    let deps = riffs
+    let deps = subcontract
         .iter()
         .map(|i| i.0.to_path_buf().into_std_path_buf())
         .collect::<Vec<_>>();
