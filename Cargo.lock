@@ -584,7 +584,7 @@ version = "0.1.0"
 dependencies = [
  "loam-sdk",
  "loam-sdk-macro",
- "loam-sdk-subcontract-core",
+ "loam-subcontract-core",
  "normal-dep",
 ]
 
@@ -766,7 +766,7 @@ name = "example-calculator"
 version = "0.0.0"
 dependencies = [
  "loam-sdk",
- "loam-sdk-subcontract-core",
+ "loam-subcontract-core",
 ]
 
 [[package]]
@@ -774,8 +774,8 @@ name = "example-core"
 version = "0.0.0"
 dependencies = [
  "loam-sdk",
- "loam-sdk-subcontract-core",
  "loam-soroban-sdk",
+ "loam-subcontract-core",
 ]
 
 [[package]]
@@ -784,7 +784,7 @@ version = "0.0.0"
 dependencies = [
  "loam-sdk",
  "loam-sdk-ft",
- "loam-sdk-subcontract-core",
+ "loam-subcontract-core",
 ]
 
 [[package]]
@@ -792,7 +792,7 @@ name = "example-status-message"
 version = "0.0.0"
 dependencies = [
  "loam-sdk",
- "loam-sdk-subcontract-core",
+ "loam-subcontract-core",
 ]
 
 [[package]]
@@ -1222,18 +1222,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "loam-sdk-subcontract-core"
-version = "0.7.0"
-dependencies = [
- "loam-sdk",
-]
-
-[[package]]
 name = "loam-soroban-sdk"
 version = "0.6.7"
 dependencies = [
  "loam-sdk-macro",
  "soroban-sdk",
+]
+
+[[package]]
+name = "loam-subcontract-core"
+version = "0.7.0"
+dependencies = [
+ "loam-sdk",
 ]
 
 [[package]]
@@ -1287,7 +1287,7 @@ version = "0.1.0"
 dependencies = [
  "loam-sdk",
  "loam-sdk-macro",
- "loam-sdk-subcontract-core",
+ "loam-subcontract-core",
  "other",
  "riff-dep",
 ]
@@ -1298,7 +1298,7 @@ version = "0.1.0"
 dependencies = [
  "loam-sdk",
  "loam-sdk-macro",
- "loam-sdk-subcontract-core",
+ "loam-subcontract-core",
  "normal",
 ]
 
