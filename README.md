@@ -1,6 +1,12 @@
 # Loam
 
-Loam is a set of tools:
+Build **composable**, **upgradeable**, **secure** Smart Contracts. 
+
+Build frontends that interact easily with (your own or anyone's) Smart Contracts.
+
+Focus on the important parts of your [Soroban](https://soroban.stellar.org/) app. Let Loam handle the tedious bits.
+
+Loam is comprised of three main components:
   1. Loam SDK - Create Smart Contracts for Soroban using smaller, more flexible building blocks called "Subcontracts".
   2. Loam Frontend - Modern frontend tooling paired with a declarative environment configurations to help with local, test, and live blockchain networks.
   3. Loam CLI - Build and deploy Loam Frontend to work with Smart Contracts.
