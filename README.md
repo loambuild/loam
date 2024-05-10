@@ -19,7 +19,7 @@ This readme primarily serves to direct you to more specific readme's about the S
 
 # What is Loam SDK and what is Loam CLI?
 
-The Software Development Kit (SDK) and build tool is for writing smart contracts (the concept in Rust on Wasm blockchains) by creating "subcontracts". Currently, the focus is on the Soroban VM, but the same ideas apply to other VMs.
+The Software Development Kit (SDK) and build tool is for writing smart contracts by creating and assembling "subcontracts". Think of subcontracts as lego blocks you can snap together into a more complex whole. Currently, the SDK is focused on Stellar/Soroban smart contracts, but the subcontract pattern can be made to work with other blockchains as well.
 
 The Command Line Interface (CLI) is for creating, developing, and deploying a loam project with a frontend using a file that defines network settings, accounts, and contracts.
 
