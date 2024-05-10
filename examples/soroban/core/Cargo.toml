@@ -13,7 +13,7 @@ doctest = false
 
 [dependencies]
 loam-sdk = { workspace = true, features = ["loam-soroban-sdk"] }
-loam-sdk-core-riff = { workspace = true }
+loam-subcontract-core = { workspace = true }
 loam-soroban-sdk = { workspace = true }
 
 

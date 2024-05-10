@@ -1,6 +1,6 @@
 [package]
 name = "loam-soroban-sdk"
-version = "0.6.6"
+version = "0.6.7"
 edition = "2021"
 description = "A wrapper around the soroban-sdk, providing some soroban specific traits"
 license = "Apache-2.0"
@@ -12,8 +12,8 @@ crate-type = ["rlib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-loam-sdk-macro = { path = "../loam-sdk-macro", version = "0.6.4" }
-soroban-sdk = { version = "20.0.3" }
+loam-sdk-macro = { path = "../loam-sdk-macro", version = "0.7.0" }
+soroban-sdk = { version = "20.5.0" }
 
 
 [features]

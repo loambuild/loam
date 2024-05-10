@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.6.6...loam-cli-v0.7.0) - 2024-03-22
+
+### Added
+- Add new update-env command ([#39](https://github.com/loambuild/loam-sdk/pull/39))
+- [**breaking**] rename Owner to Admin ([#37](https://github.com/loambuild/loam-sdk/pull/37))
+
+### Fixed
+- create .env if it doesn't exist ([#41](https://github.com/loambuild/loam-sdk/pull/41))
+
 ## [0.6.6](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.6.5...loam-cli-v0.6.6) - 2024-01-09
 
 ### Other

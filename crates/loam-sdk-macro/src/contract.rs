@@ -18,7 +18,7 @@ impl From<Error> for TokenStream {
     }
 }
 
-/// Find all riff deps then use `syn_file_expand` to generate the needed functions from each dep
+/// Find all subcontract deps then use `syn_file_expand` to generate the needed functions from each dep
 pub fn generate(paths: &[PathBuf]) -> TokenStream {
     let methods = paths
         .iter()
@@ -28,9 +28,9 @@ pub fn generate(paths: &[PathBuf]) -> TokenStream {
         })
         .collect::<Vec<_>>();
     quote! {
-    #[soroban_sdk::contract]
+    #[loam_sdk::soroban_sdk::contract(crate_path = "loam_sdk::soroban_sdk")]
     pub struct SorobanContract;
-    #[soroban_sdk::contractimpl]
+    #[loam_sdk::soroban_sdk::contractimpl(crate_path = "loam_sdk::soroban_sdk")]
     impl SorobanContract {
             #(#methods)*
     }}

@@ -6,22 +6,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.6.5](https://github.com/loambuild/loam-sdk/compare/loam-sdk-core-riff-v0.6.4...loam-sdk-core-riff-v0.6.5) - 2023-09-22
+## [0.7.0](https://github.com/loambuild/loam-sdk/compare/loam-subcontract-core-v0.6.5...loam-subcontract-core-v0.7.0) - 2024-03-22
+
+### Added
+- [**breaking**] rename Owner to Admin ([#37](https://github.com/loambuild/loam-sdk/pull/37))
+
+### Other
+- release
+
+## [0.6.5](https://github.com/loambuild/loam-sdk/compare/loam-subcontract-core-v0.6.4...loam-subcontract-core-v0.6.5) - 2023-09-22
 
 ### Added
 - update soroban-sdk ([#29](https://github.com/loambuild/loam-sdk/pull/29))
 
-## [0.6.4](https://github.com/loambuild/loam-sdk/compare/loam-sdk-core-riff-v0.6.3...loam-sdk-core-riff-v0.6.4) - 2023-09-01
+## [0.6.4](https://github.com/loambuild/loam-sdk/compare/loam-subcontract-core-v0.6.3...loam-subcontract-core-v0.6.4) - 2023-09-01
 
 ### Fixed
 - use versions directly so they get bumped by release ([#24](https://github.com/loambuild/loam-sdk/pull/24))
 
-## [0.6.3](https://github.com/loambuild/loam-sdk/compare/loam-sdk-core-riff-v0.6.2...loam-sdk-core-riff-v0.6.3) - 2023-09-01
+## [0.6.3](https://github.com/loambuild/loam-sdk/compare/loam-subcontract-core-v0.6.2...loam-subcontract-core-v0.6.3) - 2023-09-01
 
 ### Other
 - release ([#15](https://github.com/loambuild/loam-sdk/pull/15))
 
-## [0.6.2](https://github.com/loambuild/loam-sdk/releases/tag/loam-sdk-core-riff-v0.6.2) - 2023-08-31
+## [0.6.2](https://github.com/loambuild/loam-sdk/releases/tag/loam-subcontract-core-v0.6.2) - 2023-08-31
 
 ### Added
 - add CLI with build command and update soroban-sdk ([#11](https://github.com/loambuild/loam-sdk/pull/11))

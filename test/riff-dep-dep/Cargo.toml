@@ -11,4 +11,4 @@ doctest = false
 [dependencies]
 
 [package.metadata.loam]
-riff = true
+subcontract = true

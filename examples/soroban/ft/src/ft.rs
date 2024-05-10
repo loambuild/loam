@@ -2,8 +2,8 @@ use loam_sdk::{
     soroban_sdk::{self, contracttype, env, Address, Bytes, Lazy, Map},
     IntoKey,
 };
-use loam_sdk_core_riff::CoreRiff;
-use loam_sdk_ft::{IsFungible, IsInitable};
+use loam_subcontract_core::Core;
+use loam_subcontract_ft::{IsFungible, IsInitable};
 
 use crate::Contract;
 
@@ -48,7 +48,7 @@ impl Default for MyFungibleToken {
 
 impl IsInitable for MyFungibleToken {
     fn ft_init(&mut self, admin: Address, name: Bytes, symbol: Bytes, decimals: u32) {
-        Contract::owner_get().unwrap().require_auth();
+        Contract::admin_get().unwrap().require_auth();
         MyFungibleToken::set_lazy(MyFungibleToken::new(admin, name, symbol, decimals));
     }
 }

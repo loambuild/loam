@@ -1,5 +1,5 @@
 use loam_sdk::{
-    riff,
+    subcontract,
     soroban_sdk::{self, Lazy},
     vec,
 };
@@ -9,13 +9,13 @@ use crate::error::Error;
 #[derive(Lazy, Default)]
 pub struct Calculator;
 
-#[riff]
+#[subcontract]
 pub trait IsCalc {
     /// Add two 32 bit unsigned integers
     fn add_u32(&self, a: u32, b: u32) -> Result<u32, Error>;
 
     /// Puts two into into a vector
-    fn two_array(&self, a: u32, b: u32) -> soroban_sdk::Vec<u32>;
+    fn two_array(&self, a: u32, b: u32) -> loam_sdk::soroban_sdk::Vec<u32>;
 }
 
 impl IsCalc for Calculator {

@@ -14,7 +14,7 @@ normal-dep = { path = "../normal-dep" }
 
 loam-sdk = { workspace = true }
 loam-sdk-macro = { workspace = true }
-loam-sdk-core-riff = { workspace = true }
+loam-subcontract-core = { workspace = true }
 
 [package.metadata.loam]
 contract = true

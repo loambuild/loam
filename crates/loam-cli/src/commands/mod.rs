@@ -3,13 +3,14 @@ use std::str::FromStr;
 use clap::{command, CommandFactory, FromArgMatches, Parser};
 
 pub mod build;
+pub mod update_env;
 
 
 
-const ABOUT: &str = "Build contracts";
+const ABOUT: &str = "Build contracts and generate front ends";
 
 // long_about is shown when someone uses `--help`; short help when using `-h`
-const LONG_ABOUT: &str = "LONG ABOUT";
+const LONG_ABOUT: &str = "";
 
 #[derive(Parser, Debug)]
 #[command(
@@ -42,6 +43,7 @@ impl Root {
     pub fn run(&mut self) -> Result<(), Error> {
         match &mut self.cmd {
             Cmd::Build(build_info) => build_info.run()?,
+            Cmd::UpdateEnv(e) => e.run()?,
         };
         Ok(())
     }
@@ -59,6 +61,8 @@ impl FromStr for Root {
 pub enum Cmd {
     /// Build contracts
     Build(build::Cmd),
+    /// Update an environment variable in a .env file
+    UpdateEnv(update_env::Cmd),
     
 }
 
@@ -67,4 +71,6 @@ pub enum Error {
     // TODO: stop using Debug for displaying errors
     #[error(transparent)]
     Build(#[from] build::Error),
+    #[error(transparent)]
+    UpdateEnv(#[from] update_env::Error),
 }
