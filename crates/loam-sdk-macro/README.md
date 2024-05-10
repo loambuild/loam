@@ -1,15 +1,11 @@
 # loam-sdk-macro
 
-This crate only contains macros. Macros generate the code necessary for a user to implement a Subcontract. Ultimately, this means a user only writes a few lines of code to create a Core Subcontract, allowing them to instead focus on other Subcontracts they'd like to create.
+This crate contains the source for the macros that all subcontracts depend on, such as the `#[subcontract]` macro itself. Rust macros generate code, allowing users to write less. These macros generate the code necessary for all Subcontracts, and do so in a way that makes it easy to author your own Subcontracts.
 
-These macros implement the key methods of a Core Subcontract, `subcontract`, `into_key`, `lazy`.
+`#[subcontract]` is an [attribute procedural macro](https://doc.rust-lang.org/reference/procedural-macros.html#:~:text=Attribute%20macros%20are%20defined%20by,not%20including%20the%20outer%20delimiters.) (proc macro) that you need when you create your own subcontracts.
 
-`#[subcontract]` is an attribute procedural macro (proc macro) that allows user to get and set an admin. This ability is what creates a Core Subcontract and thus defines the most basic definition of a Subcontract.
+Aside from `#[subcontract]`, this crate also contains the implementation for some [derive macros](https://veykril.github.io/tlborm/proc-macros/methodical/derive.html) such as `IntoKey`, which structs in the subcontract need to derive in order to lazily load and store the type. 
 
-`lazy` deserializes keys but only as needed.
+For more information about how to use and author Subcontracts, see the [loam-sdk README](../loam-sdk/README.md).
 
-`into_key` loads and stores types.
-
-Both `lazy` and `into_key` can be used in your subcontract implementations when appropriate.
-
-See `lib.rs` for the implementations of subcontract, lazy, and into_key.
+See [lib.rs](src/lib.rs) for the implementations of `subcontract`, `IntoKey`, and other macros.
