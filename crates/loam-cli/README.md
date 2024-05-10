@@ -1,14 +1,14 @@
 # loam-cli
 
-Loam CLI helps a user create, develop, and deplopy a loam project with a frontend. [A template repository example using Astro can be seen here](https://github.com/loambuild/template?tab=readme-ov-file#loam-dev).
-
-As seen in that template, you fill out an `environment.toml` file to describe the network settings, accounts, and contracts for each environment your team builds against. This will be used to get environments to a predictable starting state.
+Build smart contracts authored with Loam SDK, manage smart contract dependencies from a frontend, initialize new loam projects.
 
 Loam CLI comes with three main commands:
 
-* `loam init` - Generates the loam frontend template
-* `loam dev` - Turns the contracts you depend on (contract dependencies) into frontend packages (NPM dependencies), getting your app to the point where it is ready to build or run with its own dev server. Also monitors `contracts/*` for changes to the environments.
-* `loam build` - Essentially the same as `loam dev` but runs for the production environment identified in `environment.toml` and does not continuously monitor `contracts/*`.
+* `loam init` - Generates a [Loam frontend](https://github.com/loambuild/template?tab=readme-ov-file) that includes an `environments.toml` file describing the network settings, accounts, and contracts for each environment your team builds against.
+* `loam build` - Two build processes in one:
+  * Build smart contracts. Essentially, this is a wrapper around `cargo build` that will additionally traverse dependencies and find any with a `package.metadata.loam.contract = true` setting in their Cargo.toml, and ensure that they all get built in the correct order. You can use `loam build` to build non-Loam-SDK projects and it will Just Work.
+  * Build frontend clients. If the project contains an `environments.toml` file, `loam build` will match the environment specified by the `LOAM_ENV` environment variable (for `loam build`, the default is `production`) to a predictable starting state. It will turn the contracts you depend on (contract dependencies) into frontend packages (NPM dependencies), getting your frontend app to the point where it is ready to build or run with its own dev server. This is done in as low-intrusive a way as possible (for example, if contracts are already deployed, are they using the correct Wasm hash? Do they need to have their TTL extended? It will update these things, rather than re-deploy every time.)
+* `loam dev` - Monitors `contracts/*` and `environments.toml` for changes and re-runs `loam build` as needed. It also defaults to `LOAM_ENV=development`, rather than `production`.
 
 ## `loam dev` and `loam build` in Depth
 
