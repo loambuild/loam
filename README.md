@@ -27,7 +27,7 @@ The Command Line Interface (CLI) is for building smart contracts authored with L
 # Loam SDK and Loam CLI in Depth
 - [Loam SDK](crates/loam-sdk/README.md) - Tool for creating subcontracts.
   - [loam-subcontract-core](./crates/loam-subcontract-core) - The most basic form of a subcontract, creating an admin/ownsership trait.
-  - [loam-sdk-macro](crates/loam-sdk-macro/README.md) - Code for the `#[subcontract]` macro to create your own brand new subcontract, if existing contracts do not suffice.
+  - [loam-sdk-macro](crates/loam-sdk-macro/README.md) - Code for the `#[subcontract]` macro to create your own brand new subcontract, if existing subcontracts do not suffice.
 - [Loam CLI](crates/loam-cli/README.md) - Build smart contracts authored with Loam SDK, manage smart contract dependencies from a frontend, initialize new loam projects
 - [Loam Build](crates/loam-build/README.md) - Used by CLI and SDK to look at dependencies and build contracts in the correct order.
 
