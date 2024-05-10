@@ -13,7 +13,7 @@ Loam is comprised of three main components:
 
 This project is a mono repo containing code primarily for the Loam SDK but also for the Loam CLI, both of which share build code.
 
-This shared build coded was created because Smart contracts built with Loam often cannot be built correctly with a standard cargo build. They may have complex subcontract interdependencies that need to be resolved in the correct order. So, `loam-build` guarantees that subcontracts get compiled in the correct order. 
+This shared build code was created because Smart contracts built with Loam often cannot be built correctly with a standard `cargo build`. They may have complex subcontract interdependencies that need to be resolved in the correct order. So, `loam-build` guarantees that subcontracts get compiled in the correct order. 
 
 This readme primarily serves to direct you to more specific readme's about the SDK and CLI and examples.
 
