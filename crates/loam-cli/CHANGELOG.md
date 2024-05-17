@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.7.0...loam-cli-v0.8.0) - 2024-05-17
+
+### Added
+- [**breaking**] rename subcontract crates ([#49](https://github.com/loambuild/loam-sdk/pull/49))
+- [**breaking**] rename riff to subcontract ([#48](https://github.com/loambuild/loam-sdk/pull/48))
+- make `target/loam` default directory and use symbolic linking ([#43](https://github.com/loambuild/loam-sdk/pull/43))
+
 ## [0.7.0](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.6.6...loam-cli-v0.7.0) - 2024-03-22
 
 ### Added
