@@ -76,7 +76,7 @@ The `Core` trait provides the minimum logic needed for a contract to be redeploy
 
 ### Using  `Core`
 
-To use the core riff, create a `Contract` structure and implement the `Core` for it. The `Contract` will be redeployable and will be able to implement other Subcontracts.
+To use the core subcontract, create a `Contract` struct and implement `Core` for it. This makes `Contract` redeployable by the Admin of the contract and will continue to be redeployable if the new contract also implements `Core`. After `Core` other Subcontracts can be added as needed.
 
 ```rust
 use loam_sdk::{soroban_contract, soroban_sdk};
