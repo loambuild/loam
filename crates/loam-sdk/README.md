@@ -74,7 +74,7 @@ pub trait IsPostable {
 
 The `Core` trait provides the minimum logic needed for a contract to be redeployable. A contract should be able to be redeployed to another contract that can also be redeployed. Redeployment requires admin status, as it would be undesirable for an account to redeploy the contract without permission.
 
-### Using the CoreSubcontract
+### Using  `Core`
 
 To use the core riff, create a `Contract` structure and implement the `Core` for it. The `Contract` will be redeployable and will be able to implement other Subcontracts.
 
