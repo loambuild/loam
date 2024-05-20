@@ -84,7 +84,7 @@ use loam_subcontract_core::{Admin, Core};
 
 pub struct Contract;
 
-impl CoreSubcontract for Contract {
+impl Core for Contract {
     type Impl = Admin;
 }
 
