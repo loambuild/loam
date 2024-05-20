@@ -40,7 +40,7 @@ A subcontract is a type that implements the `IntoKey` trait, which is used for l
 
 ### Creating  Subcontracts
 
-Here's an example of how to create a contract riff:
+Here's an example of how to create a subcontract:
 
 ```rust
 #[contracttype]
