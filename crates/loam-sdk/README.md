@@ -80,7 +80,7 @@ To use the core riff, create a `Contract` structure and implement the `Core` for
 
 ```rust
 use loam_sdk::{soroban_contract, soroban_sdk};
-use loam_sdk_core_riff::{owner::Owner, CoreSubcontract};
+use loam_subcontract_core::{Admin, Core};
 
 pub struct Contract;
 
