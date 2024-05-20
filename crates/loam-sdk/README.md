@@ -7,7 +7,7 @@
 - [Subcontracts](#subcontracts)
     - [Creating Contract Subcontracts](#creating-contract-subcontracts)
     - [External API](#external-api)
-- [CoreSubcontract](#coreriff)
+- [Core](#core-subcontract)
 -   [Using the Core Subcontract](#using-the-coreriff)
 
 ### Installation
