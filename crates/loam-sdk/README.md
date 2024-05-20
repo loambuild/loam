@@ -1,44 +1,17 @@
 # loam-sdk
 
-- [Getting Started](#getting-started)
-    - [Installation](#installation)
-    - [Setup](#setup)
-    - [Redeploy](#redeploy)
 - [Subcontracts](#subcontracts)
     - [Creating Contract Subcontracts](#creating-contract-subcontracts)
     - [External API](#external-api)
 - [Core](#core-subcontract)
 -   [Using the Core Subcontract](#using-the-core-subcontract)
 
-### Installation
 
-To install `just`, run the following command:
-
-```bash
-cargo install just
-```
-
-### Setup
-
-To set up the environment, run:
-
-```bash
-just setup
-```
-
-### Redeploy
-
-To see redeployment in action, use:
-
-```bash
-just redeploy
-```
-
-## Subcontracts
+# Subcontracts
 
 A subcontract is a type that implements the `IntoKey` trait, which is used for lazily loading and storing the type.
 
-### Creating  Subcontracts
+## Creating  Subcontracts
 
 Here's an example of how to create a subcontract:
 
@@ -58,7 +31,7 @@ impl IntoKey for Messages {
     }
 ```
 
-### External API
+## External API
 
 You can also create and implement external APIs for contract subcontracts:
 
@@ -70,11 +43,11 @@ pub trait IsPostable {
 }
 ```
 
-## Core Subcontract
+# Core Subcontract
 
 The `Core` trait provides the minimum logic needed for a contract to be redeployable. A contract should be able to be redeployed to another contract that can also be redeployed. Redeployment requires admin status, as it would be undesirable for an account to redeploy the contract without permission.
 
-### Using  `Core`
+## Using  `Core`
 
 To use the core subcontract, create a `Contract` struct and implement `Core` for it. This makes `Contract` redeployable by the Admin of the contract and will continue to be redeployable if the new contract also implements `Core`. After `Core` other Subcontracts can be added as needed.
 
