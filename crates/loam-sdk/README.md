@@ -63,7 +63,7 @@ impl IntoKey for Messages {
 You can also create and implement external APIs for contract subcontracts:
 
 ```rust
-#[riff]
+#[subcontract]
 pub trait IsPostable {
     fn messages_get(&self, author: Address) -> Option<String>;
     fn messages_set(&mut self, author: Address, text: String);
