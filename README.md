@@ -6,32 +6,33 @@ Build frontends that interact easily with (your own or anyone's) Smart Contracts
 
 Focus on the important parts of your [Soroban](https://soroban.stellar.org/) app. Let Loam handle the tedious bits.
 
-Loam is comprised of three main components:
-  1. Loam SDK - Create Smart Contracts for Soroban using smaller, more flexible building blocks called "Subcontracts".
-  2. Loam Frontend - Modern frontend tooling paired with a declarative environment configurations to help with local, test, and live blockchain networks.
-  3. Loam CLI - Build and deploy Loam Frontend to work with Smart Contracts.
+At a high level, Loam is comprised of three main components:
 
-This project is a mono repo containing code primarily for the Loam SDK but also for the Loam CLI, both of which share build code.
+1. Loam SDK - The Software Development Kit (SDK) are for writing smart contracts by creating and assembling **subcontracts**. Think of subcontracts as lego blocks you can snap together into a more complex whole. Currently, the SDK is focused on Stellar/Soroban smart contracts, but the subcontract pattern can be made to work with other blockchains as well.
+2. Loam Frontend - Modern frontend tooling paired with declarative environment configurations to help with local, test, and live blockchain networks. The source code for Loam Frontend lives at [loambuild/frontend](https://github.com/loambuild/frontend?tab=readme-ov-file#loam-dev).
+3. Loam CLI - Command Line Interface (CLI) for building smart contracts authored with Loam SDK. It's also for easily working with smart contract dependencies in a Loam frontend.
 
-This shared build code was created because Smart contracts built with Loam often cannot be built correctly with a standard `cargo build`. They may have complex subcontract interdependencies that need to be resolved in the correct order. So, `loam-build` guarantees that subcontracts get compiled in the correct order. 
+This project is a monorepo containing code primarily for Loam SDK but also for Loam CLI, both of which share build code.
 
-This readme primarily serves to direct you to more specific readme's about the SDK and CLI and examples.
+# What's in this monorepo?
 
-# What is Loam SDK and what is Loam CLI?
+This repository contains two main folders, [./crates](./crates) and [./examples](./examples).
 
-The Software Development Kit (SDK) and build tool are for writing smart contracts by creating and assembling "subcontracts". Think of subcontracts as lego blocks you can snap together into a more complex whole. Currently, the SDK is focused on Stellar/Soroban smart contracts, but the subcontract pattern can be made to work with other blockchains as well.
+## What's in [./crates](./crates)?
 
-The Command Line Interface (CLI) is for building smart contracts authored with Loam SDK. It's also for easily working with smart contract dependencies in a Loam frontend.
+Organized hierarchically:
 
+- [Loam SDK](crates/loam-sdk) - Tool for creating subcontracts.
+  - [loam-subcontract-core](./crates/loam-subcontract-core) - The most basic and essential subcontract, which manages admin/ownership and redeployability.
+  - [loam-sdk-macro](crates/loam-sdk-macro) - Code for the `#[subcontract]` macro to create your own brand new subcontract, if existing subcontracts do not suffice.
+- [Loam CLI](crates/loam-cli) - Build smart contracts authored with Loam SDK, manage smart contract dependencies from a frontend, initialize new loam projects
+- [loam-build](crates/loam-build) - Used by CLI and SDK to look at dependencies and build contracts in the correct order.
+- [loam-soroban-sdk](./crates/loam-soroban-sdk) – This is a wrapper around [soroban-sdk]() that extends it with features needed by Loam SDK.
+- [loam-subcontract-ft](./crates/loam-subcontract-ft): like `loam-subcontract-core` above, this contains the source code for a subcontract. This subcontract is mostly in this repository as an example; see below.
 
-# Loam SDK and Loam CLI in Depth
-- [Loam SDK](crates/loam-sdk/README.md) - Tool for creating subcontracts.
-  - [loam-subcontract-core](./crates/loam-subcontract-core) - The most basic form of a subcontract, creating an admin/ownsership trait.
-  - [loam-sdk-macro](crates/loam-sdk-macro/README.md) - Code for the `#[subcontract]` macro to create your own brand new subcontract, if existing subcontracts do not suffice.
-- [Loam CLI](crates/loam-cli/README.md) - Build smart contracts authored with Loam SDK, manage smart contract dependencies from a frontend, initialize new loam projects
-- [Loam Build](crates/loam-build/README.md) - Used by CLI and SDK to look at dependencies and build contracts in the correct order.
+## What's in [./examples](./examples)?
 
-# Examples of Loam SDK Created Subcontracts
-- [Core Subcontract](examples/soroban/core) - This is required for the creation of all other subcontracts and can be seen in the other examples within [`examples/`](examples)
-- [Fungible Tokens Subcontract](examples/soroban/ft) - This contains the implementation of a Fungible Token Subcontract interface. Find the interface inside of [`crates/loam-subcontract-ft`](crates/loam-subcontract-ft)
-- [Loam Frontend Repository](https://github.com/loambuild/frontend?tab=readme-ov-file#loam-dev) - A template of how Loam CLI commands work with Loam Frontend.
+A non-exhaustive list; feel free to explore the other examples on your own! (And add to this documentation 😉)
+
+- [Core Subcontract](examples/soroban/core) - Start here; this is an example of the most basic smart contract you can create with Loam SDK. It only implements `loam-subcontract-core`. All the other examples implement multiple subcontracts, but must at least include `loam-subcontract-core`.
+- [Fungible Token Subcontract](examples/soroban/ft) - This contains the implementation of a Fungible Token subcontract. Unlike `loam-subcontract-core` which contains its own implementation, [`loam-subcontract-ft`](crates/loam-subcontract-ft) is an _interface-only_ subcontract; a smart contract that uses it must provide its own implementation. This sort of subcontract is still useful to help you ensure that you implemented the interface correctly.
