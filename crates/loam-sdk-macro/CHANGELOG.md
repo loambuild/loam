@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0](https://github.com/loambuild/loam-sdk/compare/loam-sdk-macro-v0.7.0...loam-sdk-macro-v0.8.0) - 2024-05-21
+
+### Added
+- [**breaking**] rename riff to subcontract ([#48](https://github.com/loambuild/loam-sdk/pull/48))
+
+### Other
+- Add and edits readmes ([#47](https://github.com/loambuild/loam-sdk/pull/47))
+
 ## [0.7.0](https://github.com/loambuild/loam-sdk/compare/loam-sdk-macro-v0.6.4...loam-sdk-macro-v0.7.0) - 2024-03-22
 
 ### Added
