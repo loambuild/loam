@@ -28,7 +28,7 @@ build:
 
 # Setup the project to use a pinned version of the CLI
 setup:
-    -cargo binstall -y --install-path ./target/bin soroban-cli --version 20.3.1
+    -cargo binstall -y --install-path ./target/bin soroban-cli --version 21.0.0-preview.1
 
 test: build
     cargo test

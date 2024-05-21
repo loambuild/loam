@@ -35,6 +35,7 @@ clap = { version = "4.1.8", features = [
     "string",
 ] }
 
+cargo_metadata = { workspace = true }
 clap-cargo-extra = "0.3.0"
 
 thiserror = "1.0.31"
@@ -43,11 +44,10 @@ serde_derive = "1.0.82"
 serde_json = "1.0.82"
 
 tokio = { version = "1", features = ["full"] }
-dirs = "4.0.0"
-itertools = "0.10.5"
-strsim = "0.10.0"
-heck = "0.4.1"
-cargo_metadata = "0.15.4"
+dirs = "5.0.1"
+itertools = "0.12.1"
+strsim = "0.11.1"
+heck = "0.5.0"
 pathdiff = "0.2.1"
 shlex = "1.1.0"
 symlink = "0.1.0"
@@ -55,4 +55,4 @@ symlink = "0.1.0"
 [dev-dependencies]
 assert_cmd = "2.0.4"
 assert_fs = "1.0.7"
-predicates = "2.1.5"
+predicates = "3.1.0"
