@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0](https://github.com/loambuild/loam-sdk/releases/tag/loam-subcontract-core-v0.7.0) - 2024-05-23
+
+### Other
+- release ([#52](https://github.com/loambuild/loam-sdk/pull/52))
+- Add and edits readmes ([#47](https://github.com/loambuild/loam-sdk/pull/47))
+
 ## [0.7.0](https://github.com/loambuild/loam-sdk/compare/loam-subcontract-core-v0.6.5...loam-subcontract-core-v0.7.0) - 2024-03-22
 
 ### Added
