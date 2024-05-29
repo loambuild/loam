@@ -19,3 +19,4 @@ soroban-sdk = { version = "21.0.1-preview.2" }
 [features]
 default = []
 testutils = ["soroban-sdk/testutils"]
+alloc = ["soroban-sdk/alloc"]
