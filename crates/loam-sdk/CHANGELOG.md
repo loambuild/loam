@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.9](https://github.com/loambuild/loam-sdk/compare/loam-sdk-v0.6.8...loam-sdk-v0.6.9) - 2024-06-04
+
+### Added
+- expose alloc feature from soroban-sdk ([#57](https://github.com/loambuild/loam-sdk/pull/57))
+
 ## [0.6.8](https://github.com/loambuild/loam-sdk/compare/loam-sdk-v0.6.7...loam-sdk-v0.6.8) - 2024-05-21
 
 ### Other
