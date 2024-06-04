@@ -1217,7 +1217,7 @@ dependencies = [
 
 [[package]]
 name = "loam-sdk"
-version = "0.6.8"
+version = "0.6.9"
 dependencies = [
  "loam-sdk-macro",
  "loam-soroban-sdk",
@@ -1240,7 +1240,7 @@ dependencies = [
 
 [[package]]
 name = "loam-soroban-sdk"
-version = "0.6.8"
+version = "0.6.9"
 dependencies = [
  "loam-sdk-macro",
  "soroban-sdk",
@@ -1248,14 +1248,14 @@ dependencies = [
 
 [[package]]
 name = "loam-subcontract-core"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "loam-sdk",
 ]
 
 [[package]]
 name = "loam-subcontract-ft"
-version = "0.6.6"
+version = "0.6.7"
 dependencies = [
  "loam-sdk",
 ]
