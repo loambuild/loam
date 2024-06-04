@@ -19,3 +19,4 @@ loam-soroban-sdk = { path = "../loam-soroban-sdk", version = "0.6.8", optional =
 [features]
 default = ["loam-soroban-sdk"]
 soroban-sdk-testutils = ["loam-soroban-sdk/testutils"]
+soroban-sdk-alloc = ["loam-soroban-sdk/alloc"]
