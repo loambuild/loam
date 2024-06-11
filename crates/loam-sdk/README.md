@@ -1,5 +1,7 @@
 # loam-sdk
 
+Build **composable, upgradeable, secure Smart Contracts.
+
 - [Subcontracts](#subcontracts)
     - [Creating Contract Subcontracts](#creating-contract-subcontracts)
     - [External API](#external-api)
