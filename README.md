@@ -8,9 +8,9 @@ Focus on the important parts of your [Soroban](https://soroban.stellar.org/) app
 
 At a high level, Loam is comprised of three main components:
 
-1. Loam SDK - The Software Development Kit (SDK) are for writing smart contracts by creating and assembling **subcontracts**. Think of subcontracts as lego blocks you can snap together into a more complex whole. Currently, the SDK is focused on Stellar/Soroban smart contracts, but the subcontract pattern can be made to work with other blockchains as well.
-2. Loam Frontend - Modern frontend tooling paired with declarative environment configurations to help with local, test, and live blockchain networks. The source code for Loam Frontend lives at [loambuild/frontend](https://github.com/loambuild/frontend?tab=readme-ov-file#loam-dev).
-3. Loam CLI - Command Line Interface (CLI) for building smart contracts authored with Loam SDK. It's also for easily working with smart contract dependencies in a Loam frontend.
+1. [Loam SDK](./crates/loam-sdk) - The Software Development Kit (SDK) are for writing smart contracts by creating and assembling **subcontracts**. Think of subcontracts as lego blocks you can snap together into a more complex whole. Currently, the SDK is focused on Stellar/Soroban smart contracts, but the subcontract pattern can be made to work with other blockchains as well.
+2. [Loam Frontend](https://github.com/loambuild/frontend?tab=readme-ov-file#loam-dev) - Modern frontend tooling paired with declarative environment configurations to help with local, test, and live blockchain networks.
+3. [Loam CLI](./crates/loam-cli) - Command Line Interface (CLI) for building smart contracts authored with Loam SDK. It's also for easily working with smart contract dependencies in a Loam frontend.
 
 This project is a monorepo containing code primarily for Loam SDK but also for Loam CLI, both of which share build code.
 
