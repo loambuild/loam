@@ -4,9 +4,14 @@ permissions:
   # TODO: once `releases: write` is supported, use it instead.
   contents: write
 
+# on:
+#   release:
+#     types: [published]
+
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - add-release-binaries
 
 env:
   CARGO_INCREMENTAL: 0
@@ -24,35 +29,34 @@ defaults:
 jobs:
   upload-assets:
     name: ${{ matrix.target }}
-    if: github.repository_owner == 'MarcoIeni' && startsWith(github.event.release.name, 'release-plz-v')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-          - target: aarch64-pc-windows-msvc
-            os: windows-2022
+          # - target: aarch64-pc-windows-msvc
+          #   os: windows-2022
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-22.04
-          - target: x86_64-apple-darwin
-            os: macos-12
-          - target: x86_64-pc-windows-msvc
-            os: windows-2022
-          - target: x86_64-unknown-linux-musl
-            os: ubuntu-22.04
-          - target: aarch64-unknown-linux-gnu
-            os: ubuntu-22.04
-          - target: aarch64-unknown-linux-musl
-            os: ubuntu-22.04
-          - target: aarch64-apple-darwin
-            os: macos-12
-          - target: x86_64-unknown-freebsd
-            os: ubuntu-22.04
-          - target: universal-apple-darwin
-            os: macos-12
+          # - target: x86_64-apple-darwin
+          #   os: macos-12
+          # - target: x86_64-pc-windows-msvc
+          #   os: windows-2022
+          # - target: x86_64-unknown-linux-musl
+          #   os: ubuntu-22.04
+          # - target: aarch64-unknown-linux-gnu
+          #   os: ubuntu-22.04
+          # - target: aarch64-unknown-linux-musl
+          #   os: ubuntu-22.04
+          # - target: aarch64-apple-darwin
+          #   os: macos-12
+          # - target: x86_64-unknown-freebsd
+          #   os: ubuntu-22.04
+          # - target: universal-apple-darwin
+          #   os: macos-12
     timeout-minutes: 60
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/setup-cross-toolchain-action@v1
@@ -65,7 +69,7 @@ jobs:
         if: endsWith(matrix.target, 'windows-msvc')
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
-          bin: release-plz
+          bin: loam
           target: ${{ matrix.target }}
           tar: all
           zip: windows
