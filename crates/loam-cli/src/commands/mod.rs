@@ -18,8 +18,6 @@ const LONG_ABOUT: &str = "loam-sdk also helps when writing smart contracts.";
     disable_help_subcommand = true,
 )]
 pub struct Root {
-    // #[clap(flatten)]
-    // pub global_args: global::Args,
     #[command(subcommand)]
     pub cmd: Cmd,
 }
