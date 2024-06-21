@@ -11,6 +11,7 @@ const url_1 = require("url");
 const util_1 = require("util");
 const utils_1 = require("./utils");
 const pipeline = (0, util_1.promisify)(stream.pipeline);
+// this is based on https://github.com/raendev/raen/blob/main/npm/src/index.ts
 class Binary {
     constructor(name, url, installDir = Binary.DEFAULT_INSTALL_DIR) {
         Object.defineProperty(this, "name", {
