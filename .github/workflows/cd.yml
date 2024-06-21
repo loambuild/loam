@@ -24,7 +24,7 @@ defaults:
 jobs:
   upload-assets:
     name: ${{ matrix.target }}
-    if: github.repository_owner == 'MarcoIeni' && startsWith(github.event.release.name, 'release-plz-v')
+    if: github.repository_owner == 'loambuild' && startsWith(github.event.release.name, 'release-plz-v')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/setup-cross-toolchain-action@v1
@@ -65,8 +65,9 @@ jobs:
         if: endsWith(matrix.target, 'windows-msvc')
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
-          bin: release-plz
+          bin: loam
           target: ${{ matrix.target }}
           tar: all
           zip: windows
+          archive: $bin-$tag-$target
           token: ${{ secrets.GITHUB_TOKEN }}
