@@ -8,7 +8,7 @@ pub mod update_env;
 const ABOUT: &str = "Build contracts and generate front ends";
 
 // long_about is shown when someone uses `--help`; short help when using `-h`
-const LONG_ABOUT: &str = "";
+const LONG_ABOUT: &str = "loam-sdk also helps when writing smart contracts.";
 
 #[derive(Parser, Debug)]
 #[command(
