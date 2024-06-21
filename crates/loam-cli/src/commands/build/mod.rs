@@ -1,4 +1,5 @@
 #![allow(clippy::struct_excessive_bools)]
+use cargo_metadata::{Metadata, MetadataCommand, Package};
 use clap::Parser;
 use itertools::Itertools;
 use std::{
@@ -11,7 +12,8 @@ use std::{
     process::{Command, ExitStatus, Stdio},
 };
 
-use cargo_metadata::{Metadata, MetadataCommand, Package};
+pub mod build_clients;
+pub mod env_toml;
 
 /// Build a contract from source
 ///
@@ -63,6 +65,8 @@ pub struct Cmd {
     /// Print commands to build without executing them
     #[arg(long, conflicts_with = "out_dir", help_heading = "Other")]
     pub print_commands_only: bool,
+    #[command(flatten)]
+    pub build_clients: build_clients::Args,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -83,10 +87,12 @@ pub enum Error {
     GettingCurrentDir(io::Error),
     #[error(transparent)]
     Loam(#[from] loam_build::deps::Error),
+    #[error(transparent)]
+    BuildClients(#[from] build_clients::Error),
 }
 
 impl Cmd {
-    pub fn run(&self) -> Result<(), Error> {
+    pub async fn run(&self) -> Result<(), Error> {
         let working_dir = env::current_dir().map_err(Error::GettingCurrentDir)?;
         let metadata = self.metadata()?;
         let packages = self.packages(&metadata)?;
@@ -170,6 +176,10 @@ impl Cmd {
                 }
             }
         }
+
+        self.build_clients
+            .run(&metadata.workspace_root.into_std_path_buf())
+            .await?;
 
         Ok(())
     }
