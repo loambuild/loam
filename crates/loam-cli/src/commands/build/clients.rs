@@ -1,11 +1,15 @@
 #![allow(clippy::struct_excessive_bools)]
 use crate::commands::build::env_toml;
+use stellar_xdr::curr::Error as xdrError;
 use serde_json;
 use soroban_cli::commands::NetworkRunnable;
+use soroban_cli::utils::contract_hash;
 use soroban_cli::utils::contract_hash;
 use soroban_cli::{commands as cli, CommandParser};
 use std::collections::BTreeMap as Map;
 use std::fmt::Debug;
+use std::hash::Hash;
+use serde_json;
 use std::hash::Hash;
 use stellar_xdr::curr::Error as xdrError;
 
@@ -134,67 +138,83 @@ impl Args {
 
         Ok(())
     }
+     
+    fn get_contract_alias(&self, name: &str) -> Result<Option<String>, Error> {
+        let config_dir = cli::config::locator::Args {
+            global: false,
+            config_dir: None,
+        }.config_dir()?;
+        let alias_file = config_dir.join("contract-ids").join(format!("{}.json", name));
+        
+        if alias_file.exists() {
+            let content = std::fs::read_to_string(alias_file)?;
+            let alias_data: serde_json::Value = serde_json::from_str(&content)?;
+            let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
+                .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
+            
+            if let Some(id) = alias_data["ids"].get(&network_passphrase) {
+                Ok(Some(id.as_str().unwrap().to_string()))
+            } else {
+                Ok(None)
+            }
+        } else {
+            Ok(None)
+        }
+    }
 
-    fn get_network_args(network: &Network) -> cli::network::Args {
-        cli::network::Args {
+    async fn contract_hash_matches(&self, contract_id: &str, hash: &str, network: &Network) -> Result<bool, Error> {
+        let network_args = cli::network::Args {
             rpc_url: network.rpc_url.clone(),
             network_passphrase: network.network_passphrase.clone(),
             network: network.name.clone(),
-        }
-    }
-
-    fn get_config_locator() -> cli::config::locator::Args {
-        cli::config::locator::Args {
+        };
+        let config_dir = cli::config::locator::Args {
             global: false,
             config_dir: None,
-        }
-    }
-
-    fn get_contract_alias(name: &str) -> Result<Option<String>, cli::config::locator::Error> {
-        let config_dir = Self::get_config_locator();
-        let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
-            .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
-        config_dir.get_contract_id(name, &network_passphrase)
-    }
-
-    async fn contract_hash_matches(
-        &self,
-        contract_id: &str,
-        hash: &str,
-        network: &Network,
-    ) -> Result<bool, Error> {
+        };
         let hash_vec = cli::contract::fetch::Cmd {
             contract_id: contract_id.to_string(),
-            out_file: None,
-            locator: Self::get_config_locator(),
-            network: Self::get_network_args(network),
+            out_file: None, 
+            locator: config_dir,
+            network: network_args,
         }
-        .run_against_rpc_server(None, None)
-        .await?;
+            .run_against_rpc_server(None, None)
+            .await?;
         let ctrct_hash = contract_hash(&hash_vec)?;
-        Ok(hex::encode(ctrct_hash) == hash)
+        let c_hash_string = hex::encode(ctrct_hash).to_string();
+        Ok(c_hash_string == hash)
     }
 
-    fn save_contract_alias(
-        name: &str,
-        contract_id: &str,
-        network: &Network,
-    ) -> Result<(), cli::config::locator::Error> {
-        let config_dir = Self::get_config_locator();
-        let passphrase = network
-            .network_passphrase
-            .clone()
-            .expect("You must set the network passphrase");
-        config_dir.save_contract_id(&passphrase, contract_id, name)
+    fn save_contract_alias(&self, name: &str, contract_id: &str) -> Result<(), Error> {
+        let config_dir = cli::config::locator::Args {
+            global: false,
+            config_dir: None,
+        }.config_dir()?;
+        let alias_dir = config_dir.join("contract-ids");
+        std::fs::create_dir_all(&alias_dir)?;
+        println!("{}", alias_dir.to_str().unwrap());
+        
+        let alias_file = alias_dir.join(format!("{}.json", name));
+        let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
+            .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
+        
+        let mut alias_data = if alias_file.exists() {
+            let content = std::fs::read_to_string(&alias_file)?;
+            serde_json::from_str(&content)?
+        } else {
+            serde_json::json!({ "ids": {} })
+        };
+    
+        alias_data["ids"][&network_passphrase] = serde_json::Value::String(contract_id.to_string());
+        
+        let content = serde_json::to_string_pretty(&alias_data)?;
+        std::fs::write(alias_file, content)?;
+        
+        Ok(())
     }
 
-    fn write_contract_template(
-        self,
-        workspace_root: &std::path::Path,
-        name: &str,
-        contract_id: &str,
-    ) -> Result<(), Error> {
-        let allow_http = if self.loam_env(LoamEnv::Production) == "development" {
+    fn write_contract_template(&self, workspace_root: &std::path::Path, name: &str, contract_id: &str) -> Result<(), Error> {
+        let allow_http = if self.loam_env() == "development" {
             "\n  allowHttp: true,"
         } else {
             ""
@@ -203,15 +223,15 @@ impl Args {
             .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
         let template = format!(
             r#"import * as Client from '{name}';
-import {{ rpcUrl }} from './util';
+    import {{ rpcUrl }} from './util';
     
-export default new Client.Client({{
-  networkPassphrase: '{network}',
-  contractId: '{contract_id}',
-  rpcUrl,{allow_http}
-  publicKey: undefined,
-}});
-"#
+    export default new Client.Client({{
+      networkPassphrase: '{network}',
+      contractId: '{contract_id}',
+      rpcUrl,{allow_http}
+      publicKey: undefined,
+    }});
+    "#
         );
         let path = workspace_root.join(format!("src/contracts/{name}.ts"));
         std::fs::write(path, template)?;
@@ -254,6 +274,8 @@ export default new Client.Client({{
         contracts: Option<&Map<Box<str>, env_toml::Contract>>,
         network: &Network,
     ) -> Result<(), Error> {
+        println!("Workspace root: {:?}", workspace_root);
+        println!("Contracts: {:?}", contracts);
         let Some(contracts) = contracts else {
             return Ok(());
         };
@@ -333,4 +355,5 @@ export default new Client.Client({{
 
         Ok(())
     }
+
 }
