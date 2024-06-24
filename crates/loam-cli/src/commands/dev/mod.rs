@@ -35,7 +35,7 @@ impl Cmd {
                 if let Ok(event) = res {
                     if let notify::EventKind::Modify(_) = event.kind {
                         if let Some(path) = event.paths.first() {
-                            println!("File modified: {:?}", path);
+                            eprintln!("File modified: {:?}", path);
                             // Send a signal through the channel to trigger a rebuild
                             if let Err(e) = tx_clone.blocking_send(()) {
                                 eprintln!("Error sending through channel: {}", e);
