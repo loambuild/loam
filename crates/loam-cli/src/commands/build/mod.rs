@@ -92,11 +92,17 @@ pub enum Error {
 }
 
 impl Cmd {
-    pub async fn run(&self) -> Result<(), Error> {
-        let working_dir = env::current_dir().map_err(Error::GettingCurrentDir)?;
+    pub fn list_packages(&self) -> Result<Vec<Package>, Error> {
         let metadata = self.metadata()?;
         let packages = self.packages(&metadata)?;
         let packages = loam_build::deps::get_workspace(&packages)?;
+        Ok(packages)
+    }
+
+    pub async fn run(&self) -> Result<(), Error> {
+        let working_dir = env::current_dir().map_err(Error::GettingCurrentDir)?;
+        let metadata = self.metadata()?;
+        let packages = self.list_packages()?;
         if self.list {
             for p in packages {
                 println!("{}", p.name);
