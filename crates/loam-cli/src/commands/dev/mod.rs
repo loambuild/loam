@@ -5,7 +5,7 @@ use tokio::time;
 
 use crate::commands::build;
 
-use super::build::build_clients::LoamEnv;
+use super::build::clients::LoamEnv;
 
 #[derive(Parser, Debug, Clone)]
 #[group(skip)]
@@ -31,12 +31,18 @@ impl Cmd {
         let (tx, mut rx) = tokio::sync::mpsc::channel(100);
         let mut watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
-                if let Ok(event @ notify::Event { kind: notify::EventKind::Modify(_), .. }) = res {
+                if let Ok(
+                    event @ notify::Event {
+                        kind: notify::EventKind::Modify(_),
+                        ..
+                    },
+                ) = res
+                {
                     if let Some(path) = event.paths.first() {
-                        eprintln!("File modified: {:?}", path);
+                        eprintln!("File modified: {path:?}");
                         // Send a signal through the channel to trigger a rebuild
                         if let Err(e) = tx.blocking_send(()) {
-                            eprintln!("Error sending through channel: {}", e);
+                            eprintln!("Error sending through channel: {e}");
                         }
                     }
                 }
@@ -61,7 +67,7 @@ impl Cmd {
             watcher.watch(package_path, RecursiveMode::Recursive)?;
         }
         if let Err(e) = self.build().await {
-            eprintln!("Build error: {}", e);
+            eprintln!("Build error: {e}");
         }
         println!("Watching for changes. Press Ctrl+C to stop.");
 
@@ -70,7 +76,7 @@ impl Cmd {
                 _ = rx.recv() => {
                     println!("Changes detected. Rebuilding...");
                     if let Err(e) = self.build().await {
-                        eprintln!("Build error: {}", e);
+                        eprintln!("Build error: {e}");
                     }
                 }
                 _ = tokio::signal::ctrl_c() => {
