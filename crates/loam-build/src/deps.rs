@@ -29,18 +29,6 @@ use topological_sort::TopologicalSort;
 /// - The manifest file cannot be found.
 /// - There's an issue executing the metadata command.
 /// - Any other error occurs during the metadata retrieval process.
-///
-/// # Example
-///
-/// ```rust
-/// use std::path::Path;
-///
-/// let manifest_path = Path::new("path/to/Cargo.toml");
-/// match get_target_dir(manifest_path) {
-///     Ok(target_dir) => println!("Target directory: {:?}", target_dir),
-///     Err(e) => eprintln!("Error: {}", e),
-/// }
-/// ```
 pub fn get_target_dir(manifest_path: &Path) -> Result<PathBuf, cargo_metadata::Error> {
     Ok(cargo_metadata::MetadataCommand::new()
         .manifest_path(manifest_path)
@@ -107,23 +95,6 @@ pub enum Error {
 /// This function may panic in the following situations:
 /// - If the output of `cargo tree` contains invalid UTF-8 characters
 /// - If the parsing of package names and versions from the `cargo tree` output fails
-///
-/// # Example
-///
-/// ```no_run
-/// use std::path::Path;
-/// use your_crate::deps;
-///
-/// let manifest_path = Path::new("path/to/Cargo.toml");
-/// match deps::all(manifest_path) {
-///     Ok(packages) => {
-///         for package in packages {
-///             println!("Package: {} v{}", package.name, package.version);
-///         }
-///     },
-///     Err(e) => eprintln!("Error: {:?}", e),
-/// }
-/// ```
 pub fn all(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     let metadata = cargo_metadata::MetadataCommand::new()
         .manifest_path(manifest_path)
