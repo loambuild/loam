@@ -18,6 +18,14 @@ pub fn set_env(env: Env) {
     unsafe { ENV = Some(env) };
 }
 
+/// Returns a reference to the current environment.
+///
+/// # Panics
+///
+/// This function will panic if the environment has not been initialized.
+/// It is expected that the environment is always initialized before this
+/// function is called in normal operation.
+#[must_use]
 pub fn env() -> &'static Env {
     unsafe { ENV.as_ref().unwrap() }
 }

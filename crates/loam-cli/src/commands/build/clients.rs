@@ -62,14 +62,14 @@ impl Args {
         Ok(())
     }
 
-    fn loam_env(&self) -> String {
+    fn loam_env(self) -> String {
         format!("{:?}", self.env).to_lowercase()
     }
 
-    /// Parse the network settings from the environments.toml file and set STELLAR_RPC_URL and
-    /// STELLAR_NETWORK_PASSPHRASE.
+    /// Parse the network settings from the environments.toml file and set `STELLAR_RPC_URL` and
+    /// `STELLAR_NETWORK_PASSPHRASE`.
     ///
-    /// We could set STELLAR_NETWORK instead, but when importing contracts, we want to hard-code
+    /// We could set `STELLAR_NETWORK` instead, but when importing contracts, we want to hard-code
     /// the network passphrase. So if given a network name, we use soroban-cli to fetch the RPC url
     /// & passphrase for that named network, and still set the environment variables.
     fn add_network_to_env(network: &env_toml::Network) -> Result<(), Error> {
@@ -115,7 +115,8 @@ impl Args {
 
         let default_account_candidates = accounts
             .iter()
-            .filter_map(|account| account.default.then(|| account.name.clone()))
+            .filter(|&account| account.default)
+            .map(|account| account.name.clone())
             .collect::<Vec<_>>();
 
         let default_account = match (default_account_candidates.as_slice(), accounts) {
@@ -129,7 +130,7 @@ impl Args {
             eprintln!("🔐 creating keys for {:?}", account.name);
             cli::keys::generate::Cmd::parse_arg_vec(&[&account.name])?
                 .run()
-                .await?
+                .await?;
         }
 
         std::env::set_var("STELLAR_ACCOUNT", &default_account);

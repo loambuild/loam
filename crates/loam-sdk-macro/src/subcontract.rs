@@ -19,7 +19,7 @@ impl From<Error> for TokenStream {
     }
 }
 
-pub fn generate(item: Item) -> TokenStream {
+pub fn generate(item: &Item) -> TokenStream {
     inner_generate(item).unwrap_or_else(Into::into)
 }
 fn is_result_type(output: &syn::ReturnType) -> bool {
@@ -135,7 +135,7 @@ fn generate_mutable_method(
     }
 }
 
-fn inner_generate(item: Item) -> Result<TokenStream, Error> {
+fn inner_generate(item: &Item) -> Result<TokenStream, Error> {
     if let Item::Trait(input_trait) = &item {
         let generated_methods = input_trait
             .items
@@ -215,7 +215,7 @@ mod tests {
                 fn admin_set_two(&mut self, new_admin: Address);
             }
         };
-        let result = generate(input);
+        let result = generate(&input);
         println!("{}", format_snippet(&result.to_string()));
 
         let output = quote! {
@@ -262,7 +262,7 @@ mod tests {
                 fn riff_set_two(&mut self, new_riff: Address);
             }
         };
-        let result = generate(input);
+        let result = generate(&input);
         println!("{}", format_snippet(&result.to_string()));
 
         let output = quote! {

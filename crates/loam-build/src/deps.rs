@@ -8,6 +8,39 @@ use std::{
 use cargo_metadata::{camino::Utf8PathBuf, Package, PackageId};
 use topological_sort::TopologicalSort;
 
+/// Retrieves the target directory for a Cargo project and appends "loam" to it.
+///
+/// This function uses `cargo_metadata` to get the target directory of a Cargo project
+/// specified by the given manifest path. It then appends "loam" to this path.
+///
+/// # Arguments
+///
+/// * `manifest_path` - A reference to a `Path` representing the location of the Cargo.toml file.
+///
+/// # Returns
+///
+/// Returns a `Result` containing:
+/// - `Ok(PathBuf)`: The path to the target directory with "loam" appended.
+/// - `Err(cargo_metadata::Error)`: If there's an error retrieving the metadata.
+///
+/// # Errors
+///
+/// This function will return an error if:
+/// - The manifest file cannot be found.
+/// - There's an issue executing the metadata command.
+/// - Any other error occurs during the metadata retrieval process.
+///
+/// # Example
+///
+/// ```rust
+/// use std::path::Path;
+///
+/// let manifest_path = Path::new("path/to/Cargo.toml");
+/// match get_target_dir(manifest_path) {
+///     Ok(target_dir) => println!("Target directory: {:?}", target_dir),
+///     Err(e) => eprintln!("Error: {}", e),
+/// }
+/// ```
 pub fn get_target_dir(manifest_path: &Path) -> Result<PathBuf, cargo_metadata::Error> {
     Ok(cargo_metadata::MetadataCommand::new()
         .manifest_path(manifest_path)
@@ -48,6 +81,49 @@ pub enum Error {
     Metadata(#[from] cargo_metadata::Error),
 }
 
+/// Retrieves all dependencies for the given manifest path.
+///
+/// This function executes `cargo tree` to get the dependency tree and processes the output
+/// to return a vector of `Package` structs representing all dependencies, including the root package.
+///
+/// # Arguments
+///
+/// * `manifest_path` - A reference to the Path of the Cargo.toml file.
+///
+/// # Returns
+///
+/// A `Result` containing a `Vec<Package>` on success, or an `Error` on failure.
+///
+/// # Errors
+///
+/// This function will return an error in the following situations:
+/// - If the metadata command fails to execute
+/// - If the root package is not found in the metadata
+/// - If the parent directory of the manifest path cannot be determined
+/// - If the `cargo tree` command fails to execute
+///
+/// # Panics
+///
+/// This function may panic in the following situations:
+/// - If the output of `cargo tree` contains invalid UTF-8 characters
+/// - If the parsing of package names and versions from the `cargo tree` output fails
+///
+/// # Example
+///
+/// ```no_run
+/// use std::path::Path;
+/// use your_crate::deps;
+///
+/// let manifest_path = Path::new("path/to/Cargo.toml");
+/// match deps::all(manifest_path) {
+///     Ok(packages) => {
+///         for package in packages {
+///             println!("Package: {} v{}", package.name, package.version);
+///         }
+///     },
+///     Err(e) => eprintln!("Error: {:?}", e),
+/// }
+/// ```
 pub fn all(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     let metadata = cargo_metadata::MetadataCommand::new()
         .manifest_path(manifest_path)
@@ -92,6 +168,7 @@ pub fn all(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     Ok(res)
 }
 
+#[must_use]
 pub fn out_dir(target_dir: &Path, name: &str) -> PathBuf {
     target_dir.join("loam").join(name.replace('-', "_"))
 }
@@ -110,10 +187,29 @@ impl Display for DepKind {
     }
 }
 
-pub fn loam(manifest_path: &Path, kind: DepKind) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
+/// Retrieves a list of source and output paths for dependencies of a specified kind.
+///
+/// # Arguments
+///
+/// * `manifest_path` - The path to the Cargo.toml manifest file.
+/// * `kind` - The kind of dependency to filter.
+///
+/// # Returns
+///
+/// A `Result` containing a vector of tuples, where each tuple contains:
+/// - The path to the dependency's `lib.rs` file
+/// - The output directory for the dependency
+///
+/// # Errors
+///
+/// This function can return an error in the following cases:
+/// - If there's an issue reading or parsing the manifest file
+/// - If a dependency's manifest path doesn't have a parent directory
+/// - If there are any issues accessing or processing the dependency information
+pub fn loam(manifest_path: &Path, kind: &DepKind) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
     all(manifest_path)?
         .into_iter()
-        .filter(|p| p.is_dep(&kind) || p.manifest_path == manifest_path)
+        .filter(|p| p.is_dep(kind) || p.manifest_path == manifest_path)
         .map(|p| {
             let version = &p.version;
             let name = &p.name;
@@ -133,11 +229,47 @@ pub fn loam(manifest_path: &Path, kind: DepKind) -> Result<Vec<(Utf8PathBuf, Pat
         .map(IntoIterator::into_iter)
         .map(Iterator::collect::<Vec<_>>)
 }
-
+/// Retrieves subcontract dependencies from the given manifest path.
+///
+/// # Arguments
+///
+/// * `manifest_path` - The path to the Cargo.toml manifest file.
+///
+/// # Returns
+///
+/// A `Result` containing a vector of tuples, where each tuple contains:
+/// - A `Utf8PathBuf` representing the package name and version.
+/// - A `PathBuf` representing the path to the package.
+///
+/// # Errors
+///
+/// This function may return an error if:
+/// - The manifest file cannot be read or parsed.
+/// - There are issues accessing or processing dependency information.
+/// - Any other error occurs during the dependency resolution process.
 pub fn subcontract(manifest_path: &Path) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
-    loam(manifest_path, DepKind::Subcontract)
+    loam(manifest_path, &DepKind::Subcontract)
 }
 
+/// Retrieves a list of contract dependencies for a given manifest path.
+///
+/// This function filters all dependencies of the package specified by the manifest path,
+/// returning only those that are of the Contract kind and are not the package itself.
+///
+/// # Arguments
+///
+/// * `manifest_path` - A Path to the Cargo.toml manifest file.
+///
+/// # Returns
+///
+/// A Result containing a Vec of Package structs representing the contract dependencies,
+/// or an Error if the operation fails.
+///
+/// # Errors
+///
+/// This function will return an Error if:
+/// * There's an issue reading or parsing the manifest file.
+/// * There's a problem retrieving the dependencies.
 pub fn contract(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     Ok(all(manifest_path)?
         .into_iter()
@@ -145,6 +277,25 @@ pub fn contract(manifest_path: &Path) -> Result<Vec<Package>, Error> {
         .collect())
 }
 
+/// Constructs a workspace from a list of packages, sorting them topologically based on their contract dependencies.
+///
+/// This function creates a dependency graph of the provided packages and their contract dependencies,
+/// then returns a topologically sorted list of these packages.
+///
+/// # Arguments
+///
+/// * `packages` - A slice of Package structs to process.
+///
+/// # Returns
+///
+/// A Result containing a Vec of Package structs representing the sorted workspace,
+/// or an Error if the operation fails.
+///
+/// # Errors
+///
+/// This function will return an Error if:
+/// * There's an issue retrieving contract dependencies for any of the packages.
+/// * The dependency graph contains cycles, making topological sorting impossible.
 pub fn get_workspace(packages: &[Package]) -> Result<Vec<Package>, Error> {
     let mut graph: TopologicalSort<PackageId> = TopologicalSort::new();
     for p in packages {
