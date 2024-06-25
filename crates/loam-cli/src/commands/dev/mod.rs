@@ -32,7 +32,7 @@ impl Cmd {
         let tx_clone = tx.clone();
         let mut watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
-                if let Ok(event) = res {
+                if let Ok(event @ notify::Event { kind: notify::EventKind::Modify(_) } ) = res {
                     if let notify::EventKind::Modify(_) = event.kind {
                         if let Some(path) = event.paths.first() {
                             eprintln!("File modified: {:?}", path);
