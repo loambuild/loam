@@ -29,14 +29,13 @@ impl Cmd {
         // Set LOAM_ENV to development
         std::env::set_var("LOAM_ENV", "development");
         let (tx, mut rx) = tokio::sync::mpsc::channel(100);
-        let tx_clone = tx.clone();
         let mut watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
                 if let Ok(event @ notify::Event { kind: notify::EventKind::Modify(_), .. }) = res {
                     if let Some(path) = event.paths.first() {
                         eprintln!("File modified: {:?}", path);
                         // Send a signal through the channel to trigger a rebuild
-                        if let Err(e) = tx_clone.blocking_send(()) {
+                        if let Err(e) = tx.blocking_send(()) {
                             eprintln!("Error sending through channel: {}", e);
                         }
                     }
@@ -93,7 +92,7 @@ impl Cmd {
             .build_clients
             .env
             .get_or_insert(LoamEnv::Development);
-        build_cmd.profile = "debug".to_string();
+        build_cmd.profile = "dev".to_string();
         build_cmd.run().await?;
         Ok(())
     }
