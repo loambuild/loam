@@ -8,7 +8,8 @@ pub(crate) fn from_item(item: Item) -> Result<TokenStream, syn::Error> {
         ident,
         generics,
         ..
-    }) = item else {
+    }) = item
+    else {
         return Err(syn::Error::new(
             Span::call_site(),
             "Lazy can only be derived on empty structs.",

@@ -59,7 +59,7 @@ fn generate_methods(item: &ItemTrait) -> Vec<TokenStream> {
     item.items
         .iter()
         .filter_map(|item| {
-            if let syn::TraitItem::Fn(TraitItemFn{ sig, attrs, ..}) = item {
+            if let syn::TraitItem::Fn(TraitItemFn { sig, attrs, .. }) = item {
                 let name = &sig.ident;
                 Some(generate_method(sig, attrs, name))
             } else {

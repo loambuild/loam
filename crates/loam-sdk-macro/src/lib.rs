@@ -12,10 +12,16 @@ mod util;
 
 /// Generates a companion Trait which has a default type `Impl`, which implements this trait.
 ///
+/// # Panics
+///
+/// This macro will panic if:
+/// - The input `TokenStream` cannot be parsed into a valid Rust item.
+/// - The `subcontract::generate` function fails to generate the companion trait.
+///
 #[proc_macro_attribute]
 pub fn subcontract(_: TokenStream, item: TokenStream) -> TokenStream {
     let parsed: Item = syn::parse(item).unwrap();
-    subcontract::generate(parsed).into()
+    subcontract::generate(&parsed).into()
 }
 
 #[proc_macro_derive(IntoKey)]
@@ -33,6 +39,12 @@ pub fn lazy(item: TokenStream) -> TokenStream {
 }
 
 /// Generates the soroban contract code combining all Subcontracts
+///
+/// # Panics
+///
+/// This function will panic if:
+/// - The subcontract information cannot be retrieved from the Cargo.toml file.
+/// - There are any issues with reading or processing the dependency information.
 #[proc_macro]
 pub fn soroban_contract(_: TokenStream) -> TokenStream {
     let cargo_file = manifest();
@@ -52,6 +64,14 @@ fn manifest() -> std::path::PathBuf {
 
 /// Generates a contract Client for a given contract.
 /// It is expected that the name should be the same as the published contract or a contract in your current workspace.
+///
+/// # Panics
+///
+/// This function may panic in the following situations:
+/// - If `loam_build::get_target_dir()` fails to retrieve the target directory
+/// - If the input tokens cannot be parsed as a valid identifier
+/// - If the directory path cannot be canonicalized
+/// - If the canonical path cannot be converted to a string
 #[proc_macro]
 pub fn import_contract(tokens: TokenStream) -> TokenStream {
     let cargo_file = manifest();

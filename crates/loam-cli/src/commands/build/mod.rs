@@ -12,7 +12,7 @@ use std::{
     process::{Command, ExitStatus, Stdio},
 };
 
-pub mod build_clients;
+pub mod clients;
 pub mod env_toml;
 
 /// Build a contract from source
@@ -66,7 +66,7 @@ pub struct Cmd {
     #[arg(long, conflicts_with = "out_dir", help_heading = "Other")]
     pub print_commands_only: bool,
     #[command(flatten)]
-    pub build_clients: build_clients::Args,
+    pub build_clients: clients::Args,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -88,7 +88,7 @@ pub enum Error {
     #[error(transparent)]
     Loam(#[from] loam_build::deps::Error),
     #[error(transparent)]
-    BuildClients(#[from] build_clients::Error),
+    BuildClients(#[from] clients::Error),
 }
 
 impl Cmd {
