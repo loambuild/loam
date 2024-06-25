@@ -1,6 +1,6 @@
 use clap::Parser;
 use notify::{RecursiveMode, Watcher};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use tokio::time;
 
 use crate::commands::build;
@@ -32,26 +32,23 @@ impl Cmd {
         let tx_clone = tx.clone();
         let mut watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
-                if let Ok(event @ notify::Event { kind: notify::EventKind::Modify(_) } ) = res {
-                    if let notify::EventKind::Modify(_) = event.kind {
-                        if let Some(path) = event.paths.first() {
-                            eprintln!("File modified: {:?}", path);
-                            // Send a signal through the channel to trigger a rebuild
-                            if let Err(e) = tx_clone.blocking_send(()) {
-                                eprintln!("Error sending through channel: {}", e);
-                            }
+                if let Ok(event @ notify::Event { kind: notify::EventKind::Modify(_), .. }) = res {
+                    if let Some(path) = event.paths.first() {
+                        eprintln!("File modified: {:?}", path);
+                        // Send a signal through the channel to trigger a rebuild
+                        if let Err(e) = tx_clone.blocking_send(()) {
+                            eprintln!("Error sending through channel: {}", e);
                         }
                     }
                 }
             })
             .unwrap();
 
-        let workspace_root = self
+        let workspace_root: &Path = self
             .build_cmd
             .manifest_path
             .parent()
-            .map(|path| path.to_path_buf())
-            .unwrap_or_else(|| PathBuf::from("."));
+            .unwrap_or_else(|| Path::new("."));
         let env_toml = workspace_root.join("environments.toml");
         if env_toml.exists() {
             watcher.watch(
@@ -96,7 +93,7 @@ impl Cmd {
             .build_clients
             .env
             .get_or_insert(LoamEnv::Development);
-        build_cmd.profile = "dev".to_string();
+        build_cmd.profile = "debug".to_string();
         build_cmd.run().await?;
         Ok(())
     }
