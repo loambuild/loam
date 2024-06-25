@@ -24,14 +24,3 @@ jobs:
       
       - name: Run cargo clippy
         run: cargo clippy -- -D warnings -D clippy::pedantic
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      
-      - name: Build
-        run: cargo build --verbose
