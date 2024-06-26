@@ -38,8 +38,8 @@ pub struct Cmd {
     #[arg(long)]
     pub package: Option<String>,
     /// Build with the specified profile
-    #[arg(long, default_value = "release")]
-    pub profile: String,
+    #[arg(long)]
+    pub profile: Option<String>,
     /// Build with the list of features activated, space or comma separated
     #[arg(long, help_heading = "Features")]
     pub features: Option<String>,
@@ -131,10 +131,12 @@ impl Cmd {
             ));
             cmd.arg("--crate-type=cdylib");
             cmd.arg("--target=wasm32-unknown-unknown");
-            if self.profile == "release" {
+            let profile = self.profile.clone().unwrap_or("release".to_string());
+            if profile == "release" {
                 cmd.arg("--release");
+            } else if profile == "debug" {
             } else {
-                cmd.arg(format!("--profile={}", self.profile));
+                cmd.arg(format!("--profile={}", profile));
             }
             if self.all_features {
                 cmd.arg("--all-features");
@@ -173,7 +175,7 @@ impl Cmd {
                 let file = format!("{}.wasm", p.name.replace('-', "_"));
                 let target_file_path = Path::new(target_dir)
                     .join("wasm32-unknown-unknown")
-                    .join(&self.profile)
+                    .join(profile)
                     .join(&file);
                 let out_file_path = out_dir.join(&file);
                 if !out_file_path.exists() {

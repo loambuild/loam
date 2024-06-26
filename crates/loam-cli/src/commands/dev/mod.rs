@@ -98,7 +98,7 @@ impl Cmd {
             .build_clients
             .env
             .get_or_insert(LoamEnv::Development);
-        build_cmd.profile = "dev".to_string();
+        build_cmd.profile.get_or_insert_with(|| "debug".to_string());
         build_cmd.run().await?;
         Ok(())
     }
