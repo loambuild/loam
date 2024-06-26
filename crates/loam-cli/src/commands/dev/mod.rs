@@ -26,8 +26,6 @@ pub enum Error {
 
 impl Cmd {
     pub async fn run(&self) -> Result<(), Error> {
-        // Set LOAM_ENV to development
-        std::env::set_var("LOAM_ENV", "development");
         let (tx, mut rx) = tokio::sync::mpsc::channel(100);
         let mut watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
