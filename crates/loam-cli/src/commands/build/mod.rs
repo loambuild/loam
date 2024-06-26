@@ -136,7 +136,7 @@ impl Cmd {
                 cmd.arg("--release");
             } else if profile == "debug" {
             } else {
-                cmd.arg(format!("--profile={}", profile));
+                cmd.arg(format!("--profile={profile}"));
             }
             if self.all_features {
                 cmd.arg("--all-features");
