@@ -131,7 +131,7 @@ impl Cmd {
             ));
             cmd.arg("--crate-type=cdylib");
             cmd.arg("--target=wasm32-unknown-unknown");
-            let profile = self.profile.clone().unwrap_or("release".to_string());
+            let profile = self.profile.as_deref().unwrap_or("release");
             if profile == "release" {
                 cmd.arg("--release");
             } else if profile != "debug" {
