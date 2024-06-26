@@ -141,7 +141,6 @@ impl Args {
         Ok(())
     }
 
-
     fn get_network_args(network: &Network) -> cli::network::Args {
         cli::network::Args {
             rpc_url: network.rpc_url.clone(),
@@ -158,8 +157,8 @@ impl Args {
     }
 
     fn get_config_dir(network: &Network) -> cli::config::Args {
-        let account = std::env::var("STELLAR_ACCOUNT")
-            .expect("No STELLAR_ACCOUNT environment variable set");
+        let account =
+            std::env::var("STELLAR_ACCOUNT").expect("No STELLAR_ACCOUNT environment variable set");
         cli::config::Args {
             network: Self::get_network_args(network),
             locator: Self::get_config_locator(),
@@ -167,33 +166,50 @@ impl Args {
             hd_path: Some(0),
         }
     }
-     
-    fn get_contract_alias(&self, name: &str, network: &Network) -> Result<Option<String>, cli::config::alias::Error> {
+
+    fn get_contract_alias(
+        name: &str,
+        network: &Network,
+    ) -> Result<Option<String>, cli::config::alias::Error> {
         let config_dir = Self::get_config_dir(network);
         let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
             .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
         config_dir.get_contract_id(name, &network_passphrase)
     }
 
-    async fn contract_hash_matches(&self, contract_id: &str, hash: &str, network: &Network) -> Result<bool, Error> {
+    async fn contract_hash_matches(
+        &self,
+        contract_id: &str,
+        hash: &str,
+        network: &Network,
+    ) -> Result<bool, Error> {
         let hash_vec = cli::contract::fetch::Cmd {
             contract_id: contract_id.to_string(),
-            out_file: None, 
+            out_file: None,
             locator: Self::get_config_locator(),
             network: Self::get_network_args(network),
         }
-            .run_against_rpc_server(None, None)
-            .await?;
+        .run_against_rpc_server(None, None)
+        .await?;
         let ctrct_hash = contract_hash(&hash_vec)?;
         Ok(hex::encode(ctrct_hash) == hash)
     }
 
-    fn save_contract_alias(&self, name: &str, contract_id: &str, network: &Network) -> Result<(), cli::config::alias::Error> {
+    fn save_contract_alias(
+        name: &str,
+        contract_id: &str,
+        network: &Network,
+    ) -> Result<(), cli::config::alias::Error> {
         let config_dir = Self::get_config_dir(network);
         config_dir.save_contract_id(contract_id, name)
     }
 
-    fn write_contract_template(&self, workspace_root: &std::path::Path, name: &str, contract_id: &str) -> Result<(), Error> {
+    fn write_contract_template(
+        self,
+        workspace_root: &std::path::Path,
+        name: &str,
+        contract_id: &str,
+    ) -> Result<(), Error> {
         let allow_http = if self.loam_env() == "development" {
             "\n  allowHttp: true,"
         } else {
@@ -278,16 +294,19 @@ impl Args {
                 eprintln!("    ↳ hash: {hash}");
 
                 // Check if we have an alias saved for this contract
-                let alias = self.get_contract_alias(&name, &network)?;
+                let alias = Self::get_contract_alias(name, network)?;
                 if let Some(contract_id) = alias {
-                    match self.contract_hash_matches(&contract_id, &hash, &network).await {
+                    match self
+                        .contract_hash_matches(&contract_id, &hash, network)
+                        .await
+                    {
                         Ok(true) => {
                             eprintln!("✅ Contract {name:?} is up to date");
                             continue;
-                        },
+                        }
                         Ok(false) if self.loam_env() == "production" => {
                             return Err(Error::ContractUpdateNotAllowed(name.to_string()));
-                        },
+                        }
                         Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
                         Err(e) => return Err(e),
                     }
@@ -307,7 +326,7 @@ impl Args {
                 eprintln!("    ↳ contract_id: {contract_id}");
 
                 // Save the alias for future use
-                self.save_contract_alias(&name, &contract_id, &network)?;
+                Self::save_contract_alias(name, &contract_id, network)?;
 
                 eprintln!("🎭 binding {name:?} contract");
                 cli::contract::bindings::typescript::Cmd::parse_arg_vec(&[
@@ -330,5 +349,4 @@ impl Args {
 
         Ok(())
     }
-
 }
