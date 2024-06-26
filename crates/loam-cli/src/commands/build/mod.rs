@@ -134,8 +134,7 @@ impl Cmd {
             let profile = self.profile.clone().unwrap_or("release".to_string());
             if profile == "release" {
                 cmd.arg("--release");
-            } else if profile == "debug" {
-            } else {
+            } else if profile != "debug" {
                 cmd.arg(format!("--profile={profile}"));
             }
             if self.all_features {
