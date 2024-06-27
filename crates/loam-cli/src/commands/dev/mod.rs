@@ -54,20 +54,22 @@ fn is_temporary_file(path: &Path) -> bool {
     let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
 
     // Vim temporary files
-    if file_name.starts_with(".") {
+    if file_name.starts_with('.') {
         return true;
     }
-    if file_name.ends_with("~") {
+    if file_name.ends_with('~') {
         return true;
     }
 
     // Emacs temporary files
-    if file_name.starts_with("#") && file_name.ends_with("#") {
+    if file_name.starts_with('#') && file_name.ends_with('#') {
         return true;
     }
     // VSCode temporary files
-    if file_name.ends_with(".tmp") {
-        return true;
+    if std::path::Path::new(file_name)
+        .extension()
+        .map_or(false, |ext| ext.eq_ignore_ascii_case("tmp")) {
+            return true;
     }
 
     // Add more patterns for other editors as needed
