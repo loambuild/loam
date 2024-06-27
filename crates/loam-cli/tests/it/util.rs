@@ -2,6 +2,9 @@ use assert_cmd::{assert::Assert, Command};
 use assert_fs::TempDir;
 use fs_extra::dir::{copy, CopyOptions};
 use std::path::PathBuf;
+use std::future::Future;
+use tokio::process::Command as ProcessCommand;
+
 
 pub struct TestEnv {
     pub temp_dir: TempDir,
@@ -46,8 +49,34 @@ impl TestEnv {
         f(&test_env);
     }
 
+    pub async fn from_async<F, Fut>(template: &str, f: F)
+    where
+        F: FnOnce(TestEnv) -> Fut,
+        Fut: Future<Output = ()>,
+    {
+        let test_env = TestEnv::new(template);
+        f(test_env).await;
+    }
+
+    pub fn modify_file(&self, path: &str, content: &str) {
+        let file_path = self.cwd.join(path);
+        std::fs::write(file_path, content).expect("Failed to modify file");
+    }
+
     pub fn loam(&self, cmd: &str) -> Command {
         let mut loam = Command::cargo_bin("loam").unwrap();
+        loam.current_dir(&self.cwd);
+        loam.arg(cmd);
+        loam
+    }
+    
+    fn cargo_bin_loam(&self) -> PathBuf {
+        PathBuf::from(env!("CARGO_BIN_EXE_loam"))
+    }
+
+    pub fn loam_process(&self, cmd: &str) -> ProcessCommand {
+        println!("{}",self.cargo_bin_loam().display());
+        let mut loam = ProcessCommand::new(self.cargo_bin_loam());
         loam.current_dir(&self.cwd);
         loam.arg(cmd);
         loam
