@@ -7,10 +7,20 @@ use std::{
 };
 use tokio::sync::mpsc;
 use tokio::time;
+use tokio::sync::Mutex;
+
 
 use crate::commands::build;
 
 use super::build::clients::LoamEnv;
+
+struct RebuildState {
+    pending: bool,
+}
+
+enum Message {
+    FileChanged,
+}
 
 #[derive(Parser, Debug, Clone)]
 #[group(skip)]
@@ -64,7 +74,8 @@ fn is_temporary_file(path: &Path) -> bool {
 
 impl Cmd {
     pub async fn run(&self) -> Result<(), Error> {
-        let (tx, mut rx) = mpsc::channel(100);
+        let (tx, mut rx) = mpsc::channel::<Message>(100);
+        let rebuild_state = Arc::new(Mutex::new(RebuildState { pending: false }));
         let workspace_root: &Path = self
             .build_cmd
             .manifest_path
@@ -92,7 +103,7 @@ impl Cmd {
 
         for package_path in &packages {
             watched_dirs.push(package_path.clone());
-            eprintln!("Watching {}", package_path.as_path().display());
+            println!("Watching {}", package_path.as_path().display());
         }
         let watched_dirs_clone = watched_dirs.clone();
         let env_toml_path_clone = Arc::clone(&env_toml_path);
@@ -120,14 +131,12 @@ impl Cmd {
                                 &env_toml_parent_abs,
                                 &watched_dirs_clone,
                             );
+                            println!("file change detected: {path:?}");
 
-                            let trigger_rebuild = !parent_is_env_toml_parent
-                                || parent_is_in_watched_dirs
-                                || path_is_env_toml;
-
-                            if trigger_rebuild {
-                                eprintln!("File changed: {path:?}");
-                                if let Err(e) = tx.blocking_send(()) {
+                            let skip =  parent_is_env_toml_parent && !path_is_env_toml && !parent_is_in_watched_dirs;
+                            if !skip {
+                                println!("File changed: {path:?}");
+                                if let Err(e) = tx.blocking_send(Message::FileChanged) {
                                     eprintln!("Error sending through channel: {e}");
                                 }
                             }
@@ -147,12 +156,14 @@ impl Cmd {
         }
         println!("Watching for changes. Press Ctrl+C to stop.");
 
+        let rebuild_state_clone = Arc::clone(&rebuild_state);
         loop {
             tokio::select! {
                 _ = rx.recv() => {
-                    println!("Changes detected. Rebuilding...");
-                    if let Err(e) = self.build().await {
-                        eprintln!("Build error: {e}");
+                    let mut state = rebuild_state_clone.lock().await;
+                    if !state.pending {
+                        state.pending = true;
+                        tokio::spawn(self.clone().debounced_rebuild(Arc::clone(&rebuild_state_clone)));
                     }
                 }
                 _ = tokio::signal::ctrl_c() => {
@@ -160,11 +171,21 @@ impl Cmd {
                     break;
                 }
             }
-            // Debounce to avoid multiple rapid rebuilds
-            time::sleep(std::time::Duration::from_secs(1)).await;
         }
-
         Ok(())
+    }
+
+    async fn debounced_rebuild(self, rebuild_state: Arc<Mutex<RebuildState>>) {
+        // Debounce to avoid multiple rapid rebuilds
+        time::sleep(std::time::Duration::from_secs(1)).await;
+    
+        println!("Changes detected. Rebuilding...");
+        if let Err(e) = self.build().await {
+            eprintln!("Build error: {e}");
+        }
+    
+        let mut state = rebuild_state.lock().await;
+        state.pending = false;
     }
 
     async fn build(&self) -> Result<(), Error> {

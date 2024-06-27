@@ -11,6 +11,10 @@ async fn dev_command_watches_for_changes() {
     TestEnv::from_async("soroban-init-boilerplate", |env| async move {
         env.set_environments_toml(
             r#"
+development.accounts = [
+    { name = "alice" },
+]
+
 [development.network]
 rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
@@ -20,15 +24,13 @@ network-passphrase = "Standalone Network ; February 2017"
         let mut dev_process = env
             .loam_process("dev")
             .current_dir(&env.cwd)
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
             .spawn()
             .expect("Failed to spawn dev process");
 
         println!("Dev process spawned");
 
         // Give the dev process some time to start
-        sleep(Duration::from_secs(15)).await;
+        sleep(Duration::from_secs(20)).await;
 
         // Modify a source file
         env.modify_file(
@@ -41,9 +43,11 @@ network-passphrase = "Standalone Network ; February 2017"
         dev_process.kill().await.expect("Failed to kill dev process");
         let output = dev_process.wait_with_output().await.expect("Failed to wait for dev process");
         let stderr = String::from_utf8(output.stderr).unwrap();
+        let stdout = String::from_utf8(output.stdout).unwrap();
         println!("Dev process output err: {}", stderr);
-        assert!(stderr.contains("Watching for changes. Press Ctrl+C to stop."));
-        assert!(stderr.contains("Changes detected. Rebuilding..."));
+        println!("Dev process output : {}", stdout);
+        assert!(stdout.contains("Watching for changes. Press Ctrl+C to stop."));
+        assert!(stdout.contains("Changes detected. Rebuilding..."));
     })
     .await;
 }
@@ -62,6 +66,10 @@ async fn dev_command_watches_environments_toml() {
         // Create environments.toml
         env.set_environments_toml(
             r#"
+development.accounts = [
+    { name = "alice" },
+]
+
 [development.network]
 rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
@@ -74,6 +82,10 @@ network-passphrase = "Standalone Network ; February 2017"
         // Modify environments.toml
         env.set_environments_toml(
             r#"
+development.accounts = [
+    { name = "alice" },
+]
+
 [development.network]
 rpc-url = "http://localhost:9000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
