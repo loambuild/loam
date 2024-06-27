@@ -37,6 +37,31 @@ fn is_parent_in_watched_dirs(parent: &Path, watched_dirs: &[Arc<PathBuf>]) -> bo
     watched_dirs.iter().any(|p| canonicalize_path(p) == parent)
 }
 
+fn is_temporary_file(path: &Path) -> bool {
+    let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+    
+    // Vim temporary files
+    if file_name.starts_with(".") {
+        return true;
+    }
+    if file_name.ends_with("~") {
+        return true;
+    }
+
+    // Emacs temporary files
+    if file_name.starts_with("#") && file_name.ends_with("#") {
+        return true;
+    }
+    // VSCode temporary files
+    if file_name.ends_with(".tmp") {
+        return true;
+    }
+
+    // Add more patterns for other editors as needed
+
+    false
+}
+
 impl Cmd {
     pub async fn run(&self) -> Result<(), Error> {
         let (tx, mut rx) = mpsc::channel(100);
@@ -82,9 +107,12 @@ impl Cmd {
                             | notify::EventKind::Remove(_)
                     ) {
                         if let Some(path) = event.paths.first() {
+                            // Ignore temporary files
+                            if is_temporary_file(path) {
+                                return;
+                            }
                             let env_toml_parent_abs = canonicalize_path(&env_toml_parent_clone);
                             let env_toml_path_abs = canonicalize_path(&env_toml_path_clone);
-
                             let parent_is_env_toml_parent =
                                 path.parent() == Some(env_toml_parent_abs.as_path());
                             let path_is_env_toml = path == env_toml_path_abs.as_path();
