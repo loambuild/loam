@@ -68,8 +68,9 @@ fn is_temporary_file(path: &Path) -> bool {
     // VSCode temporary files
     if std::path::Path::new(file_name)
         .extension()
-        .map_or(false, |ext| ext.eq_ignore_ascii_case("tmp")) {
-            return true;
+        .map_or(false, |ext| ext.eq_ignore_ascii_case("tmp"))
+    {
+        return true;
     }
 
     // Add more patterns for other editors as needed
