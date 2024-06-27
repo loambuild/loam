@@ -1,9 +1,7 @@
 use clap::Parser;
 use notify::{self, RecursiveMode, Watcher};
 use std::{
-    fs,
-    path::{Path, PathBuf},
-    sync::Arc,
+    env, fs, path::{Path, PathBuf}, sync::Arc
 };
 use tokio::sync::mpsc;
 use tokio::time;
@@ -40,7 +38,11 @@ pub enum Error {
 }
 
 fn canonicalize_path(path: &Path) -> PathBuf {
-    fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf())
+    if path.as_os_str().is_empty() {
+        env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
+    } else {
+        fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf())
+    }
 }
 
 fn is_parent_in_watched_dirs(parent: &Path, watched_dirs: &[Arc<PathBuf>]) -> bool {
@@ -131,10 +133,8 @@ impl Cmd {
                                 &env_toml_parent_abs,
                                 &watched_dirs_clone,
                             );
-                            println!("file change detected: {path:?}");
-
-                            let skip =  parent_is_env_toml_parent && !path_is_env_toml && !parent_is_in_watched_dirs;
-                            if !skip {
+                            // skip if the file is in the parent directory of environments.toml and it is not environments.toml
+                            if !(parent_is_env_toml_parent && !path_is_env_toml && !parent_is_in_watched_dirs) {
                                 println!("File changed: {path:?}");
                                 if let Err(e) = tx.blocking_send(Message::FileChanged) {
                                     eprintln!("Error sending through channel: {e}");
