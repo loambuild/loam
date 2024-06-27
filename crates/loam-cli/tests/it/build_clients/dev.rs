@@ -1,11 +1,15 @@
 use crate::util::TestEnv;
 use std::process::Stdio;
 use std::time::Duration;
-use tokio::time::sleep;
+use tokio::time::{timeout, sleep};
+use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio_stream::wrappers::LinesStream;  // Import this wrapper
+use tokio_stream::StreamExt;  // Import StreamExt trait for iterating streams
 
 #[tokio::test]
 async fn dev_command_watches_for_changes_and_environments_toml() {
-    TestEnv::from_async("soroban-init-boilerplate", |env| async move {
+    TestEnv::from_async("soroban-init-boilerplate", |env| async {
+        Box::pin(async move {
         env.set_environments_toml(
             r#"
 development.accounts = [
@@ -27,8 +31,14 @@ network-passphrase = "Standalone Network ; February 2017"
             .spawn()
             .expect("Failed to spawn dev process");
 
-        // Give the dev process some time to start and perform initial build
-        sleep(Duration::from_secs(20)).await;
+        let stdout = dev_process.stdout.take().unwrap();
+        let stderr = dev_process.stderr.take().unwrap();
+
+        let mut stdout_lines = LinesStream::new(BufReader::new(stdout).lines());
+        let mut stderr_lines = LinesStream::new(BufReader::new(stderr).lines());
+
+        // Wait for initial build to complete
+        wait_for_output(&mut stdout_lines, "Watching for changes. Press Ctrl+C to stop.").await;
 
         // Test 1: Modify a source file
         let file_changed = "contracts/hello_world/src/lib.rs";
@@ -36,7 +46,7 @@ network-passphrase = "Standalone Network ; February 2017"
         let file_changed_path = env.cwd.join(file_changed);
 
         // Wait for the dev process to detect changes and rebuild
-        sleep(Duration::from_secs(5)).await;
+        wait_for_output(&mut stdout_lines, &format!("File changed: {:?}", file_changed_path)).await;
 
         // Test 2: Create and modify environments.toml
         env.set_environments_toml(
@@ -56,9 +66,7 @@ soroban_increment_contract.workspace = true
         );
 
         // Wait for the dev process to detect changes and rebuild
-        sleep(Duration::from_secs(5)).await;
-
-        // Modify environments.toml again
+        wait_for_output(&mut stderr_lines, "🌐 using network at http://localhost:8000/rpc").await;
         env.set_environments_toml(
             r#"
 development.accounts = [
@@ -76,26 +84,33 @@ soroban_increment_contract.workspace = true
         );
 
         // Wait for the dev process to detect changes and rebuild
-        sleep(Duration::from_secs(5)).await;
-
+        wait_for_output(&mut stderr_lines, "🌐 using network at http://localhost:9000/rpc").await;
         dev_process
             .kill()
             .await
             .expect("Failed to kill dev process");
 
-        let output = dev_process
-            .wait_with_output()
+        dev_process
+            .wait()
             .await
             .expect("Failed to wait for dev process");
-        let stdout = String::from_utf8(output.stdout).unwrap();
-        let stderr = String::from_utf8(output.stderr).unwrap();
+    }).await;
+}).await;
+}
 
-        // Check for file changes
-        assert!(stdout.contains(&format!("File changed: {:?}", file_changed_path)));
-
-        // Check for network changes
-        assert!(stderr.contains("🌐 using network at http://localhost:8000/rpc"));
-        assert!(stderr.contains("🌐 using network at http://localhost:9000/rpc"));
-    })
-    .await;
+async fn wait_for_output<T: tokio_stream::Stream<Item = Result<String, tokio::io::Error>> + Unpin>(lines: &mut T, expected: &str) {
+    let timeout_duration = Duration::from_secs(120); // 2 minutes
+    let result = timeout(timeout_duration, async {
+        while let Some(line) = lines.next().await {
+            let line = line.expect("Failed to read line");
+            if line.contains(expected) {
+                return;
+            }
+            sleep(Duration::from_millis(100)).await;
+        }
+    }).await;
+    match result {
+        Ok(_) => {println!("Found string {}", expected)},
+        Err(_) => panic!("Timed out waiting for output: {}", expected),
+    }
 }
