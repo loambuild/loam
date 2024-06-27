@@ -1,12 +1,13 @@
 use clap::Parser;
 use notify::{self, RecursiveMode, Watcher};
 use std::{
-    env, fs, path::{Path, PathBuf}, sync::Arc
+    env, fs,
+    path::{Path, PathBuf},
+    sync::Arc,
 };
 use tokio::sync::mpsc;
-use tokio::time;
 use tokio::sync::Mutex;
-
+use tokio::time;
 
 use crate::commands::build;
 
@@ -51,7 +52,7 @@ fn is_parent_in_watched_dirs(parent: &Path, watched_dirs: &[Arc<PathBuf>]) -> bo
 
 fn is_temporary_file(path: &Path) -> bool {
     let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
-    
+
     // Vim temporary files
     if file_name.starts_with(".") {
         return true;
@@ -134,7 +135,10 @@ impl Cmd {
                                 &watched_dirs_clone,
                             );
                             // skip if the file is in the parent directory of environments.toml and it is not environments.toml
-                            if !(parent_is_env_toml_parent && !path_is_env_toml && !parent_is_in_watched_dirs) {
+                            if !(parent_is_env_toml_parent
+                                && !path_is_env_toml
+                                && !parent_is_in_watched_dirs)
+                            {
                                 println!("File changed: {path:?}");
                                 if let Err(e) = tx.blocking_send(Message::FileChanged) {
                                     eprintln!("Error sending through channel: {e}");
@@ -178,12 +182,12 @@ impl Cmd {
     async fn debounced_rebuild(self, rebuild_state: Arc<Mutex<RebuildState>>) {
         // Debounce to avoid multiple rapid rebuilds
         time::sleep(std::time::Duration::from_secs(1)).await;
-    
+
         println!("Changes detected. Rebuilding...");
         if let Err(e) = self.build().await {
             eprintln!("Build error: {e}");
         }
-    
+
         let mut state = rebuild_state.lock().await;
         state.pending = false;
     }

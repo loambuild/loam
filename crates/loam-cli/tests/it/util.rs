@@ -1,10 +1,9 @@
 use assert_cmd::{assert::Assert, Command};
 use assert_fs::TempDir;
 use fs_extra::dir::{copy, CopyOptions};
-use std::path::PathBuf;
 use std::future::Future;
+use std::path::PathBuf;
 use tokio::process::Command as ProcessCommand;
-
 
 pub struct TestEnv {
     pub temp_dir: TempDir,
@@ -69,13 +68,13 @@ impl TestEnv {
         loam.arg(cmd);
         loam
     }
-    
+
     fn cargo_bin_loam(&self) -> PathBuf {
         PathBuf::from(env!("CARGO_BIN_EXE_loam"))
     }
 
     pub fn loam_process(&self, cmd: &str) -> ProcessCommand {
-        println!("{}",self.cargo_bin_loam().display());
+        println!("{}", self.cargo_bin_loam().display());
         let mut loam = ProcessCommand::new(self.cargo_bin_loam());
         loam.current_dir(&self.cwd);
         loam.arg(cmd);

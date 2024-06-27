@@ -32,10 +32,7 @@ network-passphrase = "Standalone Network ; February 2017"
 
         // Test 1: Modify a source file
         let file_changed = "contracts/hello_world/src/lib.rs";
-        env.modify_file(
-            file_changed,
-            "// This is a test modification",
-        );
+        env.modify_file(file_changed, "// This is a test modification");
         let file_changed_path = env.cwd.join(file_changed);
 
         // Wait for the dev process to detect changes and rebuild
@@ -81,12 +78,18 @@ soroban_increment_contract.workspace = true
         // Wait for the dev process to detect changes and rebuild
         sleep(Duration::from_secs(5)).await;
 
-        dev_process.kill().await.expect("Failed to kill dev process");
+        dev_process
+            .kill()
+            .await
+            .expect("Failed to kill dev process");
 
-        let output = dev_process.wait_with_output().await.expect("Failed to wait for dev process");
+        let output = dev_process
+            .wait_with_output()
+            .await
+            .expect("Failed to wait for dev process");
         let stdout = String::from_utf8(output.stdout).unwrap();
         let stderr = String::from_utf8(output.stderr).unwrap();
-        
+
         // Check for file changes
         assert!(stdout.contains(&format!("File changed: {:?}", file_changed_path)));
 
