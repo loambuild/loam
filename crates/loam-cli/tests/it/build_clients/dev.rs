@@ -10,18 +10,6 @@ use tokio_stream::StreamExt; // Import StreamExt trait for iterating streams
 async fn dev_command_watches_for_changes_and_environments_toml() {
     TestEnv::from_async("soroban-init-boilerplate", |env| async {
         Box::pin(async move {
-            env.set_environments_toml(
-                r#"
-development.accounts = [
-    { name = "alice" },
-]
-
-[development.network]
-rpc-url = "http://localhost:8000/rpc"
-network-passphrase = "Standalone Network ; February 2017"
-
-"#,
-            );
 
             let mut dev_process = env
                 .loam_process("dev")
@@ -31,15 +19,12 @@ network-passphrase = "Standalone Network ; February 2017"
                 .spawn()
                 .expect("Failed to spawn dev process");
 
-            let stdout = dev_process.stdout.take().unwrap();
             let stderr = dev_process.stderr.take().unwrap();
-
-            let mut stdout_lines = LinesStream::new(BufReader::new(stdout).lines());
             let mut stderr_lines = LinesStream::new(BufReader::new(stderr).lines());
 
             // Wait for initial build to complete
             wait_for_output(
-                &mut stdout_lines,
+                &mut stderr_lines,
                 "Watching for changes. Press Ctrl+C to stop.",
             )
             .await;
@@ -51,8 +36,14 @@ network-passphrase = "Standalone Network ; February 2017"
 
             // Wait for the dev process to detect changes and rebuild
             wait_for_output(
-                &mut stdout_lines,
+                &mut stderr_lines,
                 &format!("File changed: {:?}", file_changed_path),
+            )
+            .await;
+
+            wait_for_output(
+                &mut stderr_lines,
+                "Watching for changes. Press Ctrl+C to stop.",
             )
             .await;
 
@@ -77,6 +68,12 @@ soroban_increment_contract.workspace = true
             wait_for_output(
                 &mut stderr_lines,
                 "🌐 using network at http://localhost:8000/rpc",
+            )
+            .await;
+
+            wait_for_output(
+                &mut stderr_lines,
+                "Watching for changes. Press Ctrl+C to stop.",
             )
             .await;
             env.set_environments_toml(
@@ -105,11 +102,6 @@ soroban_increment_contract.workspace = true
                 .kill()
                 .await
                 .expect("Failed to kill dev process");
-
-            dev_process
-                .wait()
-                .await
-                .expect("Failed to wait for dev process");
         })
         .await;
     })

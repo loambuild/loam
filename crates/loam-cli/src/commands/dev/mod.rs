@@ -101,7 +101,7 @@ impl Cmd {
 
         for package_path in &packages {
             watched_dirs.push(package_path.clone());
-            println!("Watching {}", package_path.as_path().display());
+            eprintln!("Watching {}", package_path.as_path().display());
         }
         let watched_dirs_clone = watched_dirs.clone();
         let env_toml_path_clone = Arc::clone(&env_toml_path);
@@ -134,7 +134,7 @@ impl Cmd {
                                 && !path_is_env_toml
                                 && !parent_is_in_watched_dirs)
                             {
-                                println!("File changed: {path:?}");
+                                eprintln!("File changed: {path:?}");
                                 if let Err(e) = tx.blocking_send("FileChanged".to_string()) {
                                     eprintln!("Error sending through channel: {e}");
                                 }
@@ -153,7 +153,7 @@ impl Cmd {
         if let Err(e) = self.build().await {
             eprintln!("Build error: {e}");
         }
-        println!("Watching for changes. Press Ctrl+C to stop.");
+        eprintln!("Watching for changes. Press Ctrl+C to stop.");
 
         let rebuild_state_clone = rebuild_state.clone();
         loop {
@@ -166,7 +166,7 @@ impl Cmd {
                     }
                 }
                 _ = tokio::signal::ctrl_c() => {
-                    println!("Stopping dev mode.");
+                    eprintln!("Stopping dev mode.");
                     break;
                 }
             }
@@ -178,10 +178,11 @@ impl Cmd {
         // Debounce to avoid multiple rapid rebuilds
         time::sleep(std::time::Duration::from_secs(1)).await;
 
-        println!("Changes detected. Rebuilding...");
+        eprintln!("Changes detected. Rebuilding...");
         if let Err(e) = self.build().await {
             eprintln!("Build error: {e}");
         }
+        eprintln!("Watching for changes. Press Ctrl+C to stop.");
 
         let mut state = rebuild_state.lock().await;
         *state = false;
