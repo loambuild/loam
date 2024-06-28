@@ -13,6 +13,10 @@ use crate::commands::build;
 
 use super::build::clients::LoamEnv;
 
+enum Message {
+    FileChanged,
+}
+
 #[derive(Parser, Debug, Clone)]
 #[group(skip)]
 pub struct Cmd {
@@ -77,7 +81,7 @@ fn is_temporary_file(path: &Path) -> bool {
 
 impl Cmd {
     pub async fn run(&mut self) -> Result<(), Error> {
-        let (tx, mut rx) = mpsc::channel::<String>(100);
+        let (tx, mut rx) = mpsc::channel::<Message>(100);
         let rebuild_state = Arc::new(Mutex::new(false));
         let workspace_root: &Path = self
             .build_cmd
@@ -140,7 +144,7 @@ impl Cmd {
                                 && !parent_is_in_watched_dirs)
                             {
                                 eprintln!("File changed: {path:?}");
-                                if let Err(e) = tx.blocking_send("FileChanged".to_string()) {
+                                if let Err(e) = tx.blocking_send(Message::FileChanged) {
                                     eprintln!("Error sending through channel: {e}");
                                 }
                             }
