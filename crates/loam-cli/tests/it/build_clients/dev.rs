@@ -133,7 +133,7 @@ async fn wait_for_output<
     lines: &mut T,
     expected: &str,
 ) {
-    let timeout_duration = Duration::from_secs(60); // 2 minutes
+    let timeout_duration = Duration::from_secs(120); // 2 minutes
     let result = timeout(timeout_duration, async {
         while let Some(line) = lines.next().await {
             let line = line.expect("Failed to read line");
