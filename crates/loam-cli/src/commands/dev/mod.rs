@@ -71,7 +71,7 @@ fn is_temporary_file(path: &Path) -> bool {
 }
 
 impl Cmd {
-    pub async fn run(&self) -> Result<(), Error> {
+    pub async fn run(&mut self) -> Result<(), Error> {
         let (tx, mut rx) = mpsc::channel::<String>(100);
         let rebuild_state = Arc::new(Mutex::new(false));
         let workspace_root: &Path = self
@@ -150,19 +150,26 @@ impl Cmd {
             watcher.watch(package_path.as_path(), RecursiveMode::Recursive)?;
         }
 
-        if let Err(e) = self.build().await {
+        let build_command = self.cloned_build_command()?;
+        let cmd = build_command.lock().await;
+        if let Err(e) = cmd.run().await {
             eprintln!("Build error: {e}");
         }
         println!("Watching for changes. Press Ctrl+C to stop.");
 
-        let rebuild_state_clone = Arc::clone(&rebuild_state);
+        let rebuild_state_clone = rebuild_state.clone();
         loop {
             tokio::select! {
                 _ = rx.recv() => {
                     let mut state = rebuild_state_clone.lock().await;
                     if !*state {
                         *state= true;
-                        tokio::spawn(self.clone().debounced_rebuild(Arc::clone(&rebuild_state_clone)));
+                        // Capture the necessary clones to move into the async block
+                        let rebuild_state_clone_inner = rebuild_state_clone.clone();
+                        let inner_build_command = self.cloned_build_command()?;
+                        tokio::spawn(async move {
+                            Self::debounced_rebuild(inner_build_command, rebuild_state_clone_inner).await;
+                        });
                     }
                 }
                 _ = tokio::signal::ctrl_c() => {
@@ -174,12 +181,13 @@ impl Cmd {
         Ok(())
     }
 
-    async fn debounced_rebuild(self, rebuild_state: Arc<Mutex<bool>>) {
+    async fn debounced_rebuild(build_cmd: Arc<Mutex<build::Cmd>>, rebuild_state: Arc<Mutex<bool>>) {
         // Debounce to avoid multiple rapid rebuilds
         time::sleep(std::time::Duration::from_secs(1)).await;
 
         println!("Changes detected. Rebuilding...");
-        if let Err(e) = self.build().await {
+        let cmd = build_cmd.lock().await;
+        if let Err(e) = cmd.run().await {
             eprintln!("Build error: {e}");
         }
 
@@ -187,14 +195,13 @@ impl Cmd {
         *state = false;
     }
 
-    async fn build(&self) -> Result<(), Error> {
-        let mut build_cmd = self.build_cmd.clone();
-        build_cmd
+    fn cloned_build_command(&mut self) -> Result<Arc<Mutex<build::Cmd>>, Error> {
+        self.build_cmd
             .build_clients
             .env
             .get_or_insert(LoamEnv::Development);
-        build_cmd.profile.get_or_insert_with(|| "debug".to_string());
-        build_cmd.run().await?;
-        Ok(())
+        self.build_cmd.profile.get_or_insert_with(|| "debug".to_string());
+        let build_cmd = Arc::new(Mutex::new(self.build_cmd.clone()));
+        Ok(build_cmd)
     }
 }
