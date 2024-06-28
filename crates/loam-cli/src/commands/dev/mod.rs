@@ -159,8 +159,7 @@ impl Cmd {
             watcher.watch(package_path.as_path(), RecursiveMode::Recursive)?;
         }
 
-
-        let build_command = self.cloned_build_command()?;
+        let build_command = self.cloned_build_command();
         let cmd = build_command.lock().await;
         if let Err(e) = cmd.run().await {
             eprintln!("Build error: {e}");
@@ -172,7 +171,7 @@ impl Cmd {
             tokio::select! {
                 _ = rx.recv() => {
                     let mut state = rebuild_state_clone.lock().await;
-                    let build_command_inner = self.cloned_build_command()?;
+                    let build_command_inner = self.cloned_build_command();
                     if !*state {
                         *state= true;
                         tokio::spawn(Self::debounced_rebuild(build_command_inner, Arc::clone(&rebuild_state_clone)));
@@ -187,7 +186,10 @@ impl Cmd {
         Ok(())
     }
 
-    async fn debounced_rebuild(build_command: Arc<Mutex<build::Cmd>>, rebuild_state: Arc<Mutex<bool>>) {
+    async fn debounced_rebuild(
+        build_command: Arc<Mutex<build::Cmd>>,
+        rebuild_state: Arc<Mutex<bool>>,
+    ) {
         // Debounce to avoid multiple rapid rebuilds
         time::sleep(std::time::Duration::from_secs(1)).await;
 
@@ -202,13 +204,14 @@ impl Cmd {
         *state = false;
     }
 
-    fn cloned_build_command(&mut self) -> Result<Arc<Mutex<build::Cmd>>, Error> {
+    fn cloned_build_command(&mut self) -> Arc<Mutex<build::Cmd>> {
         self.build_cmd
             .build_clients
             .env
             .get_or_insert(LoamEnv::Development);
-        self.build_cmd.profile.get_or_insert_with(|| "debug".to_string());
-        let build_cmd = Arc::new(Mutex::new(self.build_cmd.clone()));
-        Ok(build_cmd)
+        self.build_cmd
+            .profile
+            .get_or_insert_with(|| "debug".to_string());
+        Arc::new(Mutex::new(self.build_cmd.clone()))
     }
 }

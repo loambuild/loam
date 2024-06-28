@@ -10,7 +10,6 @@ use tokio_stream::StreamExt; // Import StreamExt trait for iterating streams
 async fn dev_command_watches_for_changes_and_environments_toml() {
     TestEnv::from_async("soroban-init-boilerplate", |env| async {
         Box::pin(async move {
-
             let mut dev_process = env
                 .loam_process("dev")
                 .current_dir(&env.cwd)
