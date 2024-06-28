@@ -155,7 +155,7 @@ impl Cmd {
         }
         println!("Watching for changes. Press Ctrl+C to stop.");
 
-        let rebuild_state_clone = Arc::clone(&rebuild_state);
+        let rebuild_state_clone = rebuild_state.clone();
         loop {
             tokio::select! {
                 _ = rx.recv() => {
