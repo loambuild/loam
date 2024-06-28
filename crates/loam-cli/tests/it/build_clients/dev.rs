@@ -76,6 +76,8 @@ soroban_increment_contract.workspace = true
                 "Watching for changes. Press Ctrl+C to stop.",
             )
             .await;
+
+            // Test 3: modify the network url in environments.toml
             env.set_environments_toml(
                 r#"
 development.accounts = [
@@ -98,6 +100,23 @@ soroban_increment_contract.workspace = true
                 "🌐 using network at http://localhost:9000/rpc",
             )
             .await;
+
+            wait_for_output(
+                &mut stderr_lines,
+                "Watching for changes. Press Ctrl+C to stop.",
+            )
+            .await;
+
+            // Test 4: remove environments.toml
+            let file_changed = "environments.toml";
+            env.delete_file(file_changed);
+
+            wait_for_output(
+                &mut stderr_lines,
+                "Watching for changes. Press Ctrl+C to stop.",
+            )
+            .await;
+
             dev_process
                 .kill()
                 .await
@@ -114,10 +133,11 @@ async fn wait_for_output<
     lines: &mut T,
     expected: &str,
 ) {
-    let timeout_duration = Duration::from_secs(120); // 2 minutes
+    let timeout_duration = Duration::from_secs(60); // 2 minutes
     let result = timeout(timeout_duration, async {
         while let Some(line) = lines.next().await {
             let line = line.expect("Failed to read line");
+            println!("{}", line);
             if line.contains(expected) {
                 return;
             }

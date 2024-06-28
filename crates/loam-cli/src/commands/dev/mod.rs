@@ -33,6 +33,11 @@ pub enum Error {
 fn canonicalize_path(path: &Path) -> PathBuf {
     if path.as_os_str().is_empty() {
         env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
+    } else if path.components().count() == 1 {
+        // Path is a single component, assuming it's a filename
+        env::current_dir()
+            .unwrap_or_else(|_| PathBuf::from("."))
+            .join(path)
     } else {
         fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf())
     }

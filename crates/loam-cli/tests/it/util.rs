@@ -62,6 +62,11 @@ impl TestEnv {
         std::fs::write(file_path, content).expect("Failed to modify file");
     }
 
+    pub fn delete_file(&self, path: &str) {
+        let file_path = self.cwd.join(path);
+        std::fs::remove_file(file_path).expect("Failed to delete file");
+    }
+
     pub fn loam(&self, cmd: &str) -> Command {
         let mut loam = Command::cargo_bin("loam").unwrap();
         loam.current_dir(&self.cwd);
