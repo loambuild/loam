@@ -13,14 +13,6 @@ use crate::commands::build;
 
 use super::build::clients::LoamEnv;
 
-struct RebuildState {
-    pending: bool,
-}
-
-enum Message {
-    FileChanged,
-}
-
 #[derive(Parser, Debug, Clone)]
 #[group(skip)]
 pub struct Cmd {
@@ -80,8 +72,8 @@ fn is_temporary_file(path: &Path) -> bool {
 
 impl Cmd {
     pub async fn run(&self) -> Result<(), Error> {
-        let (tx, mut rx) = mpsc::channel::<Message>(100);
-        let rebuild_state = Arc::new(Mutex::new(RebuildState { pending: false }));
+        let (tx, mut rx) = mpsc::channel::<String>(100);
+        let rebuild_state = Arc::new(Mutex::new(false));
         let workspace_root: &Path = self
             .build_cmd
             .manifest_path
@@ -143,7 +135,7 @@ impl Cmd {
                                 && !parent_is_in_watched_dirs)
                             {
                                 println!("File changed: {path:?}");
-                                if let Err(e) = tx.blocking_send(Message::FileChanged) {
+                                if let Err(e) = tx.blocking_send("FileChanged".to_string()) {
                                     eprintln!("Error sending through channel: {e}");
                                 }
                             }
@@ -168,8 +160,8 @@ impl Cmd {
             tokio::select! {
                 _ = rx.recv() => {
                     let mut state = rebuild_state_clone.lock().await;
-                    if !state.pending {
-                        state.pending = true;
+                    if !*state {
+                        *state= true;
                         tokio::spawn(self.clone().debounced_rebuild(Arc::clone(&rebuild_state_clone)));
                     }
                 }
@@ -182,7 +174,7 @@ impl Cmd {
         Ok(())
     }
 
-    async fn debounced_rebuild(self, rebuild_state: Arc<Mutex<RebuildState>>) {
+    async fn debounced_rebuild(self, rebuild_state: Arc<Mutex<bool>>) {
         // Debounce to avoid multiple rapid rebuilds
         time::sleep(std::time::Duration::from_secs(1)).await;
 
@@ -192,7 +184,7 @@ impl Cmd {
         }
 
         let mut state = rebuild_state.lock().await;
-        state.pending = false;
+        *state = false;
     }
 
     async fn build(&self) -> Result<(), Error> {
