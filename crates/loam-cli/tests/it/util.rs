@@ -1,13 +1,21 @@
 use assert_cmd::{assert::Assert, Command};
 use assert_fs::TempDir;
 use fs_extra::dir::{copy, CopyOptions};
+<<<<<<< HEAD
 use std::future::Future;
 use std::path::PathBuf;
 use std::fs;
+=======
+>>>>>>> 89f96b7 (fmt)
 use rand::{thread_rng, Rng};
-use toml::Value;
 use std::error::Error;
+<<<<<<< HEAD
 use tokio::process::Command as ProcessCommand;
+=======
+use std::fs;
+use std::path::PathBuf;
+use toml::Value;
+>>>>>>> 89f96b7 (fmt)
 
 pub struct TestEnv {
     pub temp_dir: TempDir,
@@ -92,20 +100,25 @@ impl TestEnv {
 
     pub fn modify_wasm(&self, contract_name: &str) -> Result<(), Box<dyn Error>> {
         // Read Cargo.toml to get the actual name
-        let cargo_toml_path = self.cwd.join("contracts").join(contract_name).join("Cargo.toml");
+        let cargo_toml_path = self
+            .cwd
+            .join("contracts")
+            .join(contract_name)
+            .join("Cargo.toml");
         let cargo_toml_content = fs::read_to_string(cargo_toml_path)?;
         let cargo_toml: Value = toml::from_str(&cargo_toml_content)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
-        
-        let package_name = cargo_toml["package"]["name"]
-            .as_str()
-            .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::InvalidData, "Invalid Cargo.toml"))?;
+
+        let package_name = cargo_toml["package"]["name"].as_str().ok_or_else(|| {
+            std::io::Error::new(std::io::ErrorKind::InvalidData, "Invalid Cargo.toml")
+        })?;
 
         // Convert package name to proper filename format
         let filename = package_name.replace('-', "_");
 
         // Construct the path to the .wasm file
-        let wasm_path = self.cwd
+        let wasm_path = self
+            .cwd
             .join("target")
             .join("wasm32-unknown-unknown")
             .join("release")
@@ -121,13 +134,15 @@ impl TestEnv {
     }
 
     pub fn loam_build(&self, env: &str, randomize_wasm: bool) -> Command {
-        if(randomize_wasm){
+        if (randomize_wasm) {
             // Run initial build
             let mut initial_build = Command::cargo_bin("loam").unwrap();
             initial_build.current_dir(&self.cwd);
             initial_build.arg("build");
             initial_build.arg(env);
-            initial_build.output().expect("Failed to execute initial build");
+            initial_build
+                .output()
+                .expect("Failed to execute initial build");
 
             // Modify WASM files
             let contracts_dir = self.cwd.join("contracts");
@@ -136,7 +151,8 @@ impl TestEnv {
                     if let Ok(file_type) = entry.file_type() {
                         if file_type.is_dir() {
                             if let Some(contract_name) = entry.file_name().to_str() {
-                                self.modify_wasm(contract_name).expect("Failed to modify WASM");
+                                self.modify_wasm(contract_name)
+                                    .expect("Failed to modify WASM");
                             }
                         }
                     }
@@ -179,8 +195,7 @@ impl TestEnv {
     pub fn loam(&self, cmd: &str) -> Command {
         if cmd == "build" {
             self.loam_build("production", true)
-        }
-        else{
+        } else {
             let mut loam = Command::cargo_bin("loam").unwrap();
             loam.current_dir(&self.cwd);
             loam.arg(cmd);
