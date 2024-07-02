@@ -3,6 +3,10 @@ use assert_fs::TempDir;
 use fs_extra::dir::{copy, CopyOptions};
 use std::future::Future;
 use std::path::PathBuf;
+use std::fs;
+use rand::{thread_rng, Rng};
+use toml::Value;
+use std::error::Error;
 use tokio::process::Command as ProcessCommand;
 
 pub struct TestEnv {
@@ -67,8 +71,104 @@ impl TestEnv {
         std::fs::remove_file(file_path).expect("Failed to delete file");
     }
 
-    pub fn loam(&self, cmd: &str) -> Command {
+    pub async fn from_async<F, Fut>(template: &str, f: F)
+    where
+        F: FnOnce(TestEnv) -> Fut,
+        Fut: Future<Output = ()>,
+    {
+        let test_env = TestEnv::new(template);
+        f(test_env).await;
+    }
+
+    pub fn modify_file(&self, path: &str, content: &str) {
+        let file_path = self.cwd.join(path);
+        std::fs::write(file_path, content).expect("Failed to modify file");
+    }
+
+    pub fn delete_file(&self, path: &str) {
+        let file_path = self.cwd.join(path);
+        std::fs::remove_file(file_path).expect("Failed to delete file");
+    }
+
+    pub fn modify_wasm(&self, contract_name: &str) -> Result<(), Box<dyn Error>> {
+        // Read Cargo.toml to get the actual name
+        let cargo_toml_path = self.cwd.join("contracts").join(contract_name).join("Cargo.toml");
+        println!("cargo toml path is {:?}", cargo_toml_path);
+        let cargo_toml_content = fs::read_to_string(cargo_toml_path)?;
+        let cargo_toml: Value = toml::from_str(&cargo_toml_content)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+        
+        let package_name = cargo_toml["package"]["name"]
+            .as_str()
+            .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::InvalidData, "Invalid Cargo.toml"))?;
+
+        println!("packange name is  is {:?}", package_name);
+
+        // Convert package name to proper filename format
+        let filename = package_name.replace('-', "_");
+
+        // Construct the path to the .wasm file
+        let wasm_path = self.cwd
+            .join("target")
+            .join("wasm32-unknown-unknown")
+            .join("release")
+            .join(format!("{}.wasm", filename));
+
+        println!("wasm path is {:?}", wasm_path);
+        // Read the original wasm
+        let mut wasm_bytes = fs::read(&wasm_path)?;
+
+        // Generate random bytes
+        let mut rng = thread_rng();
+        let random_bytes: Vec<u8> = (0..10).map(|_| rng.gen()).collect();
+
+        // Write the custom section
+        wasm_gen::write_custom_section(&mut wasm_bytes, "random_data", &random_bytes);
+
+        // Write the modified wasm
+        fs::write(&wasm_path, wasm_bytes)?;
+
+        Ok(())
+    }
+
+    pub fn loam_build(&self, env: &str) -> Command {
+        // Run initial build
+        let mut initial_build = Command::cargo_bin("loam").unwrap();
+        initial_build.current_dir(&self.cwd);
+        initial_build.arg("build");
+        initial_build.arg(env);
+        initial_build.output().expect("Failed to execute initial build");
+
+        // Modify WASM files
+        let contracts_dir = self.cwd.join("contracts");
+        if let Ok(entries) = fs::read_dir(contracts_dir) {
+            for entry in entries.flatten() {
+                if let Ok(file_type) = entry.file_type() {
+                    if file_type.is_dir() {
+                        if let Some(contract_name) = entry.file_name().to_str() {
+                            self.modify_wasm(contract_name).expect("Failed to modify WASM");
+                        }
+                    }
+                }
+            }
+        }
+
+        // Run final build with --build-clients
         let mut loam = Command::cargo_bin("loam").unwrap();
+        loam.current_dir(&self.cwd);
+        loam.arg("build");
+        loam.arg(env);
+        loam.arg("--build-clients");
+        loam
+    }
+
+    fn cargo_bin_loam(&self) -> PathBuf {
+        PathBuf::from(env!("CARGO_BIN_EXE_loam"))
+    }
+
+    pub fn loam_process(&self, cmd: &str) -> ProcessCommand {
+        println!("{}", self.cargo_bin_loam().display());
+        let mut loam = ProcessCommand::new(self.cargo_bin_loam());
         loam.current_dir(&self.cwd);
         loam.arg(cmd);
         loam
@@ -86,12 +186,20 @@ impl TestEnv {
         loam
     }
 
-    pub fn loam_env(&self, cmd: &str, env: &str) -> Command {
-        let mut loam = Command::cargo_bin("loam").unwrap();
-        loam.current_dir(&self.cwd);
-        loam.arg(cmd);
-        loam.arg(env);
-        loam
+    pub fn loam(&self, cmd: &str) -> Command {
+        if cmd == "build" {
+            self.loam_build("production")
+        }
+        else{
+            let mut loam = Command::cargo_bin("loam").unwrap();
+            loam.current_dir(&self.cwd);
+            loam.arg(cmd);
+            loam
+        }
+    }
+
+    pub fn loam_env(&self, env: &str) -> Command {
+        self.loam_build(env)
     }
 
     pub fn soroban(&self, cmd: &str) -> Command {

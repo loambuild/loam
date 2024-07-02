@@ -97,7 +97,7 @@ hello_world.workspace = true
 "#,
         );
         let output = env
-            .loam_env("build", "development")
+            .loam_env("development")
             .output()
             .expect("Failed to execute command");
 
@@ -108,7 +108,7 @@ hello_world.workspace = true
             .contains("🍽️ importing \"hello_world\" contract"));
 
         let output2 = env
-            .loam_env("build", "development")
+            .loam_env("development")
             .output()
             .expect("Failed to execute command");
 
@@ -123,7 +123,7 @@ hello_world.workspace = true
         env.replace_file(file, file_replaced);
 
         let output3 = env
-            .loam_env("build", "development")
+            .loam_env("development")
             .output()
             .expect("Failed to execute command");
 

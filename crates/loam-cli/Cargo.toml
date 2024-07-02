@@ -55,6 +55,8 @@ hex = "0.4.3"
 shlex = "1.1.0"
 symlink = "0.1.0"
 toml = { version = "0.8.12", features = ["parse"] }
+rand = "0.8.5"
+wasm-gen = { version = "0.1.4" }
 soroban-cli = "21.0.0"
 notify = "5.0"
 stellar-xdr = "21.0.0"
