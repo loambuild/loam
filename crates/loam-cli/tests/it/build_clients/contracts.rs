@@ -97,7 +97,7 @@ hello_world.workspace = true
 "#,
         );
         let output = env
-            .loam_env("development")
+            .loam_env("development", true)
             .output()
             .expect("Failed to execute command");
 
@@ -108,7 +108,7 @@ hello_world.workspace = true
             .contains("🍽️ importing \"hello_world\" contract"));
 
         let output2 = env
-            .loam_env("development")
+            .loam_env("development", false)
             .output()
             .expect("Failed to execute command");
 
@@ -123,7 +123,7 @@ hello_world.workspace = true
         env.replace_file(file, file_replaced);
 
         let output3 = env
-            .loam_env("development")
+            .loam_env("development", false)
             .output()
             .expect("Failed to execute command");
 
@@ -150,7 +150,7 @@ hello_world.workspace = true
         env.replace_file("contracts/auth/src/lib.rs", file_replaced);
 
         let output4 = env
-            .loam("build")
+            .loam_build("production", false)
             .output()
             .expect("Failed to execute command");
 
