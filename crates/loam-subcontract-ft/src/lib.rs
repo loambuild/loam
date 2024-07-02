@@ -90,7 +90,7 @@ pub trait IsFungible {
 pub trait IsInitable {
     /// Initialize ft Subcontract
     fn ft_init(
-        &mut self,
+        &self,
         admin: loam_sdk::soroban_sdk::Address,
         name: loam_sdk::soroban_sdk::Bytes,
         symbol: loam_sdk::soroban_sdk::Bytes,
