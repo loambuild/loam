@@ -25,6 +25,12 @@ pub trait IsNonFungible {
 
     // Get the total count of NFTs
     fn get_total_count(&self) -> u32;
+
+    // Get all of the NFTs owned by the given address
+    fn get_collection_by_owner(
+        &self,
+        owner: loam_sdk::soroban_sdk::Address,
+    ) -> Option<loam_soroban_sdk::Vec<u32>>;
 }
 
 #[subcontract]

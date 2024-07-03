@@ -1,5 +1,5 @@
 use loam_sdk::{
-    soroban_sdk::{self, contracttype, env, Address, Bytes, Lazy, Map},
+    soroban_sdk::{self, contracttype, env, Address, Bytes, Lazy, Map, Vec},
     IntoKey,
 };
 use loam_subcontract_core::Core;
@@ -15,7 +15,7 @@ pub struct MyNonFungibleToken {
     admin: Address,
     name: Bytes,
     total_count: u32,
-    owners_to_nft_ids: Map<Address, u32>,
+    owners_to_nft_ids: Map<Address, Vec<u32>>,
     nft_ids_to_owners: Map<u32, Address>,
     nft_ids_to_metadata: Map<u32, Bytes>,
 }
@@ -58,7 +58,14 @@ impl IsNonFungible for MyNonFungibleToken {
         //todo: check that the metadata is unique
         self.nft_ids_to_metadata.set(new_id, metadata);
         self.nft_ids_to_owners.set(new_id, owner.clone());
-        self.owners_to_nft_ids.set(owner, new_id);
+
+        let mut owner_collection = self
+            .owners_to_nft_ids
+            .get(owner.clone())
+            .unwrap_or_else(|| Vec::new(env()));
+        owner_collection.push_back(new_id);
+
+        self.owners_to_nft_ids.set(owner, owner_collection);
         self.total_count = new_id;
 
         new_id
@@ -67,18 +74,47 @@ impl IsNonFungible for MyNonFungibleToken {
     // Transfer the NFT from the current owner to the new owner
     fn transfer(&mut self, id: u32, current_owner: Address, new_owner: Address) {
         current_owner.require_auth();
+        // ensures that this Address has authorized invocation of the current contract
+        // during the on-chain execution the soroban host will perform the needed auth (verify the signatures) and ensure the replay prevention
+
+        // what if current_owner is not the source account?
+
         let owner_id = self.nft_ids_to_owners.get(id).expect("NFT does not exist");
         assert!(
             owner_id == current_owner,
             "You are not the owner of this NFT"
         );
-        // remove the current owner
-        self.nft_ids_to_owners.remove(id);
-        self.owners_to_nft_ids.remove(current_owner);
 
-        // add the new owner
+        // update the nft_ids_to_owners map with the new owner
+        self.nft_ids_to_owners.remove(id);
         self.nft_ids_to_owners.set(id, new_owner.clone());
-        self.owners_to_nft_ids.set(new_owner, id);
+
+        // remove the NFT id from the current owner's collection
+        let mut current_owner_collection = self
+            .owners_to_nft_ids
+            .get(current_owner.clone())
+            .expect("Owner does not have a collection of NFTs");
+        current_owner_collection.remove(id);
+
+        if let Some(index) = current_owner_collection
+            .iter()
+            .position(|nft_id| nft_id == id)
+        {
+            current_owner_collection.remove(index.try_into().unwrap());
+        } else {
+            panic!("NFT ID not found in owner's collection");
+        }
+
+        self.owners_to_nft_ids
+            .set(current_owner, current_owner_collection);
+
+        // Add the NFT id to the new owner's collection
+        let mut new_owner_collection = self
+            .owners_to_nft_ids
+            .get(new_owner.clone())
+            .unwrap_or_else(|| Vec::new(env()));
+        new_owner_collection.push_back(id);
+        self.owners_to_nft_ids.set(new_owner, new_owner_collection);
     }
 
     // Get the NFT from the contract's storage by id
@@ -93,5 +129,9 @@ impl IsNonFungible for MyNonFungibleToken {
 
     fn get_total_count(&self) -> u32 {
         self.total_count
+    }
+
+    fn get_collection_by_owner(&self, owner: Address) -> Option<Vec<u32>> {
+        self.owners_to_nft_ids.get(owner)
     }
 }
