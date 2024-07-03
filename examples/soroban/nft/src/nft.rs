@@ -67,20 +67,18 @@ impl IsNonFungible for MyNonFungibleToken {
     // Transfer the NFT from the current owner to the new owner
     fn transfer(&mut self, id: u32, current_owner: Address, new_owner: Address) {
         current_owner.require_auth();
-        self.get_nft(id).expect("NFT does not exist");
-        if let Some(owner_id) = self.nft_ids_to_owners.get(id) {
-            assert!(
-                owner_id == current_owner,
-                "You are not the owner of this NFT"
-            );
-            // remove the current owner
-            self.nft_ids_to_owners.remove(id);
-            self.owners_to_nft_ids.remove(current_owner);
+        let owner_id = self.nft_ids_to_owners.get(id).expect("NFT does not exist");
+        assert!(
+            owner_id == current_owner,
+            "You are not the owner of this NFT"
+        );
+        // remove the current owner
+        self.nft_ids_to_owners.remove(id);
+        self.owners_to_nft_ids.remove(current_owner);
 
-            // add the new owner
-            self.nft_ids_to_owners.set(id, new_owner.clone());
-            self.owners_to_nft_ids.set(new_owner, id);
-        }
+        // add the new owner
+        self.nft_ids_to_owners.set(id, new_owner.clone());
+        self.owners_to_nft_ids.set(new_owner, id);
     }
 
     // Get the NFT from the contract's storage by id
