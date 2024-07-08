@@ -95,8 +95,7 @@ impl Cmd {
     pub fn list_packages(&self) -> Result<Vec<Package>, Error> {
         let metadata = self.metadata()?;
         let packages = self.packages(&metadata)?;
-        let packages = loam_build::deps::get_workspace(&packages)?;
-        Ok(packages)
+        Ok(loam_build::deps::get_workspace(&packages)?)
     }
 
     pub async fn run(&self) -> Result<(), Error> {
