@@ -52,25 +52,29 @@ fn is_parent_in_watched_dirs(parent: &Path, watched_dirs: &[Arc<PathBuf>]) -> bo
 }
 
 fn is_temporary_file(path: &Path) -> bool {
+    const IGNORED_EXTENSIONS: &[&str] = &["tmp", "swp", "swo"];
     let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
 
-    // Vim temporary files
-    if file_name.starts_with('.') {
+    // Vim and vscode temporary files
+    if std::path::Path::new(file_name)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map_or(false, |ext| {
+            IGNORED_EXTENSIONS
+                .iter()
+                .any(|&ignored| ext.eq_ignore_ascii_case(ignored))
+        })
+    {
         return true;
     }
+
+    // Vim temporary files
     if file_name.ends_with('~') {
         return true;
     }
 
     // Emacs temporary files
     if file_name.starts_with('#') && file_name.ends_with('#') {
-        return true;
-    }
-    // VSCode temporary files
-    if std::path::Path::new(file_name)
-        .extension()
-        .map_or(false, |ext| ext.eq_ignore_ascii_case("tmp"))
-    {
         return true;
     }
 
