@@ -57,7 +57,7 @@ impl Watcher {
     pub fn new(root_env: &Path, packages: &[PathBuf]) -> Self {
         Self {
             root_env: Arc::new(canonicalize_path(root_env)),
-            packages: Arc::new(packages.iter().map(canonicalize_path).collect()),
+            packages: Arc::new(packages.iter().map(|p: &PathBuf| canonicalize_path(p)).collect()),
         }
     }
 
