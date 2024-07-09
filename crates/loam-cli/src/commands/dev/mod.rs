@@ -1,5 +1,5 @@
 use clap::Parser;
-use notify::{self, RecursiveMode, Watcher};
+use notify::{self, RecursiveMode, Watcher as NotifyWatcher};
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -47,8 +47,28 @@ fn canonicalize_path(path: &Path) -> PathBuf {
     }
 }
 
-fn is_parent_in_watched_dirs(parent: &Path, watched_dirs: &[Arc<PathBuf>]) -> bool {
-    watched_dirs.iter().any(|p| canonicalize_path(p) == parent)
+#[derive(Clone)]
+struct Watcher {
+    root_env: Arc<PathBuf>,
+    packages: Arc<Vec<PathBuf>>,
+}
+
+impl Watcher {
+    pub fn new(root_env: &Path, packages: &[PathBuf]) -> Self {
+        Self {
+            root_env: Arc::new(canonicalize_path(root_env)),
+            packages: Arc::new(packages.iter().map(|p| canonicalize_path(p)).collect()),
+        }
+    }
+
+    pub fn is_watched(&self, path: &Path) -> bool {
+        let path = canonicalize_path(path);
+        self.packages.iter().any(|p| path.starts_with(p))
+    }
+
+    pub fn is_env_toml(&self, path: &Path) -> bool {
+        canonicalize_path(path) == *self.root_env
+    }
 }
 
 fn is_temporary_file(path: &Path) -> bool {
@@ -92,37 +112,23 @@ impl Cmd {
             .manifest_path
             .parent()
             .unwrap_or_else(|| Path::new("."));
-        let env_toml_path = Arc::new(workspace_root.join("environments.toml"));
-        let env_toml_parent = Arc::new(
-            env_toml_path
-                .parent()
-                .unwrap_or(Path::new(""))
-                .to_path_buf(),
-        );
+        let env_toml_path = workspace_root.join("environments.toml");
 
-        let mut watched_dirs = Vec::new();
         let packages = self
             .build_cmd
             .list_packages()?
             .into_iter()
-            .map(|package| {
-                Arc::new(PathBuf::from(
-                    package.manifest_path.parent().unwrap().as_str(),
-                ))
-            })
+            .map(|package| PathBuf::from(package.manifest_path.parent().unwrap().as_str()))
             .collect::<Vec<_>>();
 
-        for package_path in &packages {
-            watched_dirs.push(package_path.clone());
-            eprintln!("Watching {}", package_path.as_path().display());
+        let watcher = Watcher::new(&env_toml_path, &packages);
+
+        for package_path in watcher.packages.iter() {
+            eprintln!("Watching {}", package_path.display());
         }
-        let env_toml_path_clone = Arc::clone(&env_toml_path);
-        let env_toml_parent_clone = Arc::clone(&env_toml_parent);
-        let env_toml_parent_abs = canonicalize_path(&env_toml_parent_clone);
-        let env_toml_path_abs = canonicalize_path(&env_toml_path_clone);
-        let parent_is_in_watched_dirs =
-            is_parent_in_watched_dirs(&env_toml_parent_abs, &watched_dirs);
-        let mut watcher =
+
+        let watcher_clone = watcher.clone();
+        let mut notify_watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
                 if let Ok(event) = res {
                     if matches!(
@@ -132,19 +138,10 @@ impl Cmd {
                             | notify::EventKind::Remove(_)
                     ) {
                         if let Some(path) = event.paths.first() {
-                            // Ignore temporary files
                             if is_temporary_file(path) {
                                 return;
                             }
-                            let parent_is_env_toml_parent =
-                                path.parent() == Some(env_toml_parent_abs.as_path());
-                            let path_is_env_toml = path == env_toml_path_abs.as_path();
-                            // skip if the file is in the parent directory of environments.toml and it is not environments.toml
-                            // and the parent directory of environments.toml is not already a watched directory
-                            if parent_is_in_watched_dirs
-                                || path_is_env_toml
-                                || !parent_is_env_toml_parent
-                            {
+                            if watcher_clone.is_watched(path) || watcher_clone.is_env_toml(path) {
                                 eprintln!("File changed: {path:?}");
                                 if let Err(e) = tx.blocking_send(Message::FileChanged) {
                                     eprintln!("Error sending through channel: {e}");
@@ -155,10 +152,13 @@ impl Cmd {
                 }
             })
             .unwrap();
-        // Watch the parent directory of environments.toml
-        watcher.watch(env_toml_parent.as_path(), RecursiveMode::NonRecursive)?;
-        for package_path in watched_dirs {
-            watcher.watch(package_path.as_path(), RecursiveMode::Recursive)?;
+
+        notify_watcher.watch(
+            watcher.root_env.parent().unwrap(),
+            RecursiveMode::NonRecursive,
+        )?;
+        for package_path in watcher.packages.iter() {
+            notify_watcher.watch(package_path, RecursiveMode::Recursive)?;
         }
 
         let build_command = self.cloned_build_command();
