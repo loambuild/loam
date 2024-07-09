@@ -115,6 +115,8 @@ impl Cmd {
         let watched_dirs_clone = watched_dirs.clone();
         let env_toml_path_clone = Arc::clone(&env_toml_path);
         let env_toml_parent_clone = Arc::clone(&env_toml_parent);
+        let env_toml_parent_abs = canonicalize_path(&env_toml_parent_clone);
+        let env_toml_path_abs = canonicalize_path(&env_toml_path_clone);
         let mut watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
                 if let Ok(event) = res {
@@ -129,8 +131,6 @@ impl Cmd {
                             if is_temporary_file(path) {
                                 return;
                             }
-                            let env_toml_parent_abs = canonicalize_path(&env_toml_parent_clone);
-                            let env_toml_path_abs = canonicalize_path(&env_toml_path_clone);
                             let parent_is_env_toml_parent =
                                 path.parent() == Some(env_toml_parent_abs.as_path());
                             let path_is_env_toml = path == env_toml_path_abs.as_path();

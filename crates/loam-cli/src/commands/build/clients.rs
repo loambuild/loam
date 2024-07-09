@@ -70,7 +70,7 @@ impl Args {
     }
 
     fn loam_env(self, default: LoamEnv) -> String {
-        self.env.unwrap_or(default).to_lowercase()
+        self.env.unwrap_or(default).to_string().to_lowercase()
     }
 
     /// Parse the network settings from the environments.toml file and set `STELLAR_RPC_URL` and
