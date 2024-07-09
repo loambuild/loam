@@ -139,10 +139,9 @@ impl Cmd {
                             let parent_is_env_toml_parent =
                                 path.parent() == Some(env_toml_parent_abs.as_path());
                             let path_is_env_toml = path == env_toml_path_abs.as_path();
-                            // skip if the file is in the parent directory of environments.toml and it is not environments.toml
-                            if !(parent_is_env_toml_parent
-                                && !path_is_env_toml
-                                && !parent_is_in_watched_dirs)
+                            // skip if the file is in the parent directory of environments.toml and it is not environments.toml 
+                            // and the parent directory of environments.toml is not already a watched directory
+                            if parent_is_in_watched_dirs || path_is_env_toml || !parent_is_env_toml_parent
                             {
                                 eprintln!("File changed: {path:?}");
                                 if let Err(e) = tx.blocking_send(Message::FileChanged) {
