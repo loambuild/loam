@@ -56,8 +56,7 @@ fn is_temporary_file(path: &Path) -> bool {
     let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
 
     // Vim and vscode temporary files
-    if std::path::Path::new(file_name)
-        .extension()
+    if path.extension()
         .and_then(|ext| ext.to_str())
         .map_or(false, |ext| {
             IGNORED_EXTENSIONS
