@@ -57,7 +57,12 @@ impl Watcher {
     pub fn new(root_env: &Path, packages: &[PathBuf]) -> Self {
         Self {
             root_env: Arc::new(canonicalize_path(root_env)),
-            packages: Arc::new(packages.iter().map(|p: &PathBuf| canonicalize_path(p)).collect()),
+            packages: Arc::new(
+                packages
+                    .iter()
+                    .map(|p: &PathBuf| canonicalize_path(p))
+                    .collect(),
+            ),
         }
     }
 
@@ -73,7 +78,8 @@ impl Watcher {
 
 fn is_temporary_file(path: &Path) -> bool {
     const IGNORED_EXTENSIONS: &[&str] = &["tmp", "swp", "swo"];
-    let file_name = path.file_name()
+    let file_name = path
+        .file_name()
         .expect("Path should have a file name")
         .to_str()
         .expect("File name should be valid UTF-8");
@@ -130,7 +136,6 @@ impl Cmd {
             eprintln!("Watching {}", package_path.display());
         }
 
-        let watcher_clone = watcher.clone();
         let mut notify_watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
                 if let Ok(event) = res {
@@ -144,7 +149,7 @@ impl Cmd {
                             if is_temporary_file(path) {
                                 return;
                             }
-                            if watcher_clone.is_watched(path) || watcher_clone.is_env_toml(path) {
+                            if watcher.is_watched(path) || watcher.is_env_toml(path) {
                                 eprintln!("File changed: {path:?}");
                                 if let Err(e) = tx.blocking_send(Message::FileChanged) {
                                     eprintln!("Error sending through channel: {e}");
@@ -157,11 +162,11 @@ impl Cmd {
             .unwrap();
 
         notify_watcher.watch(
-            watcher.root_env.parent().unwrap(),
+            &canonicalize_path(&env_toml_path),
             RecursiveMode::NonRecursive,
         )?;
-        for package_path in watcher.packages.iter() {
-            notify_watcher.watch(package_path, RecursiveMode::Recursive)?;
+        for package_path in packages {
+            notify_watcher.watch(&canonicalize_path(&package_path), RecursiveMode::Recursive)?;
         }
 
         let build_command = self.cloned_build_command();
