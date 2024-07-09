@@ -56,7 +56,8 @@ fn is_temporary_file(path: &Path) -> bool {
     let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
 
     // Vim and vscode temporary files
-    if path.extension()
+    if path
+        .extension()
         .and_then(|ext| ext.to_str())
         .map_or(false, |ext| {
             IGNORED_EXTENSIONS
@@ -115,11 +116,12 @@ impl Cmd {
             watched_dirs.push(package_path.clone());
             eprintln!("Watching {}", package_path.as_path().display());
         }
-        let watched_dirs_clone = watched_dirs.clone();
         let env_toml_path_clone = Arc::clone(&env_toml_path);
         let env_toml_parent_clone = Arc::clone(&env_toml_parent);
         let env_toml_parent_abs = canonicalize_path(&env_toml_parent_clone);
         let env_toml_path_abs = canonicalize_path(&env_toml_path_clone);
+        let parent_is_in_watched_dirs =
+            is_parent_in_watched_dirs(&env_toml_parent_abs, &watched_dirs);
         let mut watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
                 if let Ok(event) = res {
@@ -137,10 +139,6 @@ impl Cmd {
                             let parent_is_env_toml_parent =
                                 path.parent() == Some(env_toml_parent_abs.as_path());
                             let path_is_env_toml = path == env_toml_path_abs.as_path();
-                            let parent_is_in_watched_dirs = is_parent_in_watched_dirs(
-                                &env_toml_parent_abs,
-                                &watched_dirs_clone,
-                            );
                             // skip if the file is in the parent directory of environments.toml and it is not environments.toml
                             if !(parent_is_env_toml_parent
                                 && !path_is_env_toml
