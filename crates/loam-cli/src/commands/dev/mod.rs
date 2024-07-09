@@ -73,7 +73,10 @@ impl Watcher {
 
 fn is_temporary_file(path: &Path) -> bool {
     const IGNORED_EXTENSIONS: &[&str] = &["tmp", "swp", "swo"];
-    let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+    let file_name = path.file_name()
+        .expect("Path should have a file name")
+        .to_str()
+        .expect("File name should be valid UTF-8");
 
     // Vim and vscode temporary files
     if path
