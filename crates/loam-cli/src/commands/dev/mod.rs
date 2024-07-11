@@ -74,6 +74,27 @@ impl Watcher {
     pub fn is_env_toml(&self, path: &Path) -> bool {
         canonicalize_path(path) == *self.root_env
     }
+
+    pub fn handle_event(&self, event: &notify::Event, tx: &mpsc::Sender<Message>) {
+        if matches!(
+            event.kind,
+            notify::EventKind::Create(_)
+                | notify::EventKind::Modify(_)
+                | notify::EventKind::Remove(_)
+        ) {
+            if let Some(path) = event.paths.first() {
+                if is_temporary_file(path) {
+                    return;
+                }
+                if self.is_watched(path) || self.is_env_toml(path) {
+                    eprintln!("File changed: {path:?}");
+                    if let Err(e) = tx.blocking_send(Message::FileChanged) {
+                        eprintln!("Error sending through channel: {e}");
+                    }
+                }
+            }
+        }
+    }
 }
 
 fn is_temporary_file(path: &Path) -> bool {
@@ -139,24 +160,7 @@ impl Cmd {
         let mut notify_watcher =
             notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
                 if let Ok(event) = res {
-                    if matches!(
-                        event.kind,
-                        notify::EventKind::Create(_)
-                            | notify::EventKind::Modify(_)
-                            | notify::EventKind::Remove(_)
-                    ) {
-                        if let Some(path) = event.paths.first() {
-                            if is_temporary_file(path) {
-                                return;
-                            }
-                            if watcher.is_watched(path) || watcher.is_env_toml(path) {
-                                eprintln!("File changed: {path:?}");
-                                if let Err(e) = tx.blocking_send(Message::FileChanged) {
-                                    eprintln!("Error sending through channel: {e}");
-                                }
-                            }
-                        }
-                    }
+                    watcher.handle_event(&event, &tx);
                 }
             })
             .unwrap();
