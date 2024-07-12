@@ -2,6 +2,7 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use std::env;
+use subcontract::derive_contract_impl;
 
 use quote::quote;
 use syn::Item;
@@ -38,28 +39,8 @@ pub fn lazy(item: TokenStream) -> TokenStream {
         .map_or_else(|e| e.to_compile_error().into(), Into::into)
 }
 
-/// Generates the soroban contract code combining all Subcontracts
-///
-/// # Panics
-///
-/// This function will panic if:
-/// - The subcontract information cannot be retrieved from the Cargo.toml file.
-/// - There are any issues with reading or processing the dependency information.
-#[proc_macro]
-pub fn soroban_contract(_: TokenStream) -> TokenStream {
-    let cargo_file = manifest();
-    let subcontract = loam_build::deps::subcontract(&cargo_file).unwrap();
-
-    let deps = subcontract
-        .iter()
-        .map(|i| i.0.to_path_buf().into_std_path_buf())
-        .collect::<Vec<_>>();
-
-    contract::generate(&deps).into()
-}
-
-fn manifest() -> std::path::PathBuf {
-    std::path::PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("Cargo.toml")
+pub(crate) fn manifest() -> std::path::PathBuf {
+    std::path::PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("failed to finde cargo manifest")).join("Cargo.toml")
 }
 
 /// Generates a contract Client for a given contract.
@@ -90,3 +71,58 @@ pub fn import_contract(tokens: TokenStream) -> TokenStream {
     }
     .into()
 }
+
+/// Generates a contract made up of subcontracts
+/// ```no_run
+/// #[derive_contract(Core(Admin), Postable(StatusMessage))]
+/// pub struct Contract;
+/// ```
+/// Generates
+/// ```no_run
+/// pub struct Contract;
+/// impl Postable for Contract {
+///     type Impl = StatusMessage;
+/// }
+/// impl Core for Contract {
+///     type Impl = Admin;
+/// }
+/// #[loam_sdk::soroban_sdk::contract]
+/// struct SorobanContract__;
+///
+/// #[loam_sdk::soroban_sdk::contract]
+/// impl SorobanContract__ {
+///  // Postable and Core methods exposed
+/// }
+///
+///
+/// ```
+#[proc_macro_attribute]
+pub fn derive_contract(args: TokenStream, item: TokenStream) -> TokenStream {
+    let parsed: Item = syn::parse(item.clone()).expect("failed to parse Item");
+    derive_contract_impl(proc_macro2::TokenStream::from(args), parsed).into()
+}
+
+// fn find_deps() -> Vec<proc_macro2::TokenStream> {
+//     let cargo_file = manifest();
+//     loam_build::deps::contract(&cargo_file)
+//         .unwrap()
+//         .iter()
+//         .map(|i| i.manifest_path.as_std_path())
+//         .filter_map(|path| {
+//             let file = util::parse_crate_as_file(path)?;
+//             generate_soroban(&quote::format_ident!("Core"), &file)
+//         })
+//         .collect::<Vec<_>>()
+// }
+
+
+// #[test]
+// fn test_deriveC_contract() {
+//     let input: Item = syn::parse_quote! {
+//         #[loam_sdk::derive_contract(Core(Admin), Calc(Calculator))]
+//         pub struct Contract;
+//     };
+    
+//     println!("{input:#?}");
+    
+// }

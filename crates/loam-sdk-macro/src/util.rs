@@ -1,19 +1,19 @@
-use std::path::Path;
+use std::{collections::BTreeMap, path::Path};
 
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{File, ItemTrait, TraitItemFn};
-use syn_file_expand::read_full_crate_source_code;
 
 /// Read a crate starting from a single file then parse into a file
 pub fn parse_crate_as_file(path: &Path) -> Option<File> {
-    if let Ok(file) = read_full_crate_source_code(path, |_| Ok(false)) {
-        let mut tokens = TokenStream::new();
-        file.to_tokens(&mut tokens);
-        syn::parse(tokens.into()).ok()
-    } else {
-        None
-    }
+    syn_file_expand::read_crate(path)
+        .map_err(|e| {
+            println!("{e}");
+            e
+        })
+        .ok()
+        .map(|file| file.to_token_stream().to_string())
+        .and_then(|file| syn::parse_file(&file).ok())
 }
 
 pub fn has_macro(attrs: &[syn::Attribute], macro_name: &str) -> bool {
@@ -27,31 +27,27 @@ pub fn has_macro(attrs: &[syn::Attribute], macro_name: &str) -> bool {
 
 use syn::visit::Visit;
 
+pub type Traits = BTreeMap<String, Vec<TokenStream>>;
+
 #[derive(Default)]
 pub struct TraitVisitor {
-    pub functions: Vec<TokenStream>,
+    pub traits: Traits,
 }
 
 impl TraitVisitor {
-    pub fn find_items_in_file(ast: &syn::File) -> Vec<TokenStream> {
+    pub fn find_traits_in_file(ast: &syn::File) -> Traits {
         let mut visitor = TraitVisitor::default();
         syn::visit::visit_file(&mut visitor, ast);
-        visitor.functions
+        visitor.traits
     }
 }
 
 impl<'ast> Visit<'ast> for TraitVisitor {
     fn visit_item_trait(&mut self, item: &'ast syn::ItemTrait) {
         if has_macro(&item.attrs, "subcontract") {
-            self.functions.extend(generate_methods(item));
+            self.traits
+                .insert(item.ident.to_string(), generate_methods(item));
         }
-    }
-}
-
-pub fn generate_soroban(file: &syn::File) -> TokenStream {
-    let methods = TraitVisitor::find_items_in_file(file);
-    quote! {
-        #(#methods)*
     }
 }
 
