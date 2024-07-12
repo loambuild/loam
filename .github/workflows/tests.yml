@@ -46,6 +46,6 @@ jobs:
     - uses: cargo-bins/cargo-binstall@main
     - run: just setup
     - run: just create
-    - run: just redeploy
     - run: just test
+    - run: just redeploy
 
