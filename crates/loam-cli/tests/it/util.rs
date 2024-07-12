@@ -74,13 +74,14 @@ impl TestEnv {
         loam
     }
 
-    fn cargo_bin_loam(&self) -> PathBuf {
+    fn cargo_bin_loam() -> PathBuf {
         PathBuf::from(env!("CARGO_BIN_EXE_loam"))
     }
 
     pub fn loam_process(&self, cmd: &str) -> ProcessCommand {
-        println!("{}", self.cargo_bin_loam().display());
-        let mut loam = ProcessCommand::new(self.cargo_bin_loam());
+        let bin = Self::cargo_bin_loam();
+        println!("{}", bin.display());
+        let mut loam = ProcessCommand::new(bin);
         loam.current_dir(&self.cwd);
         loam.arg(cmd);
         loam

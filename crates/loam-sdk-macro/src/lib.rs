@@ -81,7 +81,7 @@ pub fn import_contract(tokens: TokenStream) -> TokenStream {
 /// pub struct Contract;
 /// ```
 /// Generates
-/// ```no_run
+/// ```ignore
 /// pub struct Contract;
 /// impl Postable for Contract {
 ///     type Impl = StatusMessage;
