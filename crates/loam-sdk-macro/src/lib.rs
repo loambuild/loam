@@ -101,28 +101,3 @@ pub fn derive_contract(args: TokenStream, item: TokenStream) -> TokenStream {
     let parsed: Item = syn::parse(item.clone()).expect("failed to parse Item");
     derive_contract_impl(proc_macro2::TokenStream::from(args), parsed).into()
 }
-
-// fn find_deps() -> Vec<proc_macro2::TokenStream> {
-//     let cargo_file = manifest();
-//     loam_build::deps::contract(&cargo_file)
-//         .unwrap()
-//         .iter()
-//         .map(|i| i.manifest_path.as_std_path())
-//         .filter_map(|path| {
-//             let file = util::parse_crate_as_file(path)?;
-//             generate_soroban(&quote::format_ident!("Core"), &file)
-//         })
-//         .collect::<Vec<_>>()
-// }
-
-
-// #[test]
-// fn test_deriveC_contract() {
-//     let input: Item = syn::parse_quote! {
-//         #[loam_sdk::derive_contract(Core(Admin), Calc(Calculator))]
-//         pub struct Contract;
-//     };
-    
-//     println!("{input:#?}");
-    
-// }
