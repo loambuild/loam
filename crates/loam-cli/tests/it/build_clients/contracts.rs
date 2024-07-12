@@ -1,4 +1,6 @@
 use crate::util::{AssertExt, TestEnv};
+use tokio::time::{sleep, Duration};
+
 
 #[test]
 fn contracts_built() {
@@ -79,84 +81,89 @@ hello.workspace = true
     });
 }
 
-#[test]
-fn contract_alias_skips_install() {
-    TestEnv::from("soroban-init-boilerplate", |env| {
-        env.set_environments_toml(
-            r#"
-development.accounts = [
-    { name = "alice" },
-]
+#[tokio::test]
+async fn contract_alias_skips_install() {
+    TestEnv::from_async("soroban-init-boilerplate", |env| async {
+        Box::pin(async move {
+            env.set_environments_toml(
+                r#"
+    development.accounts = [
+        { name = "alice" },
+    ]
 
-[development.network]
-rpc-url = "http://localhost:8000/rpc"
-network-passphrase = "Standalone Network ; February 2017"
+    [development.network]
+    rpc-url = "http://localhost:8000/rpc"
+    network-passphrase = "Standalone Network ; February 2017"
 
-[development.contracts]
-hello_world.workspace = true
-"#,
-        );
-        let output = env
-            .loam_env("development", true)
-            .output()
-            .expect("Failed to execute command");
+    [development.contracts]
+    hello_world.workspace = true
+    "#,
+            );
 
-        println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
-        // ensure it imports
-        assert!(output.status.success());
-        assert!(String::from_utf8_lossy(&output.stderr)
-            .contains("🍽️ importing \"hello_world\" contract"));
+            sleep(Duration::from_secs(2)).await;
 
-        let output2 = env
-            .loam_env("development", false)
-            .output()
-            .expect("Failed to execute command");
+            let output = env
+                .loam_env("development", true)
+                .output()
+                .expect("Failed to execute command");
 
-        println!("stderr: {}", String::from_utf8_lossy(&output2.stderr));
-        // ensure alias retrieval works
-        assert!(output2.status.success());
-        assert!(String::from_utf8_lossy(&output2.stderr)
-            .contains("✅ Contract \"hello_world\" is up to date"));
+            println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+            // ensure it imports
+            assert!(output.status.success());
+            assert!(String::from_utf8_lossy(&output.stderr)
+                .contains("🍽️ importing \"hello_world\" contract"));
 
-        let file = "contracts/increment/src/lib.rs";
-        let file_replaced = "contracts/hello_world/src/lib.rs";
-        env.replace_file(file, file_replaced);
+            let output2 = env
+                .loam_env("development", false)
+                .output()
+                .expect("Failed to execute command");
 
-        let output3 = env
-            .loam_env("development", false)
-            .output()
-            .expect("Failed to execute command");
+            println!("stderr: {}", String::from_utf8_lossy(&output2.stderr));
+            // ensure alias retrieval works
+            assert!(output2.status.success());
+            assert!(String::from_utf8_lossy(&output2.stderr)
+                .contains("✅ Contract \"hello_world\" is up to date"));
 
-        println!("stderr: {}", String::from_utf8_lossy(&output3.stderr));
-        // ensure contract hash change check works, should update in dev mode
-        assert!(output3.status.success());
-        assert!(String::from_utf8_lossy(&output3.stderr)
-            .contains("🔄 Updating contract \"hello_world\""));
+            let file = "contracts/increment/src/lib.rs";
+            let file_replaced = "contracts/hello_world/src/lib.rs";
+            env.replace_file(file, file_replaced);
 
-        env.set_environments_toml(
-            r#"
-production.accounts = [
-    { name = "alice" },
-]
+            let output3 = env
+                .loam_env("development", false)
+                .output()
+                .expect("Failed to execute command");
 
-[production.network]
-rpc-url = "http://localhost:8000/rpc"
-network-passphrase = "Standalone Network ; February 2017"
+            println!("stderr: {}", String::from_utf8_lossy(&output3.stderr));
+            // ensure contract hash change check works, should update in dev mode
+            assert!(output3.status.success());
+            assert!(String::from_utf8_lossy(&output3.stderr)
+                .contains("🔄 Updating contract \"hello_world\""));
 
-[production.contracts]
-hello_world.workspace = true
-"#,
-        );
-        env.replace_file("contracts/auth/src/lib.rs", file_replaced);
+            env.set_environments_toml(
+                r#"
+    production.accounts = [
+        { name = "alice" },
+    ]
 
-        let output4 = env
-            .loam_build("production", false)
-            .output()
-            .expect("Failed to execute command");
+    [production.network]
+    rpc-url = "http://localhost:8000/rpc"
+    network-passphrase = "Standalone Network ; February 2017"
 
-        // ensure contract hash change check works, should throw error in production
-        assert!(!output4.status.success());
-        assert!(String::from_utf8_lossy(&output4.stderr)
-            .contains("⛔ ️Contract update not allowed in production for \"hello_world\""));
-    });
+    [production.contracts]
+    hello_world.workspace = true
+    "#,
+            );
+            env.replace_file("contracts/auth/src/lib.rs", file_replaced);
+
+            let output4 = env
+                .loam_build("production", false)
+                .output()
+                .expect("Failed to execute command");
+
+            // ensure contract hash change check works, should throw error in production
+            assert!(!output4.status.success());
+            assert!(String::from_utf8_lossy(&output4.stderr)
+                .contains("⛔ ️Contract update not allowed in production for \"hello_world\""));
+        }).await; 
+    }).await;
 }
