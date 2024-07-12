@@ -55,19 +55,15 @@ The `Core` trait provides the minimum logic needed for a contract to be redeploy
 
 ## Using  `Core`
 
-To use the core subcontract, create a `Contract` struct and implement `Core` for it. This makes `Contract` redeployable by the Admin of the contract and will continue to be redeployable if the new contract also implements `Core`. After `Core` other Subcontracts can be added as needed.
+To use the core subcontract, create a `Contract` struct and implement `Core` with the `Admin` implementation, which ensures the contract is redeployable and will continue to be redeployable if the new contract also implements `Core`. After `Core` other Subcontracts can be added as needed.
 
 ```rust
-use loam_sdk::{soroban_contract, soroban_sdk};
+use loam_sdk::derive_contract;
 use loam_subcontract_core::{Admin, Core};
 
+#[derive_contract(Core(Admin))]
 pub struct Contract;
 
-impl Core for Contract {
-    type Impl = Admin;
-}
-
-soroban_contract!();
 ```
 
 This code generates the following implementation:
@@ -95,6 +91,6 @@ impl SorobanContract {
 }
 ```
 
-By specifying the associated `Impl` type for `Core`, you enable the default `Admin` methods to be used (`admin_set`, `admin_get`, `redeploy`). However, you can also provide a different implementation if needed by replacing `Admin` with a different struct/enum that also implements [IsCore](replace).
+By specifying the associated a concrete implementation for `Core`, `Admin`, you enable its methods to be used (`admin_set`, `admin_get`, `redeploy`). However, you can also provide a different implementation if needed by replacing `Admin` with a different struct/enum that also implements [IsCore](replace).
 
-Notice that the generated code calls `Contract::redeploy` and other methods. This ensures that the `Contract` type is redeployable, while also allowing for extensions, as `Contract` can overwrite the default methods.
+Notice that the generated code includes `Contract::redeploy` and other methods. This ensures that the `Contract` type is redeployable, while also allowing for extensions, as different concrete implementation can overwrite the default methods.

@@ -113,7 +113,8 @@ pub fn all(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     let parent = manifest_path
         .parent()
         .ok_or_else(|| Error::ParentNotFound(manifest_path.to_path_buf()))?;
-    let output = Command::new("cargo")
+    let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
+    let output = Command::new(cargo)
         .current_dir(parent)
         .args(["tree", "--prefix", "none", "--edges", "normal"])
         .output()
@@ -218,7 +219,7 @@ pub fn loam(manifest_path: &Path, kind: &DepKind) -> Result<Vec<(Utf8PathBuf, Pa
 /// - The manifest file cannot be read or parsed.
 /// - There are issues accessing or processing dependency information.
 /// - Any other error occurs during the dependency resolution process.
-pub fn subcontract(manifest_path: &Path) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
+pub fn subcontract_paths(manifest_path: &Path) -> Result<Vec<(Utf8PathBuf, PathBuf)>, Error> {
     loam(manifest_path, &DepKind::Subcontract)
 }
 
@@ -245,6 +246,32 @@ pub fn contract(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     Ok(all(manifest_path)?
         .into_iter()
         .filter(|p| p.is_dep(&DepKind::Contract) && p.manifest_path != manifest_path)
+        .collect())
+}
+
+/// Retrieves a list of subcontract dependencies for a given manifest path.
+///
+/// This function filters all dependencies of the package specified by the manifest path,
+/// returning only those that are of the Contract kind and are not the package itself.
+///
+/// # Arguments
+///
+/// * `manifest_path` - A Path to the Cargo.toml manifest file.
+///
+/// # Returns
+///
+/// A Result containing a Vec of Package structs representing the contract dependencies,
+/// or an Error if the operation fails.
+///
+/// # Errors
+///
+/// This function will return an Error if:
+/// * There's an issue reading or parsing the manifest file.
+/// * There's a problem retrieving the dependencies.
+pub fn subcontract(manifest_path: &Path) -> Result<Vec<Package>, Error> {
+    Ok(all(manifest_path)?
+        .into_iter()
+        .filter(|p| p.is_dep(&DepKind::Subcontract) && p.manifest_path != manifest_path)
         .collect())
 }
 
@@ -301,7 +328,7 @@ mod tests {
         println!("{normal:#?}{}", normal.name);
         let deps = all(&manifest_path).unwrap();
         println!("{deps:#?}\n{}", deps.len());
-        let deps = subcontract(&manifest_path).unwrap();
+        let deps = subcontract_paths(&manifest_path).unwrap();
         println!("{deps:#?}\n{}", deps.len());
     }
 }

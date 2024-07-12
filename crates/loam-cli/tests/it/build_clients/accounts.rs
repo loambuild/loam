@@ -21,7 +21,7 @@ accounts = [
         // check that they're actually funded
         let stderr = env
             .soroban("keys")
-            .args(&[
+            .args([
                 "fund",
                 "alice",
                 "--network-passphrase",

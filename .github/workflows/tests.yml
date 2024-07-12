@@ -10,9 +10,10 @@ jobs:
     name: test RPC
     runs-on: ubuntu-22.04
     env:
-        SOROBAN_RPC_URL: http://localhost:8000/soroban/rpc
-        SOROBAN_NETWORK_PASSPHRASE: "Standalone Network ; February 2017"
-        SOROBAN_ACCOUNT: default
+        STELLAR_RPC_URL: http://localhost:8000/soroban/rpc
+        STELLAR_NETWORK_PASSPHRASE: "Standalone Network ; February 2017"
+        STELLAR_ACCOUNT: default
+        STELLAR_CONTRACT_ID: core
     services:
       rpc:
         image: stellar/quickstart:v423-testing
@@ -45,7 +46,5 @@ jobs:
     - uses: cargo-bins/cargo-binstall@main
     - run: just setup
     - run: just create
-    - run: cat .env
-    - run: just redeploy
     - run: just test
 
