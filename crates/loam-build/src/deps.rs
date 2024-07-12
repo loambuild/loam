@@ -113,7 +113,8 @@ pub fn all(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     let parent = manifest_path
         .parent()
         .ok_or_else(|| Error::ParentNotFound(manifest_path.to_path_buf()))?;
-    let output = Command::new("cargo")
+    let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
+    let output = Command::new(cargo)
         .current_dir(parent)
         .args(["tree", "--prefix", "none", "--edges", "normal"])
         .output()

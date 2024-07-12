@@ -136,7 +136,7 @@ async fn wait_for_output<
     let result = timeout(timeout_duration, async {
         while let Some(line) = lines.next().await {
             let line = line.expect("Failed to read line");
-            println!("{}", line);
+            println!("{line}");
             if line.contains(expected) {
                 return;
             }
@@ -145,9 +145,9 @@ async fn wait_for_output<
     })
     .await;
     match result {
-        Ok(_) => {
-            println!("Found string {}", expected)
+        Ok(()) => {
+            println!("Found string {expected}");
         }
-        Err(_) => panic!("Timed out waiting for output: {}", expected),
+        _ => panic!("Timed out waiting for output: {expected}"),
     }
 }
