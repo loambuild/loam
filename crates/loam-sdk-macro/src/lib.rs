@@ -98,7 +98,7 @@ pub fn import_contract(tokens: TokenStream) -> TokenStream {
 /// }
 ///
 /// ```
-/// 
+///
 /// # Panics
 /// This function may panic if the input tokens cannot be parsed as a valid Rust item.
 ///
