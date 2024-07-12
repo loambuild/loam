@@ -76,11 +76,12 @@ pub fn import_contract(tokens: TokenStream) -> TokenStream {
 }
 
 /// Generates a contract made up of subcontracts
-/// ```no_run
+/// ```ignore
 /// #[derive_contract(Core(Admin), Postable(StatusMessage))]
 /// pub struct Contract;
 /// ```
 /// Generates
+/// 
 /// ```ignore
 /// pub struct Contract;
 /// impl Postable for Contract {

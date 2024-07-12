@@ -36,7 +36,7 @@ async fn dev_command_watches_for_changes_and_environments_toml() {
             // Wait for the dev process to detect changes and rebuild
             wait_for_output(
                 &mut stderr_lines,
-                &format!("File changed: {:?}", file_changed_path),
+                &format!("File changed: {file_changed_path:?}"),
             )
             .await;
 
