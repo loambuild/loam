@@ -1,11 +1,11 @@
 use assert_cmd::{assert::Assert, Command};
 use assert_fs::TempDir;
 use fs_extra::dir::{copy, CopyOptions};
-use std::future::Future;
-use std::path::PathBuf;
-use std::fs;
 use rand::{thread_rng, Rng};
 use std::error::Error;
+use std::fs;
+use std::future::Future;
+use std::path::PathBuf;
 use tokio::process::Command as ProcessCommand;
 use toml::Value;
 
