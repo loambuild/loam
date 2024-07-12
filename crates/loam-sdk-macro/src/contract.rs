@@ -28,6 +28,6 @@ pub fn generate(contract: &Ident, methods: &[&TokenStream]) -> TokenStream {
     }
 }
 
-pub fn generate_boilerplate(name: syn::Ident, methods: &[&TokenStream]) -> TokenStream {
-    generate(&name, methods)
+pub fn generate_boilerplate(name: &syn::Ident, methods: &[&TokenStream]) -> TokenStream {
+    generate(name, methods)
 }

@@ -97,8 +97,11 @@ pub fn import_contract(tokens: TokenStream) -> TokenStream {
 ///  // Postable and Core methods exposed
 /// }
 ///
-///
 /// ```
+/// 
+/// # Panics
+/// This function may panic if the input tokens cannot be parsed as a valid Rust item.
+///
 #[proc_macro_attribute]
 pub fn derive_contract(args: TokenStream, item: TokenStream) -> TokenStream {
     let parsed: Item = syn::parse(item.clone()).expect("failed to parse Item");

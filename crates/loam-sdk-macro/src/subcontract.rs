@@ -199,7 +199,7 @@ pub fn derive_contract_impl(args: TokenStream, trait_impls: Item) -> TokenStream
             }
         });
     }
-    let outer_impl = contract::generate_boilerplate(strukt.ident.clone(), &methods);
+    let outer_impl = contract::generate_boilerplate(&strukt.ident, &methods);
     quote! {
         #outer_impl
         #impls
