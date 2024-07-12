@@ -220,7 +220,7 @@ impl Cmd {
 
     fn cloned_build_command(&mut self) -> Arc<Mutex<build::Cmd>> {
         self.build_cmd
-            .build_clients
+            .build_clients_args
             .env
             .get_or_insert(LoamEnv::Development);
         self.build_cmd

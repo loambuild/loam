@@ -1,21 +1,13 @@
 use assert_cmd::{assert::Assert, Command};
 use assert_fs::TempDir;
 use fs_extra::dir::{copy, CopyOptions};
-<<<<<<< HEAD
 use std::future::Future;
 use std::path::PathBuf;
 use std::fs;
-=======
->>>>>>> 89f96b7 (fmt)
 use rand::{thread_rng, Rng};
 use std::error::Error;
-<<<<<<< HEAD
 use tokio::process::Command as ProcessCommand;
-=======
-use std::fs;
-use std::path::PathBuf;
 use toml::Value;
->>>>>>> 89f96b7 (fmt)
 
 pub struct TestEnv {
     pub temp_dir: TempDir,
@@ -79,25 +71,6 @@ impl TestEnv {
         std::fs::remove_file(file_path).expect("Failed to delete file");
     }
 
-    pub async fn from_async<F, Fut>(template: &str, f: F)
-    where
-        F: FnOnce(TestEnv) -> Fut,
-        Fut: Future<Output = ()>,
-    {
-        let test_env = TestEnv::new(template);
-        f(test_env).await;
-    }
-
-    pub fn modify_file(&self, path: &str, content: &str) {
-        let file_path = self.cwd.join(path);
-        std::fs::write(file_path, content).expect("Failed to modify file");
-    }
-
-    pub fn delete_file(&self, path: &str) {
-        let file_path = self.cwd.join(path);
-        std::fs::remove_file(file_path).expect("Failed to delete file");
-    }
-
     pub fn modify_wasm(&self, contract_name: &str) -> Result<(), Box<dyn Error>> {
         // Read Cargo.toml to get the actual name
         let cargo_toml_path = self
@@ -134,7 +107,7 @@ impl TestEnv {
     }
 
     pub fn loam_build(&self, env: &str, randomize_wasm: bool) -> Command {
-        if (randomize_wasm) {
+        if randomize_wasm {
             // Run initial build
             let mut initial_build = Command::cargo_bin("loam").unwrap();
             initial_build.current_dir(&self.cwd);
@@ -165,18 +138,6 @@ impl TestEnv {
         loam.arg("build");
         loam.arg(env);
         loam.arg("--build-clients");
-        loam
-    }
-
-    fn cargo_bin_loam(&self) -> PathBuf {
-        PathBuf::from(env!("CARGO_BIN_EXE_loam"))
-    }
-
-    pub fn loam_process(&self, cmd: &str) -> ProcessCommand {
-        println!("{}", self.cargo_bin_loam().display());
-        let mut loam = ProcessCommand::new(self.cargo_bin_loam());
-        loam.current_dir(&self.cwd);
-        loam.arg(cmd);
         loam
     }
 
