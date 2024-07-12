@@ -4,6 +4,7 @@ use clap::{command, CommandFactory, FromArgMatches, Parser};
 
 pub mod build;
 pub mod dev;
+pub mod init;
 pub mod update_env;
 
 const ABOUT: &str = "Build contracts and generate front ends";
@@ -38,6 +39,7 @@ impl Root {
     }
     pub async fn run(&mut self) -> Result<(), Error> {
         match &mut self.cmd {
+            Cmd::Init(init_info) => init_info.run()?,
             Cmd::Build(build_info) => build_info.run().await?,
             Cmd::UpdateEnv(e) => e.run()?,
             Cmd::Dev(dev_info) => dev_info.run().await?,
@@ -56,6 +58,9 @@ impl FromStr for Root {
 
 #[derive(Parser, Debug)]
 pub enum Cmd {
+    /// Initialize the project
+    Init(init::Cmd),
+
     /// Build contracts, resolving Loam dependencies in the correct order. If you have an `environments.toml` file, it will also follow its instructions to configure the environment set by the `LOAM_ENV` environment variable, turning your contracts into frontend packages (NPM dependencies).
     Build(build::Cmd),
 
@@ -69,6 +74,8 @@ pub enum Cmd {
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     // TODO: stop using Debug for displaying errors
+    #[error(transparent)]
+    Init(#[from] init::Error),
     #[error(transparent)]
     BuildContracts(#[from] build::Error),
     #[error(transparent)]
