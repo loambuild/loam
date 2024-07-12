@@ -81,7 +81,7 @@ pub fn import_contract(tokens: TokenStream) -> TokenStream {
 /// pub struct Contract;
 /// ```
 /// Generates
-/// 
+///
 /// ```ignore
 /// pub struct Contract;
 /// impl Postable for Contract {
