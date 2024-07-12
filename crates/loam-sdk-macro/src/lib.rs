@@ -40,7 +40,10 @@ pub fn lazy(item: TokenStream) -> TokenStream {
 }
 
 pub(crate) fn manifest() -> std::path::PathBuf {
-    std::path::PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("failed to finde cargo manifest")).join("Cargo.toml")
+    std::path::PathBuf::from(
+        env::var("CARGO_MANIFEST_DIR").expect("failed to finde cargo manifest"),
+    )
+    .join("Cargo.toml")
 }
 
 /// Generates a contract Client for a given contract.
