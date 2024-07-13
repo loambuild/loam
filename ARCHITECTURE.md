@@ -37,3 +37,39 @@ Smart Contracts
 - `Contract Registry` - Deploying a contract requires a Wasm hash and returns a unique Contract Id which isn't human readable. With integration with the `Package Manager`, this contract allows you to register a name for your contract, deploy it, and initialize it all in one transaction.
 - `Expiration Tracker` - Contract's and Wasm binaries can both expire. This contract allows tracking and prepaying so that you don't have to worry about manually extending lifetimes.
 
+```mermaid
+graph TD
+    SDK[loam-sdk]
+    CLI[loam-cli]
+
+    subgraph "loam-cli Commands"
+        CLI --> C1[build]
+        CLI --> C2[dev]
+        CLI --> C3[init]
+        CLI --> C4[update-env]
+        CLI --> C5[publish]
+        CLI --> C6[deploy]
+        CLI --> C7[install]
+    end
+
+    subgraph SmartContracts[Smart Contracts]
+        SC1[Package Manager]
+        SC2[Contract Registry]
+        SC3[Expiration Tracker]
+
+        SC2 -.->|Uses for deploy/redeploy| SC1
+        SC1 -.->|Provides Wasm info| SC3
+        SC2 -.->|Provides Contract id info| SC3
+    end
+
+    %% SDK Interactions
+    SDK -.->|Used for development| SmartContracts
+    SDK -.->|Allows importing deployed contracts| C7
+
+    %% CLI Command Interactions
+    C1 -.->SDK
+
+    C5 -.->|Interacts with| SC1
+    C6 -.->|Register name and initialize| SC2
+    C7 -.->|Retrieves contract id| SC2
+    ```
