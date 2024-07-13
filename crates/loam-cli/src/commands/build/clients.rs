@@ -60,8 +60,6 @@ pub enum Error {
     #[error(transparent)]
     ConfigLocator(#[from] cli::config::locator::Error),
     #[error(transparent)]
-    ConfigAlias(#[from] cli::config::alias::Error),
-    #[error(transparent)]
     Clap(#[from] clap::Error),
     #[error(transparent)]
     WasmHash(#[from] xdrError),
@@ -152,22 +150,10 @@ impl Args {
         }
     }
 
-    fn get_config_dir(network: &Network) -> cli::config::Args {
-        let account =
-            std::env::var("STELLAR_ACCOUNT").expect("No STELLAR_ACCOUNT environment variable set");
-        cli::config::Args {
-            network: Self::get_network_args(network),
-            locator: Self::get_config_locator(),
-            source_account: account,
-            hd_path: Some(0),
-        }
-    }
-
     fn get_contract_alias(
         name: &str,
-        network: &Network,
-    ) -> Result<Option<String>, cli::config::alias::Error> {
-        let config_dir = Self::get_config_dir(network);
+    ) -> Result<Option<String>, cli::config::locator::Error> {
+        let config_dir = Self::get_config_locator();
         let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
             .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
         config_dir.get_contract_id(name, &network_passphrase)
@@ -195,9 +181,10 @@ impl Args {
         name: &str,
         contract_id: &str,
         network: &Network,
-    ) -> Result<(), cli::config::alias::Error> {
-        let config_dir = Self::get_config_dir(network);
-        config_dir.save_contract_id(contract_id, name)
+    ) -> Result<(), cli::config::locator::Error> {
+        let config_dir = Self::get_config_locator();
+        let passphrase = network.network_passphrase.clone().expect("You must set the network passphrase");
+        config_dir.save_contract_id(&passphrase, contract_id, name)
     }
 
     fn write_contract_template(
@@ -290,7 +277,7 @@ export default new Client.Client({{
                 eprintln!("    ↳ hash: {hash}");
 
                 // Check if we have an alias saved for this contract
-                let alias = Self::get_contract_alias(name, network)?;
+                let alias = Self::get_contract_alias(name)?;
                 if let Some(contract_id) = alias {
                     match self
                         .contract_hash_matches(&contract_id, &hash, network)
