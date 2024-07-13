@@ -62,12 +62,8 @@ impl Cmd {
         })?;
 
         copy_example_contracts(&self.project_path)?;
-        let core = self.project_path.join("contract/core/Cargo.toml.remove");
-        let status_message = self
-            .project_path
-            .join("contract/status_message/Cargo.toml.remove");
-        fs::rename(&core, core.with_extension(""))?;
-        fs::rename(&status_message, status_message.with_extension(""))?;
+        rename_cargo_toml_remove(&self.project_path, "core")?;
+        rename_cargo_toml_remove(&self.project_path, "status_message")?;
         Ok(())
     }
 }
@@ -133,4 +129,12 @@ fn file_exists(file_path: &Path) -> bool {
         .as_ref()
         .map(Metadata::is_file)
         .unwrap_or(false)
+}
+
+fn rename_cargo_toml_remove(project: &Path, name: &str) -> Result<(), Error> {
+    let from = project.join(format!("contracts/{name}/Cargo.toml.remove"));
+    let to = from.with_extension("");
+    println!("Renaming to {from:?} to {to:?}");
+    fs::rename(from, to)?;
+    Ok(())
 }
