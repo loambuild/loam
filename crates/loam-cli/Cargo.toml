@@ -12,7 +12,13 @@ rust-version = "1.70"
 autobins = false
 default-run = "loam"
 
-include = ["examples/soroban/**/*"]
+include = [
+    "examples/soroban/**/*",
+    "*/loam-cli/src/**/*",
+    "*/loam-cli/Cargo.toml",
+    "*/loam-cli/README.md",
+    "*/loam-cli/CHANGELOG.md",
+]
 
 [[bin]]
 name = "loam"
