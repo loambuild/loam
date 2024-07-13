@@ -2670,6 +2670,7 @@ dependencies = [
  "notify",
  "pathdiff",
  "predicates",
+ "rust-embed",
  "serde",
  "serde_derive",
  "serde_json",
