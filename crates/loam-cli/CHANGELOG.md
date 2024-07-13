@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.10.0...loam-cli-v0.10.1) - 2024-07-13
+
+### Fixed
+- *(CLI)* never default to debug ([#100](https://github.com/loambuild/loam-sdk/pull/100))
+- properly rename Cargo.toml.remove ([#106](https://github.com/loambuild/loam-sdk/pull/106))
+
 ## [0.10.0](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.9.4...loam-cli-v0.10.0) - 2024-07-13
 
 ### Added
