@@ -1,15 +1,11 @@
 #![allow(clippy::struct_excessive_bools)]
 use crate::commands::build::env_toml;
-use stellar_xdr::curr::Error as xdrError;
 use serde_json;
 use soroban_cli::commands::NetworkRunnable;
-use soroban_cli::utils::contract_hash;
 use soroban_cli::utils::contract_hash;
 use soroban_cli::{commands as cli, CommandParser};
 use std::collections::BTreeMap as Map;
 use std::fmt::Debug;
-use std::hash::Hash;
-use serde_json;
 use std::hash::Hash;
 use stellar_xdr::curr::Error as xdrError;
 
@@ -63,8 +59,6 @@ pub enum Error {
     ContractFetch(#[from] cli::contract::fetch::Error),
     #[error(transparent)]
     ConfigLocator(#[from] cli::config::locator::Error),
-    #[error(transparent)]
-    ConfigAlias(#[from] cli::config::alias::Error),
     #[error(transparent)]
     ContractInvoke(#[from] cli::contract::invoke::Error),
     #[error(transparent)]
@@ -158,22 +152,8 @@ impl Args {
         }
     }
 
-    fn get_config_dir(network: &Network) -> cli::config::Args {
-        let account =
-            std::env::var("STELLAR_ACCOUNT").expect("No STELLAR_ACCOUNT environment variable set");
-        cli::config::Args {
-            network: Self::get_network_args(network),
-            locator: Self::get_config_locator(),
-            source_account: account,
-            hd_path: Some(0),
-        }
-    }
-
-    fn get_contract_alias(
-        name: &str,
-        network: &Network,
-    ) -> Result<Option<String>, cli::config::alias::Error> {
-        let config_dir = Self::get_config_dir(network);
+    fn get_contract_alias(name: &str) -> Result<Option<String>, cli::config::locator::Error> {
+        let config_dir = Self::get_config_locator();
         let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
             .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
         config_dir.get_contract_id(name, &network_passphrase)
@@ -201,9 +181,13 @@ impl Args {
         name: &str,
         contract_id: &str,
         network: &Network,
-    ) -> Result<(), cli::config::alias::Error> {
-        let config_dir = Self::get_config_dir(network);
-        config_dir.save_contract_id(contract_id, name)
+    ) -> Result<(), cli::config::locator::Error> {
+        let config_dir = Self::get_config_locator();
+        let passphrase = network
+            .network_passphrase
+            .clone()
+            .expect("You must set a network passphrase.");
+        config_dir.save_contract_id(&passphrase, contract_id, name)
     }
 
     fn write_contract_template(
@@ -212,7 +196,7 @@ impl Args {
         name: &str,
         contract_id: &str,
     ) -> Result<(), Error> {
-        let allow_http = if self.loam_env() == "development" {
+        let allow_http = if self.loam_env(LoamEnv::Production) == "development" {
             "\n  allowHttp: true,"
         } else {
             ""
@@ -296,7 +280,7 @@ export default new Client.Client({{
                 eprintln!("    ↳ hash: {hash}");
 
                 // Check if we have an alias saved for this contract
-                let alias = Self::get_contract_alias(name, network)?;
+                let alias = Self::get_contract_alias(name)?;
                 let is_new_deployment = alias.is_none();
                 if let Some(contract_id) = alias {
                     match self
@@ -307,7 +291,7 @@ export default new Client.Client({{
                             eprintln!("✅ Contract {name:?} is up to date");
                             continue;
                         }
-                        Ok(false) if self.loam_env() == "production" => {
+                        Ok(false) if self.loam_env(LoamEnv::Production) == "production" => {
                             return Err(Error::ContractUpdateNotAllowed(name.to_string()));
                         }
                         Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
@@ -332,10 +316,14 @@ export default new Client.Client({{
                 Self::save_contract_alias(name, &contract_id, network)?;
 
                 // Run init script if it's a new deployment and we're in development or test environment
-                if is_new_deployment && (self.loam_env() == "development" || self.loam_env() == "test") {
+                if is_new_deployment
+                    && (self.loam_env(LoamEnv::Production) == "development"
+                        || self.loam_env(LoamEnv::Production) == "test")
+                {
                     if let Some(init_script) = &settings.init {
                         eprintln!("🚀 Running initialization script for {name:?}");
-                        self.run_init_script(name, &contract_id, init_script).await?;
+                        self.run_init_script(name, &contract_id, init_script)
+                            .await?;
                     }
                 }
 
@@ -361,7 +349,12 @@ export default new Client.Client({{
         Ok(())
     }
 
-    async fn run_init_script(&self, name: &str, contract_id: &str, init_script: &str) -> Result<(), Error> {
+    async fn run_init_script(
+        &self,
+        name: &str,
+        contract_id: &str,
+        init_script: &str,
+    ) -> Result<(), Error> {
         for line in init_script.lines() {
             let line = line.trim();
             if line.is_empty() {
