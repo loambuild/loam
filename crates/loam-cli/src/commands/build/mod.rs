@@ -65,8 +65,11 @@ pub struct Cmd {
     /// Print commands to build without executing them
     #[arg(long, conflicts_with = "out_dir", help_heading = "Other")]
     pub print_commands_only: bool,
+    /// Build client code in addition to building the contract
+    #[arg(long)]
+    pub build_clients: bool,
     #[command(flatten)]
-    pub build_clients: clients::Args,
+    pub build_clients_args: clients::Args,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -183,9 +186,11 @@ impl Cmd {
             }
         }
 
-        self.build_clients
-            .run(&metadata.workspace_root.into_std_path_buf())
-            .await?;
+        if self.build_clients {
+            self.build_clients_args
+                .run(&metadata.workspace_root.into_std_path_buf())
+                .await?;
+        }
 
         Ok(())
     }
