@@ -185,7 +185,7 @@ impl Cmd {
             tokio::select! {
                 _ = rx.recv() => {
                     let mut state = rebuild_state_clone.lock().await;
-                    let build_command_inner = self.cloned_build_command();
+                    let build_command_inner = build_command.clone();
                     if !*state {
                         *state= true;
                         tokio::spawn(Self::debounced_rebuild(build_command_inner, Arc::clone(&rebuild_state_clone)));
