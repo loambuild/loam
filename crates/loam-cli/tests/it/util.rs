@@ -6,7 +6,10 @@ use std::error::Error;
 use std::fs;
 use std::future::Future;
 use std::path::PathBuf;
+use std::time::Duration;
 use tokio::process::Command as ProcessCommand;
+use tokio::time::{sleep, timeout};
+use tokio_stream::StreamExt;
 use toml::Value;
 
 pub struct TestEnv {
@@ -59,6 +62,32 @@ impl TestEnv {
     {
         let test_env = TestEnv::new(template);
         f(test_env).await;
+    }
+
+    pub async fn wait_for_output<
+        T: tokio_stream::Stream<Item = Result<String, tokio::io::Error>> + Unpin,
+    >(
+        lines: &mut T,
+        expected: &str,
+    ) {
+        let timeout_duration = Duration::from_secs(120); // 2 minutes
+        let result = timeout(timeout_duration, async {
+            while let Some(line) = lines.next().await {
+                let line = line.expect("Failed to read line");
+                println!("{line}");
+                if line.contains(expected) {
+                    return;
+                }
+                sleep(Duration::from_millis(100)).await;
+            }
+        })
+        .await;
+        match result {
+            Ok(()) => {
+                println!("Found string {expected}");
+            }
+            _ => panic!("Timed out waiting for output: {expected}"),
+        }
     }
 
     pub fn modify_file(&self, path: &str, content: &str) {

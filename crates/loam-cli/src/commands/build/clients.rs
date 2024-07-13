@@ -318,7 +318,7 @@ export default new Client.Client({{
                 // Run init script if it's a new deployment and we're in development or test environment
                 if is_new_deployment
                     && (self.loam_env(LoamEnv::Production) == "development"
-                        || self.loam_env(LoamEnv::Production) == "test")
+                        || self.loam_env(LoamEnv::Production) == "testing")
                 {
                     if let Some(init_script) = &settings.init {
                         eprintln!("🚀 Running initialization script for {name:?}");
@@ -362,14 +362,60 @@ export default new Client.Client({{
             }
 
             let mut args = vec!["--id", contract_id];
-            args.extend(line.split_whitespace());
+            let mut source_account: Option<&str> = None;
 
-            eprintln!("  ↳ Executing: soroban {}", args.join(" "));
-            cli::contract::invoke::Cmd::parse_arg_vec(&args)?
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            let mut command_parts = vec!["--"];
+
+            for part in &parts {
+                if let Some(value) = part.strip_prefix("STELLAR_ACCOUNT=") {
+                    source_account = Some(value);
+                } else if let Some(value) = part.strip_prefix("SOROBAN_ACCOUNT=") {
+                    source_account = Some(value);
+                } else {
+                    command_parts.push(*part);
+                }
+            }
+
+            if let Some(account) = source_account {
+                args.push("--source-account");
+                args.push(account);
+            }
+
+            args.extend(&command_parts);
+
+            eprintln!("  ↳ Executing: soroban contract invoke {}", args.join(" "));
+            let result = cli::contract::invoke::Cmd::parse_arg_vec(&args)?
                 .run_against_rpc_server(None, None)
                 .await?;
+            eprintln!("  ↳ Result: {result:?}");
         }
         eprintln!("✅ Initialization script for {name:?} completed successfully");
         Ok(())
     }
+
+    /*async fn run_init_script(
+        &self,
+        name: &str,
+        contract_id: &str,
+        init_script: &str,
+    ) -> Result<(), Error> {
+        for line in init_script.lines() {
+            let line = line.trim();
+            if line.is_empty() {
+                continue;
+            }
+
+            let mut args = vec!["--id", contract_id, "--"];
+            args.extend(line.split_whitespace());
+
+            eprintln!("  ↳ Executing: soroban contract invoke {}", args.join(" "));
+            let result = cli::contract::invoke::Cmd::parse_arg_vec(&args)?
+                .run_against_rpc_server(None, None)
+                .await?;
+            eprintln!("  ↳ Result: {:?}", result);
+        }
+        eprintln!("✅ Initialization script for {name:?} completed successfully");
+        Ok(())
+    }*/
 }
