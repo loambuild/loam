@@ -2,26 +2,26 @@ use clap::Parser;
 use rust_embed::{EmbeddedFile, RustEmbed};
 use soroban_cli::commands::contract::init as soroban_init;
 use std::{
-    fs::{create_dir_all, metadata, remove_dir_all, write, Metadata},
+    fs::{self, create_dir_all, metadata, remove_dir_all, write, Metadata},
     io,
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 const FRONTEND_TEMPLATE: &str = "https://github.com/loambuild/frontend";
 
 #[derive(RustEmbed)]
-#[folder = "examples/soroban/core"]
+#[folder = "./src/examples/soroban/core"]
 struct ExampleCore;
 
 #[derive(RustEmbed)]
-#[folder = "examples/soroban/status_message"]
+#[folder = "./src/examples/soroban/status_message"]
 struct ExampleStatusMessage;
 
 /// A command to initialize a new project
 #[derive(Parser, Debug, Clone)]
 pub struct Cmd {
     /// The path to the project must be provided to initialize
-    pub project_path: String,
+    pub project_path: PathBuf,
 }
 /// Errors that can occur during initialization
 #[derive(thiserror::Error, Debug)]
@@ -49,21 +49,25 @@ impl Cmd {
         // by default uses a provided frontend template
         // Examples cannot currently be added by user
         soroban_init::Cmd {
-            project_path: self.project_path.clone(),
+            project_path: self.project_path.to_string_lossy().to_string(),
             with_example: vec![],
             frontend_template: FRONTEND_TEMPLATE.to_string(),
         }
         .run()?;
 
         // remove soroban hello_world default contract
-        remove_dir_all(Path::new(&self.project_path.clone()).join("contracts/hello_world/"))
-            .map_err(|e| {
-                eprintln!("Error removing directory");
-                e
-            })?;
+        remove_dir_all(self.project_path.join("contracts/hello_world/")).map_err(|e| {
+            eprintln!("Error removing directory");
+            e
+        })?;
 
-        copy_example_contracts(Path::new(&self.project_path.clone()))?;
-
+        copy_example_contracts(&self.project_path)?;
+        let core = self.project_path.join("contract/core/Cargo.toml.remove");
+        let status_message = self
+            .project_path
+            .join("contract/status_message/Cargo.toml.remove");
+        fs::rename(&core, core.with_extension(""))?;
+        fs::rename(&status_message, status_message.with_extension(""))?;
         Ok(())
     }
 }
