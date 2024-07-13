@@ -150,9 +150,7 @@ impl Args {
         }
     }
 
-    fn get_contract_alias(
-        name: &str,
-    ) -> Result<Option<String>, cli::config::locator::Error> {
+    fn get_contract_alias(name: &str) -> Result<Option<String>, cli::config::locator::Error> {
         let config_dir = Self::get_config_locator();
         let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
             .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
@@ -183,7 +181,10 @@ impl Args {
         network: &Network,
     ) -> Result<(), cli::config::locator::Error> {
         let config_dir = Self::get_config_locator();
-        let passphrase = network.network_passphrase.clone().expect("You must set the network passphrase");
+        let passphrase = network
+            .network_passphrase
+            .clone()
+            .expect("You must set the network passphrase");
         config_dir.save_contract_id(&passphrase, contract_id, name)
     }
 
