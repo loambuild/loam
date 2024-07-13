@@ -38,6 +38,7 @@ Smart Contracts
 - `Expiration Tracker` - Contract's and Wasm binaries can both expire. This contract allows tracking and prepaying so that you don't have to worry about manually extending lifetimes.
 
 ```mermaid
+
 graph TD
     SDK[loam-sdk]
     CLI[loam-cli]
@@ -72,4 +73,4 @@ graph TD
     C5 -.->|Interacts with| SC1
     C6 -.->|Register name and initialize| SC2
     C7 -.->|Retrieves contract id| SC2
-    ```
+```
