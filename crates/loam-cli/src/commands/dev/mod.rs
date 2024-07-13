@@ -223,9 +223,6 @@ impl Cmd {
             .build_clients_args
             .env
             .get_or_insert(LoamEnv::Development);
-        self.build_cmd
-            .profile
-            .get_or_insert_with(|| "debug".to_string());
         Arc::new(Mutex::new(self.build_cmd.clone()))
     }
 }
