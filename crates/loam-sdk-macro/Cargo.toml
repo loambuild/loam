@@ -16,8 +16,10 @@ syn = { version = "2", features = ["full", "fold", "extra-traits", "visit"] }
 quote = "1.0"
 Inflector = { version = "0.11.4", default-features = false, features = [] }
 thiserror = { workspace = true }
-syn-file-expand = "0.2.0"
+syn-file-expand = "0.3.0"
 cargo_metadata = { workspace = true }
+darling = "0.20.8"
+itertools = "0.12.1"
 
 [dev-dependencies]
 assert_fs = "1.0.13"

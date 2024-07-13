@@ -46,10 +46,10 @@ network-passphrase = "Standalone Network ; February 2017"
 
         // check that contracts are actually deployed, bound, and imported
         for contract in contracts {
-            assert!(env.cwd.join(format!("packages/{}", contract)).exists());
+            assert!(env.cwd.join(format!("packages/{contract}")).exists());
             assert!(env
                 .cwd
-                .join(format!("src/contracts/{}.ts", contract))
+                .join(format!("src/contracts/{contract}.ts"))
                 .exists());
         }
     });

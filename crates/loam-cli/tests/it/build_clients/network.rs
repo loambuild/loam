@@ -25,7 +25,7 @@ fn run_named_network() {
     TestEnv::from("soroban-init-boilerplate", |env| {
         // create a network named "lol"
         env.soroban("network")
-            .args(&[
+            .args([
                 "add",
                 "lol",
                 "--rpc-url",
