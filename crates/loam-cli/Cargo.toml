@@ -60,6 +60,7 @@ wasm-gen = { version = "0.1.4" }
 soroban-cli = "21.0.0"
 notify = "5.0"
 stellar-xdr = "21.0.0"
+rust-embed = { version = "8.2.0", features = ["debug-embed"] }
 
 [dev-dependencies]
 assert_cmd = "2.0.4"

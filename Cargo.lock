@@ -2685,6 +2685,7 @@ dependencies = [
  "pathdiff",
  "predicates",
  "rand",
+ "rust-embed",
  "serde",
  "serde_derive",
  "serde_json",
