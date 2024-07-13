@@ -47,4 +47,5 @@ jobs:
     - run: just setup
     - run: just create
     - run: just test
+    - run: just redeploy
 

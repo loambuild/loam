@@ -213,6 +213,7 @@ fn find_deps() -> Traits {
         .expect("failed to find all contract deps")
         .iter()
         .map(|i| i.manifest_path.as_std_path())
+        .chain([cargo_file.as_path()])
         .filter_map(|path| {
             let path = path.parent().unwrap().join("src/lib.rs");
             let res = crate::util::parse_crate_as_file(&path)?;
