@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.11](https://github.com/loambuild/loam-sdk/compare/loam-sdk-v0.6.10...loam-sdk-v0.6.11) - 2024-07-13
+
+### Added
+- add `derive_contract` to make it macro more explicit ([#93](https://github.com/loambuild/loam-sdk/pull/93))
+
 ## [0.6.10](https://github.com/loambuild/loam-sdk/compare/loam-sdk-v0.6.9...loam-sdk-v0.6.10) - 2024-06-21
 
 ### Other
