@@ -89,20 +89,12 @@ impl TestEnv {
         // Convert package name to proper filename format
         let filename = package_name.replace('-', "_");
 
-        // Construct the path to the .wasm file
-        let wasm_path = self
-            .cwd
-            .join("target")
-            .join("wasm32-unknown-unknown")
-            .join("release")
-            .join(format!("{}.wasm", filename));
-
+        let wasm_path = self.cwd.join(format!("target/loam/{filename}.wasm"));
         let mut wasm_bytes = fs::read(&wasm_path)?;
         let mut rng = thread_rng();
         let random_bytes: Vec<u8> = (0..10).map(|_| rng.gen()).collect();
         wasm_gen::write_custom_section(&mut wasm_bytes, "random_data", &random_bytes);
         fs::write(&wasm_path, wasm_bytes)?;
-
         Ok(())
     }
 
@@ -177,13 +169,6 @@ impl TestEnv {
         soroban.current_dir(&self.cwd);
         soroban.arg(cmd);
         soroban
-    }
-
-    pub fn replace_file(&self, path1: &str, path2: &str) {
-        let file_path1 = self.cwd.join(path1);
-        let file_path2 = self.cwd.join(path2);
-        let content = std::fs::read_to_string(&file_path1).expect("Failed to read file1");
-        std::fs::write(&file_path2, content).expect("Failed to modify file");
     }
 
     pub fn set_environments_toml(&self, contents: impl AsRef<[u8]>) {

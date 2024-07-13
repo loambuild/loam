@@ -1,7 +1,6 @@
 use crate::util::{AssertExt, TestEnv};
 use tokio::time::{sleep, Duration};
 
-
 #[test]
 fn contracts_built() {
     let contracts = [
@@ -124,12 +123,8 @@ async fn contract_alias_skips_install() {
             assert!(String::from_utf8_lossy(&output2.stderr)
                 .contains("✅ Contract \"hello_world\" is up to date"));
 
-            let file = "contracts/increment/src/lib.rs";
-            let file_replaced = "contracts/hello_world/src/lib.rs";
-            env.replace_file(file, file_replaced);
-
             let output3 = env
-                .loam_env("development", false)
+                .loam_env("development", true)
                 .output()
                 .expect("Failed to execute command");
 
@@ -153,10 +148,9 @@ async fn contract_alias_skips_install() {
     hello_world.workspace = true
     "#,
             );
-            env.replace_file("contracts/auth/src/lib.rs", file_replaced);
 
             let output4 = env
-                .loam_build("production", false)
+                .loam_build("production", true)
                 .output()
                 .expect("Failed to execute command");
 
@@ -164,6 +158,8 @@ async fn contract_alias_skips_install() {
             assert!(!output4.status.success());
             assert!(String::from_utf8_lossy(&output4.stderr)
                 .contains("⛔ ️Contract update not allowed in production for \"hello_world\""));
-        }).await; 
-    }).await;
+        })
+        .await;
+    })
+    .await;
 }
