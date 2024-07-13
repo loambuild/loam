@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.2](https://github.com/loambuild/loam-sdk/compare/loam-sdk-macro-v0.8.1...loam-sdk-macro-v0.8.2) - 2024-07-13
+
+### Other
+- updated the following local packages: loam-build
+
 ## [0.8.1](https://github.com/loambuild/loam-sdk/compare/loam-sdk-macro-v0.8.0...loam-sdk-macro-v0.8.1) - 2024-07-13
 
 ### Added
