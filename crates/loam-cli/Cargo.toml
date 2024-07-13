@@ -12,6 +12,8 @@ rust-version = "1.70"
 autobins = false
 default-run = "loam"
 
+include = ["examples/soroban/**/*"]
+
 [[bin]]
 name = "loam"
 path = "src/bin/main.rs"
