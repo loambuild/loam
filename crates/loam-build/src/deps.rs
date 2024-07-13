@@ -271,7 +271,7 @@ pub fn contract(manifest_path: &Path) -> Result<Vec<Package>, Error> {
 pub fn subcontract(manifest_path: &Path) -> Result<Vec<Package>, Error> {
     Ok(all(manifest_path)?
         .into_iter()
-        .filter(|p| p.is_dep(&DepKind::Subcontract) && p.manifest_path != manifest_path)
+        .filter(|p| p.is_dep(&DepKind::Subcontract))
         .collect())
 }
 
