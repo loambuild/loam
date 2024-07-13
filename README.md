@@ -14,10 +14,6 @@ At a high level, Loam is comprised of three main components:
 
 This project is a monorepo containing code primarily for Loam SDK but also for Loam CLI, both of which share build code.
 
-# What's in this monorepo?
-
-This repository contains two main folders, [./crates](./crates) and [./examples](./examples).
-
 ## What's in [./crates](./crates)?
 
 Organized hierarchically:
@@ -30,9 +26,3 @@ Organized hierarchically:
 - [loam-soroban-sdk](./crates/loam-soroban-sdk) – This is a wrapper around [soroban-sdk]() that extends it with features needed by Loam SDK.
 - [loam-subcontract-ft](./crates/loam-subcontract-ft): like `loam-subcontract-core` above, this contains the source code for a subcontract. This subcontract is mostly in this repository as an example; see below.
 
-## What's in [./examples](./examples)?
-
-A non-exhaustive list; feel free to explore the other examples on your own! (And add to this documentation 😉)
-
-- [Core Subcontract](examples/soroban/core) - Start here; this is an example of the most basic smart contract you can create with Loam SDK. It only implements `loam-subcontract-core`. All the other examples implement multiple subcontracts, but must at least include `loam-subcontract-core`.
-- [Fungible Token Subcontract](examples/soroban/ft) - This contains the implementation of a Fungible Token subcontract. Unlike `loam-subcontract-core` which contains its own implementation, [`loam-subcontract-ft`](crates/loam-subcontract-ft) is an _interface-only_ subcontract; a smart contract that uses it must provide its own implementation. This sort of subcontract is still useful to help you ensure that you implemented the interface correctly.

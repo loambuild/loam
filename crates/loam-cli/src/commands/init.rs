@@ -10,11 +10,11 @@ use std::{
 const FRONTEND_TEMPLATE: &str = "https://github.com/loambuild/frontend";
 
 #[derive(RustEmbed)]
-#[folder = "../../examples/soroban/core"]
+#[folder = "examples/soroban/core"]
 struct ExampleCore;
 
 #[derive(RustEmbed)]
-#[folder = "../../examples/soroban/status_message"]
+#[folder = "examples/soroban/status_message"]
 struct ExampleStatusMessage;
 
 /// A command to initialize a new project

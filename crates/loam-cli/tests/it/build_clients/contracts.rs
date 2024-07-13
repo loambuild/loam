@@ -154,5 +154,5 @@ hello_world.workspace = true
         assert!(!output4.status.success());
         assert!(String::from_utf8_lossy(&output4.stderr)
             .contains("⛔ ️Contract update not allowed in production for \"hello_world\""));
-    })
+    });
 }
