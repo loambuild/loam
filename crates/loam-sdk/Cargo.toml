@@ -1,6 +1,6 @@
 [package]
 name = "loam-sdk"
-version = "0.6.11"
+version = "0.6.12"
 edition = "2021"
 description = "SDK  for writing smart contracts"
 license = "Apache-2.0"
@@ -13,7 +13,7 @@ crate-type = ["rlib"]
 
 [dependencies]
 loam-sdk-macro = { path = "../loam-sdk-macro", version = "0.8.2" }
-loam-soroban-sdk = { path = "../loam-soroban-sdk", version = "0.6.11", optional = true }
+loam-soroban-sdk = { path = "../loam-soroban-sdk", version = "0.6.12", optional = true }
 
 
 [features]
