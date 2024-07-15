@@ -281,7 +281,6 @@ export default new Client.Client({{
 
                 // Check if we have an alias saved for this contract
                 let alias = Self::get_contract_alias(name)?;
-                let is_new_deployment = alias.is_none();
                 if let Some(contract_id) = alias {
                     match self
                         .contract_hash_matches(&contract_id, &hash, network)
@@ -315,10 +314,9 @@ export default new Client.Client({{
                 // Save the alias for future use
                 Self::save_contract_alias(name, &contract_id, network)?;
 
-                // Run init script if it's a new deployment and we're in development or test environment
-                if is_new_deployment
-                    && (self.loam_env(LoamEnv::Production) == "development"
-                        || self.loam_env(LoamEnv::Production) == "testing")
+                // Run init script if we're in development or test environment
+                if self.loam_env(LoamEnv::Production) == "development"
+                    || self.loam_env(LoamEnv::Production) == "testing"
                 {
                     if let Some(init_script) = &settings.init {
                         eprintln!("🚀 Running initialization script for {name:?}");
