@@ -153,6 +153,9 @@ impl Cmd {
                     cmd.arg(format!("--features={activate}"));
                 }
             }
+            if self.profile.is_none() {
+                set_default_profile_flags(&mut cmd);
+            }
             let cmd_str = format!(
                 "cargo {}",
                 cmd.get_args().map(OsStr::to_string_lossy).join(" ")
@@ -238,4 +241,27 @@ impl Cmd {
         // the output.
         cmd.exec()
     }
+}
+
+fn set_default_profile_flags(cmd: &mut Command) {
+    cmd.args([
+        "--",
+        "-C",
+        "opt-level=z", // Sets the optimization level to "z", which is equivalent to the opt-level = "z" in the Cargo profile.
+        "-C",
+        "overflow-checks=yes", // Enables overflow checks, equivalent to overflow-checks = true.
+        "-C",
+        "debuginfo=0", // Disables debug information, equivalent to debug = 0.
+        "-C",
+        "strip=symbols", // Strips symbols from the binary, equivalent to strip = "symbols".
+        "-C",
+        "debug-assertions=yes", // Enables debug assertions, equivalent to debug-assertions = true.
+        "-C",
+        "panic=abort", // Sets the panic strategy to "abort", equivalent to panic = "abort".
+        "-C",
+        "codegen-units=1", // Sets the number of codegen units to 1, equivalent to codegen-units = 1.
+        "-C",
+        "lto=yes", // Enables link-time optimization, equivalent to lto = true.
+    ]);
+    cmd.env("RUSTFLAGS", "-C embed-bitcode=yes");
 }
