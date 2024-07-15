@@ -30,7 +30,7 @@ pub trait IsNonFungible {
     fn get_collection_by_owner(
         &self,
         owner: loam_sdk::soroban_sdk::Address,
-    ) -> loam_soroban_sdk::Vec<u32>;
+    ) -> loam_sdk::soroban_sdk::Vec<u32>;
 }
 
 #[subcontract]

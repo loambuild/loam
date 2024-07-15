@@ -1029,7 +1029,6 @@ name = "example-nft"
 version = "0.0.0"
 dependencies = [
  "loam-sdk",
- "loam-soroban-sdk",
  "loam-subcontract-core",
 ]
 
