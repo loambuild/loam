@@ -393,29 +393,4 @@ export default new Client.Client({{
         eprintln!("✅ Initialization script for {name:?} completed successfully");
         Ok(())
     }
-
-    /*async fn run_init_script(
-        &self,
-        name: &str,
-        contract_id: &str,
-        init_script: &str,
-    ) -> Result<(), Error> {
-        for line in init_script.lines() {
-            let line = line.trim();
-            if line.is_empty() {
-                continue;
-            }
-
-            let mut args = vec!["--id", contract_id, "--"];
-            args.extend(line.split_whitespace());
-
-            eprintln!("  ↳ Executing: soroban contract invoke {}", args.join(" "));
-            let result = cli::contract::invoke::Cmd::parse_arg_vec(&args)?
-                .run_against_rpc_server(None, None)
-                .await?;
-            eprintln!("  ↳ Result: {:?}", result);
-        }
-        eprintln!("✅ Initialization script for {name:?} completed successfully");
-        Ok(())
-    }*/
 }
