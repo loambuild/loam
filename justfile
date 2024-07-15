@@ -24,7 +24,7 @@ build_contract p:
 
 # build contracts
 build:
-    just loam build --profile contracts --out-dir ./target/loam
+    just loam build
 
 # Setup the project to use a pinned version of the CLI
 setup:
