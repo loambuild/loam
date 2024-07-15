@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.2](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.10.1...loam-cli-v0.10.2) - 2024-07-15
+
+### Fixed
+- *(CLI)* core example: rm `loam-soroban-sdk` dep ([#112](https://github.com/loambuild/loam-sdk/pull/112))
+- `loam dev` clone Arc of build command instead of cloning each time ([#108](https://github.com/loambuild/loam-sdk/pull/108))
+
 ## [0.10.1](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.10.0...loam-cli-v0.10.1) - 2024-07-13
 
 ### Fixed
