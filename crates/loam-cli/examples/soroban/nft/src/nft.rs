@@ -48,7 +48,6 @@ impl IsInitable for MyNonFungibleToken {
 }
 
 impl IsNonFungible for MyNonFungibleToken {
-    // Mint a new NFT with the given owner address and metadata, returning the id
     fn mint(&mut self, owner: Address, metadata: Bytes) -> u32 {
         owner.require_auth();
 
@@ -71,7 +70,6 @@ impl IsNonFungible for MyNonFungibleToken {
         new_id
     }
 
-    // Transfer the NFT from the current owner to the new owner
     fn transfer(&mut self, id: u32, current_owner: Address, new_owner: Address) {
         current_owner.require_auth();
         let owner_id = self.nft_ids_to_owners.get(id).expect("NFT does not exist");
@@ -103,12 +101,10 @@ impl IsNonFungible for MyNonFungibleToken {
         self.owners_to_nft_ids.set(new_owner, new_owner_collection);
     }
 
-    // Get the NFT from the contract's storage by id
     fn get_nft(&self, id: u32) -> Option<Bytes> {
         self.nft_ids_to_metadata.get(id)
     }
 
-    // Get the NFT from the contract's storage by owner id
     fn get_owner(&self, id: u32) -> Option<Address> {
         self.nft_ids_to_owners.get(id)
     }
