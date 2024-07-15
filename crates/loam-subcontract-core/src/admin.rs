@@ -60,6 +60,6 @@ pub trait IsCore {
     /// a different account try to become admin
     fn admin_set(&mut self, new_admin: loam_sdk::soroban_sdk::Address);
 
-    /// Admin can redepoly the contract with given hash.
+    /// Admin can redeploy the contract with given hash.
     fn redeploy(&self, wasm_hash: loam_sdk::soroban_sdk::BytesN<32>);
 }
