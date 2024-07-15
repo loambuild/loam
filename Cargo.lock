@@ -2668,7 +2668,7 @@ dependencies = [
 
 [[package]]
 name = "loam-cli"
-version = "0.10.2"
+version = "0.10.3"
 dependencies = [
  "assert_cmd",
  "assert_fs",
@@ -2737,7 +2737,7 @@ dependencies = [
 
 [[package]]
 name = "loam-subcontract-core"
-version = "0.7.4"
+version = "0.7.5"
 dependencies = [
  "loam-sdk",
 ]
