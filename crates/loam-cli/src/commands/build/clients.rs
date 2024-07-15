@@ -370,8 +370,6 @@ export default new Client.Client({{
             for part in &parts {
                 if let Some(value) = part.strip_prefix("STELLAR_ACCOUNT=") {
                     source_account = Some(value);
-                } else if let Some(value) = part.strip_prefix("SOROBAN_ACCOUNT=") {
-                    source_account = Some(value);
                 } else {
                     command_parts.push(*part);
                 }
