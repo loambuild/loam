@@ -60,6 +60,8 @@ pub enum Error {
     #[error(transparent)]
     ConfigLocator(#[from] cli::config::locator::Error),
     #[error(transparent)]
+    ContractInvoke(#[from] cli::contract::invoke::Error),
+    #[error(transparent)]
     Clap(#[from] clap::Error),
     #[error(transparent)]
     WasmHash(#[from] xdrError),
@@ -184,7 +186,7 @@ impl Args {
         let passphrase = network
             .network_passphrase
             .clone()
-            .expect("You must set the network passphrase");
+            .expect("You must set a network passphrase.");
         config_dir.save_contract_id(&passphrase, contract_id, name)
     }
 
@@ -312,6 +314,17 @@ export default new Client.Client({{
                 // Save the alias for future use
                 Self::save_contract_alias(name, &contract_id, network)?;
 
+                // Run init script if we're in development or test environment
+                if self.loam_env(LoamEnv::Production) == "development"
+                    || self.loam_env(LoamEnv::Production) == "testing"
+                {
+                    if let Some(init_script) = &settings.init {
+                        eprintln!("🚀 Running initialization script for {name:?}");
+                        self.run_init_script(name, &contract_id, init_script)
+                            .await?;
+                    }
+                }
+
                 eprintln!("🎭 binding {name:?} contract");
                 cli::contract::bindings::typescript::Cmd::parse_arg_vec(&[
                     "--contract-id",
@@ -331,6 +344,49 @@ export default new Client.Client({{
             };
         }
 
+        Ok(())
+    }
+
+    async fn run_init_script(
+        &self,
+        name: &str,
+        contract_id: &str,
+        init_script: &str,
+    ) -> Result<(), Error> {
+        for line in init_script.lines() {
+            let line = line.trim();
+            if line.is_empty() {
+                continue;
+            }
+
+            let mut args = vec!["--id", contract_id];
+            let mut source_account: Option<&str> = None;
+
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            let mut command_parts = vec!["--"];
+
+            for part in &parts {
+                if let Some(value) = part.strip_prefix("STELLAR_ACCOUNT=") {
+                    source_account = Some(value);
+                } else {
+                    command_parts.push(*part);
+                }
+            }
+
+            if let Some(account) = source_account {
+                args.push("--source-account");
+                args.push(account);
+            }
+
+            args.extend(&command_parts);
+
+            eprintln!("  ↳ Executing: soroban contract invoke {}", args.join(" "));
+            let result = cli::contract::invoke::Cmd::parse_arg_vec(&args)?
+                .run_against_rpc_server(None, None)
+                .await?;
+            eprintln!("  ↳ Result: {result:?}");
+        }
+        eprintln!("✅ Initialization script for {name:?} completed successfully");
         Ok(())
     }
 }

@@ -1,10 +1,7 @@
 use crate::util::TestEnv;
 use std::process::Stdio;
-use std::time::Duration;
 use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::time::{sleep, timeout};
 use tokio_stream::wrappers::LinesStream;
-use tokio_stream::StreamExt;
 
 #[tokio::test]
 async fn dev_command_watches_for_changes_and_environments_toml() {
@@ -22,7 +19,7 @@ async fn dev_command_watches_for_changes_and_environments_toml() {
             let mut stderr_lines = LinesStream::new(BufReader::new(stderr).lines());
 
             // Wait for initial build to complete
-            wait_for_output(
+            TestEnv::wait_for_output(
                 &mut stderr_lines,
                 "Watching for changes. Press Ctrl+C to stop.",
             )
@@ -34,13 +31,13 @@ async fn dev_command_watches_for_changes_and_environments_toml() {
             let file_changed_path = env.cwd.join(file_changed);
 
             // Wait for the dev process to detect changes and rebuild
-            wait_for_output(
+            TestEnv::wait_for_output(
                 &mut stderr_lines,
                 &format!("File changed: {file_changed_path:?}"),
             )
             .await;
 
-            wait_for_output(
+            TestEnv::wait_for_output(
                 &mut stderr_lines,
                 "Watching for changes. Press Ctrl+C to stop.",
             )
@@ -64,13 +61,13 @@ soroban_increment_contract.workspace = true
             );
 
             // Wait for the dev process to detect changes and rebuild
-            wait_for_output(
+            TestEnv::wait_for_output(
                 &mut stderr_lines,
                 "🌐 using network at http://localhost:8000/rpc",
             )
             .await;
 
-            wait_for_output(
+            TestEnv::wait_for_output(
                 &mut stderr_lines,
                 "Watching for changes. Press Ctrl+C to stop.",
             )
@@ -94,13 +91,13 @@ soroban_increment_contract.workspace = true
             );
 
             // Wait for the dev process to detect changes and rebuild
-            wait_for_output(
+            TestEnv::wait_for_output(
                 &mut stderr_lines,
                 "🌐 using network at http://localhost:9000/rpc",
             )
             .await;
 
-            wait_for_output(
+            TestEnv::wait_for_output(
                 &mut stderr_lines,
                 "Watching for changes. Press Ctrl+C to stop.",
             )
@@ -110,7 +107,7 @@ soroban_increment_contract.workspace = true
             let file_changed = "environments.toml";
             env.delete_file(file_changed);
 
-            wait_for_output(
+            TestEnv::wait_for_output(
                 &mut stderr_lines,
                 "Watching for changes. Press Ctrl+C to stop.",
             )
@@ -124,30 +121,4 @@ soroban_increment_contract.workspace = true
         .await;
     })
     .await;
-}
-
-async fn wait_for_output<
-    T: tokio_stream::Stream<Item = Result<String, tokio::io::Error>> + Unpin,
->(
-    lines: &mut T,
-    expected: &str,
-) {
-    let timeout_duration = Duration::from_secs(120); // 2 minutes
-    let result = timeout(timeout_duration, async {
-        while let Some(line) = lines.next().await {
-            let line = line.expect("Failed to read line");
-            println!("{line}");
-            if line.contains(expected) {
-                return;
-            }
-            sleep(Duration::from_millis(100)).await;
-        }
-    })
-    .await;
-    match result {
-        Ok(()) => {
-            println!("Found string {expected}");
-        }
-        _ => panic!("Timed out waiting for output: {expected}"),
-    }
 }
