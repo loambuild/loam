@@ -55,7 +55,7 @@ network-passphrase = "Standalone Network ; February 2017"
 }
 
 #[test]
-fn contracts_built_no_workspace() {
+fn contracts_built_by_default() {
     let contracts = [
         "soroban_auth_contract",
         "soroban_custom_types_contract",
