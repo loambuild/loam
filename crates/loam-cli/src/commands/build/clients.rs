@@ -267,7 +267,7 @@ export default new Client.Client({{
         }
         // ensure contract names are valid
         if let Some(contracts) = contracts {
-            for (name, _) in contracts.iter().filter(|(_, settings)| settings.workspace) {
+            for (name, _) in contracts.iter().filter(|(_, settings)| settings.client) {
                 let wasm_path = workspace_root.join(format!("target/loam/{name}.wasm"));
                 if !wasm_path.exists() {
                     return Err(Error::BadContractName(name.to_string()));
@@ -281,7 +281,7 @@ export default new Client.Client({{
             };
             // Skip only if contract is found and its workspace setting is false
             if let Some(c) = settings {
-                if !c.workspace {
+                if !c.client {
                     continue;
                 }
             }

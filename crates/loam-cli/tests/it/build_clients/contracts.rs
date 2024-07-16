@@ -25,7 +25,7 @@ network-passphrase = "Standalone Network ; February 2017"
 "#,
                 contracts
                     .iter()
-                    .map(|c| format!("{c}.workspace = true"))
+                    .map(|c| format!("{c}.client = true"))
                     .collect::<Vec<String>>()
                     .join("\n")
             )
@@ -111,11 +111,11 @@ rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
 
 [production.contracts]
-hello.workspace = true
-soroban_increment_contract.workspace = false
-soroban_custom_types_contract.workspace = false
-soroban_auth_contract.workspace = false
-soroban_token_contract.workspace = false
+hello.client = true
+soroban_increment_contract.client = false
+soroban_custom_types_contract.client = false
+soroban_auth_contract.client = false
+soroban_token_contract.client = false
 "#,
         );
 
@@ -140,11 +140,11 @@ rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
 
 [development.contracts]
-hello_world.workspace = true
-soroban_increment_contract.workspace = false
-soroban_custom_types_contract.workspace = false
-soroban_auth_contract.workspace = false
-soroban_token_contract.workspace = false
+hello_world.client = true
+soroban_increment_contract.client = false
+soroban_custom_types_contract.client = false
+soroban_auth_contract.client = false
+soroban_token_contract.client = false
 "#,
         );
 
@@ -192,10 +192,10 @@ rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
 
 [production.contracts]
-hello_world.workspace = true
-soroban_custom_types_contract.workspace = false
-soroban_auth_contract.workspace = false
-soroban_token_contract.workspace = false
+hello_world.client = true
+soroban_custom_types_contract.client = false
+soroban_auth_contract.client = false
+soroban_token_contract.client = false
 "#,
         );
 

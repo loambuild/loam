@@ -14,11 +14,11 @@ rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
 
 [production.contracts]
-hello_world.workspace = false
-soroban_increment_contract.workspace = false
-soroban_custom_types_contract.workspace = false
-soroban_auth_contract.workspace = false
-soroban_token_contract.workspace = false
+hello_world.client = false
+soroban_increment_contract.client = false
+soroban_custom_types_contract.client = false
+soroban_auth_contract.client = false
+soroban_token_contract.client = false
 "#,
         );
 

@@ -38,7 +38,7 @@ pub struct Account {
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Contract {
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-    pub workspace: bool,
+    pub client: bool,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub init: Option<String>,
