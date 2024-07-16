@@ -59,6 +59,7 @@ hello_world.workspace = true
 soroban_increment_contract.workspace = true
 soroban_custom_types_contract.workspace = false
 soroban_auth_contract.workspace = false
+soroban_token_contract.workspace = false
 "#,
             );
 
@@ -91,6 +92,7 @@ hello_world.workspace = true
 soroban_increment_contract.workspace = true
 soroban_custom_types_contract.workspace = false
 soroban_auth_contract.workspace = false
+soroban_token_contract.workspace = false
 "#,
             );
 

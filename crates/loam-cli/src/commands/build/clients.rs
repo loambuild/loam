@@ -282,11 +282,8 @@ export default new Client.Client({{
             // Skip only if contract is found and its workspace setting is false
             if let Some(c) = settings {
                 if !c.workspace {
-                    eprintln!("Skipping {name:?} as its workspace setting is false");
                     continue;
                 }
-            } else {
-                eprintln!("Contract {name:?} not found in contracts, but continuing anyway");
             }
             let wasm_path = workspace_root.join(format!("target/loam/{name}.wasm"));
             if !wasm_path.exists() {
@@ -345,10 +342,12 @@ export default new Client.Client({{
             if self.loam_env(LoamEnv::Production) == "development"
                 || self.loam_env(LoamEnv::Production) == "testing"
             {
-                if let Some(init_script) = &settings.unwrap().init {
-                    eprintln!("🚀 Running initialization script for {name:?}");
-                    self.run_init_script(&name, &contract_id, init_script)
-                        .await?;
+                if let Some(settings) = settings {
+                    if let Some(init_script) = &settings.init {
+                        eprintln!("🚀 Running initialization script for {name:?}");
+                        self.run_init_script(&name, &contract_id, init_script)
+                            .await?;
+                    }
                 }
             }
 

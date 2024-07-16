@@ -14,6 +14,12 @@ development.accounts = [
 rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
 
+[development.contracts]
+hello_world.workspace = false
+soroban_increment_contract.workspace = false
+soroban_custom_types_contract.workspace = false
+soroban_auth_contract.workspace = false
+
 [development.contracts.soroban_token_contract]
 workspace = true
 init = """
@@ -49,6 +55,12 @@ development.accounts = [
 [development.network]
 rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
+
+[development.contracts]
+hello_world.workspace = false
+soroban_increment_contract.workspace = false
+soroban_custom_types_contract.workspace = false
+soroban_auth_contract.workspace = false
 
 [development.contracts.soroban_token_contract]
 workspace = true

@@ -115,6 +115,7 @@ hello.workspace = true
 soroban_increment_contract.workspace = false
 soroban_custom_types_contract.workspace = false
 soroban_auth_contract.workspace = false
+soroban_token_contract.workspace = false
 "#,
         );
 
@@ -143,6 +144,7 @@ hello_world.workspace = true
 soroban_increment_contract.workspace = false
 soroban_custom_types_contract.workspace = false
 soroban_auth_contract.workspace = false
+soroban_token_contract.workspace = false
 "#,
         );
 
@@ -191,9 +193,9 @@ network-passphrase = "Standalone Network ; February 2017"
 
 [production.contracts]
 hello_world.workspace = true
-soroban_increment_contract.workspace = false
 soroban_custom_types_contract.workspace = false
 soroban_auth_contract.workspace = false
+soroban_token_contract.workspace = false
 "#,
         );
 
@@ -202,6 +204,7 @@ soroban_auth_contract.workspace = false
             .output()
             .expect("Failed to execute command");
 
+        println!("stderr: {}", String::from_utf8_lossy(&output4.stderr));
         // ensure contract hash change check works, should throw error in production
         assert!(!output4.status.success());
         assert!(String::from_utf8_lossy(&output4.stderr)

@@ -18,6 +18,7 @@ hello_world.workspace = false
 soroban_increment_contract.workspace = false
 soroban_custom_types_contract.workspace = false
 soroban_auth_contract.workspace = false
+soroban_token_contract.workspace = false
 "#,
         );
 
