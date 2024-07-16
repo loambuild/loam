@@ -10,7 +10,13 @@ network = { rpc-url = "http://localhost:8000/rpc", network-passphrase = "Standal
 accounts = [
     { name = "alice" },
     { name = "bob" },
-]"#);
+]
+[production.contracts]
+hello_world.workspace = false
+soroban_increment_contract.workspace = false
+soroban_custom_types_contract.workspace = false
+soroban_auth_contract.workspace = false
+"#);
 
         let stderr = env.loam("build").assert().success().stderr_as_str();
         assert!(stderr.contains("creating keys for \"alice\""));

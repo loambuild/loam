@@ -57,6 +57,8 @@ network-passphrase = "Standalone Network ; February 2017"
 [development.contracts]
 hello_world.workspace = true
 soroban_increment_contract.workspace = true
+soroban_custom_types_contract.workspace = false
+soroban_auth_contract.workspace = false
 "#,
             );
 
@@ -87,6 +89,8 @@ network-passphrase = "Standalone Network ; February 2017"
 [development.contracts]
 hello_world.workspace = true
 soroban_increment_contract.workspace = true
+soroban_custom_types_contract.workspace = false
+soroban_auth_contract.workspace = false
 "#,
             );
 

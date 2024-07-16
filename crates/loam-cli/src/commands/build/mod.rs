@@ -121,7 +121,9 @@ impl Cmd {
             }
         }
 
+        let mut package_names: Vec<String> = Vec::new();
         for p in packages {
+            package_names.push(p.name.clone().replace('-', "_"));
             let mut cmd = Command::new("cargo");
             cmd.stdout(Stdio::piped());
             cmd.arg("rustc");
@@ -191,7 +193,7 @@ impl Cmd {
 
         if self.build_clients {
             self.build_clients_args
-                .run(&metadata.workspace_root.into_std_path_buf())
+                .run(&metadata.workspace_root.into_std_path_buf(), package_names)
                 .await?;
         }
 

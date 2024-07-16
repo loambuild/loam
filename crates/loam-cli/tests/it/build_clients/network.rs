@@ -12,6 +12,12 @@ production.accounts = [
 [production.network]
 rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
+
+[production.contracts]
+hello_world.workspace = false
+soroban_increment_contract.workspace = false
+soroban_custom_types_contract.workspace = false
+soroban_auth_contract.workspace = false
 "#,
         );
 
@@ -43,6 +49,12 @@ production.accounts = [
 ]
 
 production.network.name = "lol"
+
+[production.contracts]
+hello_world.workspace = false
+soroban_increment_contract.workspace = false
+soroban_custom_types_contract.workspace = false
+soroban_auth_contract.workspace = false
 "#,
         );
 
