@@ -10,10 +10,10 @@ use crate::subcontract::{IsInitable, IsNonFungible};
 pub struct MyNonFungibleToken {
     admin: Address,
     name: Bytes,
-    total_count: u32,
-    owners_to_nft_ids: Map<Address, Map<u32, ()>>, // the owner's collection
-    nft_ids_to_owners: Map<u32, Address>,
-    nft_ids_to_metadata: Map<u32, Bytes>,
+    total_count: u128,
+    owners_to_nft_ids: Map<Address, Map<u128, ()>>, // the owner's collection
+    nft_ids_to_owners: Map<u128, Address>,
+    nft_ids_to_metadata: Map<u128, Bytes>,
 }
 
 impl MyNonFungibleToken {
@@ -44,7 +44,7 @@ impl IsInitable for MyNonFungibleToken {
 }
 
 impl IsNonFungible for MyNonFungibleToken {
-    fn mint(&mut self, owner: Address, metadata: Bytes) -> u32 {
+    fn mint(&mut self, owner: Address, metadata: Bytes) -> u128 {
         self.admin.require_auth();
 
         let current_count = self.total_count;
@@ -66,7 +66,7 @@ impl IsNonFungible for MyNonFungibleToken {
         new_id
     }
 
-    fn transfer(&mut self, id: u32, current_owner: Address, new_owner: Address) {
+    fn transfer(&mut self, id: u128, current_owner: Address, new_owner: Address) {
         current_owner.require_auth();
         let owner_id = self.nft_ids_to_owners.get(id).expect("NFT does not exist");
         assert!(
@@ -97,19 +97,19 @@ impl IsNonFungible for MyNonFungibleToken {
         self.owners_to_nft_ids.set(new_owner, new_owner_collection);
     }
 
-    fn get_nft(&self, id: u32) -> Option<Bytes> {
+    fn get_nft(&self, id: u128) -> Option<Bytes> {
         self.nft_ids_to_metadata.get(id)
     }
 
-    fn get_owner(&self, id: u32) -> Option<Address> {
+    fn get_owner(&self, id: u128) -> Option<Address> {
         self.nft_ids_to_owners.get(id)
     }
 
-    fn get_total_count(&self) -> u32 {
+    fn get_total_count(&self) -> u128 {
         self.total_count
     }
 
-    fn get_collection_by_owner(&self, owner: Address) -> Vec<u32> {
+    fn get_collection_by_owner(&self, owner: Address) -> Vec<u128> {
         self.owners_to_nft_ids
             .get(owner)
             .unwrap_or(Map::new(env()))
