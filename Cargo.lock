@@ -2668,7 +2668,7 @@ dependencies = [
 
 [[package]]
 name = "loam-cli"
-version = "0.10.3"
+version = "0.11.0"
 dependencies = [
  "assert_cmd",
  "assert_fs",

@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0](https://github.com/loambuild/loam/compare/loam-cli-v0.10.3...loam-cli-v0.11.0) - 2024-07-16
+
+### Added
+- *(CLI)* support `init` contract scripts in `environments.toml`
+
 ## [0.10.3](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.10.2...loam-cli-v0.10.3) - 2024-07-15
 
 ### Fixed
