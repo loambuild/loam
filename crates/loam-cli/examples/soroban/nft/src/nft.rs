@@ -2,12 +2,8 @@ use loam_sdk::{
     soroban_sdk::{self, contracttype, env, Address, Bytes, Lazy, Map, Vec},
     IntoKey,
 };
-use loam_subcontract_core::Core;
 
-use crate::{
-    subcontract::{IsInitable, IsNonFungible},
-    Contract,
-};
+use crate::subcontract::{IsInitable, IsNonFungible};
 
 #[contracttype]
 #[derive(IntoKey)]
@@ -42,14 +38,14 @@ impl Default for MyNonFungibleToken {
 
 impl IsInitable for MyNonFungibleToken {
     fn nft_init(&self, admin: Address, name: Bytes) {
-        Contract::admin_get().unwrap().require_auth();
+        self.admin.require_auth();
         MyNonFungibleToken::set_lazy(MyNonFungibleToken::new(admin, name));
     }
 }
 
 impl IsNonFungible for MyNonFungibleToken {
     fn mint(&mut self, owner: Address, metadata: Bytes) -> u32 {
-        owner.require_auth();
+        self.admin.require_auth();
 
         let current_count = self.total_count;
         let new_id = current_count + 1;
