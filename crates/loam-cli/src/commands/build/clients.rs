@@ -341,16 +341,16 @@ export default new Client.Client({{
             // Save the alias for future use
             Self::save_contract_alias(&name, &contract_id, network)?;
 
-                // Run init script if we're in development or test environment
-                if self.loam_env(LoamEnv::Production) == "development"
-                    || self.loam_env(LoamEnv::Production) == "testing"
-                {
-                    if let Some(init_script) = &settings.unwrap().init {
-                        eprintln!("🚀 Running initialization script for {name:?}");
-                        self.run_init_script(&name, &contract_id, init_script)
-                            .await?;
-                    }
+            // Run init script if we're in development or test environment
+            if self.loam_env(LoamEnv::Production) == "development"
+                || self.loam_env(LoamEnv::Production) == "testing"
+            {
+                if let Some(init_script) = &settings.unwrap().init {
+                    eprintln!("🚀 Running initialization script for {name:?}");
+                    self.run_init_script(&name, &contract_id, init_script)
+                        .await?;
                 }
+            }
 
             eprintln!("🎭 binding {name:?} contract");
             cli::contract::bindings::typescript::Cmd::parse_arg_vec(&[
