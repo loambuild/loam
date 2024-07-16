@@ -279,7 +279,7 @@ export default new Client.Client({{
                 Some(contracts) => contracts.get(&name as &str),
                 None => None,
             };
-            // Skip only if contract is found and its workspace setting is false
+            // Skip only if contract is found and its `client` setting is false
             if let Some(c) = settings {
                 if !c.client {
                     continue;
