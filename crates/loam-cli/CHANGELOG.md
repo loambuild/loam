@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.3](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.10.2...loam-cli-v0.10.3) - 2024-07-15
+
+### Fixed
+- when compiling with no profile add extra flags to ensure small wasm ([#115](https://github.com/loambuild/loam-sdk/pull/115))
+
 ## [0.10.2](https://github.com/loambuild/loam-sdk/compare/loam-cli-v0.10.1...loam-cli-v0.10.2) - 2024-07-15
 
 ### Fixed
