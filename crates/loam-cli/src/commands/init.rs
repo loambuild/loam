@@ -2,10 +2,11 @@ use clap::Parser;
 use rust_embed::{EmbeddedFile, RustEmbed};
 use soroban_cli::commands::contract::init as soroban_init;
 use std::{
-    fs::{self, create_dir_all, metadata, remove_dir_all, write, Metadata},
+    fs::{self, create_dir_all, metadata, read_to_string, remove_dir_all, write, Metadata},
     io,
     path::{Path, PathBuf},
 };
+use toml_edit::{DocumentMut, TomlError};
 
 const FRONTEND_TEMPLATE: &str = "https://github.com/loambuild/frontend";
 
@@ -32,6 +33,8 @@ pub enum Error {
     SorobanInitError(#[from] soroban_init::Error),
     #[error("Failed to convert bytes to string: {0}")]
     ConverBytesToStringErr(#[from] std::str::Utf8Error),
+    #[error("Failed to parse toml file: {0}")]
+    TomlParseError(#[from] TomlError),
 }
 
 impl Cmd {
@@ -64,8 +67,37 @@ impl Cmd {
         copy_example_contracts(&self.project_path)?;
         rename_cargo_toml_remove(&self.project_path, "core")?;
         rename_cargo_toml_remove(&self.project_path, "status_message")?;
+        update_workspace_cargo_toml(&self.project_path.join("Cargo.toml"))?;
         Ok(())
     }
+}
+
+// update a soroban project to a loam project
+fn update_workspace_cargo_toml(cargo_path: &Path) -> Result<(), Error> {
+    let cargo_toml_str = read_to_string(&cargo_path).map_err(|e| {
+        eprintln!("Error reading Cargo.toml file in: {cargo_path:?}");
+        e
+    })?;
+
+    let cargo_toml_str = regex::Regex::new(r#"soroban-sdk = "[^\"]+""#)
+        .unwrap()
+        .replace_all(
+            cargo_toml_str.as_str(),
+            r#"loam-sdk = "0.6.12"
+loam-subcontract-core = "0.7.5""#,
+        );
+
+    let doc = cargo_toml_str.parse::<DocumentMut>().map_err(|e| {
+        eprintln!("Error parsing Cargo.toml file in: {cargo_path:?}");
+        e
+    })?;
+
+    write(&cargo_path, doc.to_string()).map_err(|e| {
+        eprintln!("Error writing to Cargo.toml file in: {cargo_path:?}");
+        e
+    })?;
+
+    Ok(())
 }
 
 fn copy_example_contracts(to: &Path) -> Result<(), Error> {
