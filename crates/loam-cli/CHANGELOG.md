@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0](https://github.com/loambuild/loam/compare/loam-cli-v0.11.0...loam-cli-v0.12.0) - 2024-07-17
+
+### Added
+- feat!(CLI): auto build clients for all contracts  ([#117](https://github.com/loambuild/loam/pull/117))
+
 ## [0.11.0](https://github.com/loambuild/loam/compare/loam-cli-v0.10.3...loam-cli-v0.11.0) - 2024-07-16
 
 ### Added
