@@ -12,6 +12,13 @@ production.accounts = [
 [production.network]
 rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
+
+[production.contracts]
+hello_world.client = false
+soroban_increment_contract.client = false
+soroban_custom_types_contract.client = false
+soroban_auth_contract.client = false
+soroban_token_contract.client = false
 "#,
         );
 

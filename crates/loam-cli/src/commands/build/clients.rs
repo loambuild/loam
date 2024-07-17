@@ -72,7 +72,11 @@ pub enum Error {
 }
 
 impl Args {
-    pub async fn run(&self, workspace_root: &std::path::Path) -> Result<(), Error> {
+    pub async fn run(
+        &self,
+        workspace_root: &std::path::Path,
+        package_names: Vec<String>,
+    ) -> Result<(), Error> {
         let Some(current_env) =
             env_toml::Environment::get(workspace_root, &self.loam_env(LoamEnv::Production))?
         else {
@@ -84,6 +88,7 @@ impl Args {
         self.handle_contracts(
             workspace_root,
             current_env.contracts.as_ref(),
+            package_names,
             &current_env.network,
         )
         .await?;
@@ -254,94 +259,114 @@ export default new Client.Client({{
         &self,
         workspace_root: &std::path::Path,
         contracts: Option<&Map<Box<str>, env_toml::Contract>>,
+        package_names: Vec<String>,
         network: &Network,
     ) -> Result<(), Error> {
-        let Some(contracts) = contracts else {
+        if package_names.is_empty() {
             return Ok(());
-        };
-        for (name, settings) in contracts {
-            if settings.workspace {
+        }
+        // ensure contract names are valid
+        if let Some(contracts) = contracts {
+            for (name, _) in contracts.iter().filter(|(_, settings)| settings.client) {
                 let wasm_path = workspace_root.join(format!("target/loam/{name}.wasm"));
                 if !wasm_path.exists() {
                     return Err(Error::BadContractName(name.to_string()));
                 }
-                eprintln!("📲 installing {name:?} wasm bytecode on-chain...");
-                let hash = cli::contract::install::Cmd::parse_arg_vec(&[
-                    "--wasm",
-                    wasm_path
-                        .to_str()
-                        .expect("we do not support non-utf8 paths"),
-                ])?
-                .run_against_rpc_server(None, None)
-                .await?
-                .into_result()
-                .expect("no hash returned by 'contract install'")
-                .to_string();
-                eprintln!("    ↳ hash: {hash}");
-
-                // Check if we have an alias saved for this contract
-                let alias = Self::get_contract_alias(name)?;
-                if let Some(contract_id) = alias {
-                    match self
-                        .contract_hash_matches(&contract_id, &hash, network)
-                        .await
-                    {
-                        Ok(true) => {
-                            eprintln!("✅ Contract {name:?} is up to date");
-                            continue;
-                        }
-                        Ok(false) if self.loam_env(LoamEnv::Production) == "production" => {
-                            return Err(Error::ContractUpdateNotAllowed(name.to_string()));
-                        }
-                        Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
-                        Err(e) => return Err(e),
-                    }
+            }
+        }
+        for name in package_names {
+            let settings = match contracts {
+                Some(contracts) => contracts.get(&name as &str),
+                None => None,
+            };
+            // Skip only if contract is found and its `client` setting is false
+            if let Some(c) = settings {
+                if !c.client {
+                    continue;
                 }
+            }
+            let wasm_path = workspace_root.join(format!("target/loam/{name}.wasm"));
+            if !wasm_path.exists() {
+                return Err(Error::BadContractName(name.to_string()));
+            }
+            eprintln!("📲 installing {name:?} wasm bytecode on-chain...");
+            let hash = cli::contract::install::Cmd::parse_arg_vec(&[
+                "--wasm",
+                wasm_path
+                    .to_str()
+                    .expect("we do not support non-utf8 paths"),
+            ])?
+            .run_against_rpc_server(None, None)
+            .await?
+            .into_result()
+            .expect("no hash returned by 'contract install'")
+            .to_string();
+            eprintln!("    ↳ hash: {hash}");
 
-                eprintln!("🪞 instantiating {name:?} smart contract");
-                let contract_id = cli::contract::deploy::wasm::Cmd::parse_arg_vec(&[
-                    "--alias",
-                    name,
-                    "--wasm-hash",
-                    &hash,
-                ])?
-                .run_against_rpc_server(None, None)
-                .await?
-                .into_result()
-                .expect("no contract id returned by 'contract deploy'");
-                eprintln!("    ↳ contract_id: {contract_id}");
-
-                // Save the alias for future use
-                Self::save_contract_alias(name, &contract_id, network)?;
-
-                // Run init script if we're in development or test environment
-                if self.loam_env(LoamEnv::Production) == "development"
-                    || self.loam_env(LoamEnv::Production) == "testing"
+            // Check if we have an alias saved for this contract
+            let alias = Self::get_contract_alias(&name)?;
+            if let Some(contract_id) = alias {
+                match self
+                    .contract_hash_matches(&contract_id, &hash, network)
+                    .await
                 {
+                    Ok(true) => {
+                        eprintln!("✅ Contract {name:?} is up to date");
+                        continue;
+                    }
+                    Ok(false) if self.loam_env(LoamEnv::Production) == "production" => {
+                        return Err(Error::ContractUpdateNotAllowed(name.to_string()));
+                    }
+                    Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
+                    Err(e) => return Err(e),
+                }
+            }
+
+            eprintln!("🪞 instantiating {name:?} smart contract");
+            let contract_id = cli::contract::deploy::wasm::Cmd::parse_arg_vec(&[
+                "--alias",
+                &name,
+                "--wasm-hash",
+                &hash,
+            ])?
+            .run_against_rpc_server(None, None)
+            .await?
+            .into_result()
+            .expect("no contract id returned by 'contract deploy'");
+            eprintln!("    ↳ contract_id: {contract_id}");
+
+            // Save the alias for future use
+            Self::save_contract_alias(&name, &contract_id, network)?;
+
+            // Run init script if we're in development or test environment
+            if self.loam_env(LoamEnv::Production) == "development"
+                || self.loam_env(LoamEnv::Production) == "testing"
+            {
+                if let Some(settings) = settings {
                     if let Some(init_script) = &settings.init {
                         eprintln!("🚀 Running initialization script for {name:?}");
-                        self.run_init_script(name, &contract_id, init_script)
+                        self.run_init_script(&name, &contract_id, init_script)
                             .await?;
                     }
                 }
+            }
 
-                eprintln!("🎭 binding {name:?} contract");
-                cli::contract::bindings::typescript::Cmd::parse_arg_vec(&[
-                    "--contract-id",
-                    &contract_id,
-                    "--output-dir",
-                    workspace_root
-                        .join(format!("packages/{name}"))
-                        .to_str()
-                        .expect("we do not support non-utf8 paths"),
-                    "--overwrite",
-                ])?
-                .run()
-                .await?;
+            eprintln!("🎭 binding {name:?} contract");
+            cli::contract::bindings::typescript::Cmd::parse_arg_vec(&[
+                "--contract-id",
+                &contract_id,
+                "--output-dir",
+                workspace_root
+                    .join(format!("packages/{name}"))
+                    .to_str()
+                    .expect("we do not support non-utf8 paths"),
+                "--overwrite",
+            ])?
+            .run()
+            .await?;
 
-                eprintln!("🍽️ importing {:?} contract", name.clone());
-                self.write_contract_template(workspace_root, name, &contract_id)?;
-            };
+            eprintln!("🍽️ importing {:?} contract", name.clone());
+            self.write_contract_template(workspace_root, &name, &contract_id)?;
         }
 
         Ok(())

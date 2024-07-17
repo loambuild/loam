@@ -14,8 +14,14 @@ development.accounts = [
 rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
 
+[development.contracts]
+hello_world.client = false
+soroban_increment_contract.client = false
+soroban_custom_types_contract.client = false
+soroban_auth_contract.client = false
+
 [development.contracts.soroban_token_contract]
-workspace = true
+client = true
 init = """
 initialize --symbol ABND --decimal 7 --name abundance --admin alice
 mint --amount 2000000 --to alice
@@ -50,8 +56,14 @@ development.accounts = [
 rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
 
+[development.contracts]
+hello_world.client = false
+soroban_increment_contract.client = false
+soroban_custom_types_contract.client = false
+soroban_auth_contract.client = false
+
 [development.contracts.soroban_token_contract]
-workspace = true
+client = true
 init = """
 STELLAR_ACCOUNT=bob initialize --symbol ABND --decimal 7 --name abundance --admin bob 
 STELLAR_ACCOUNT=bob mint --amount 2000000 --to bob 
