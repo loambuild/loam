@@ -74,7 +74,7 @@ impl Cmd {
 
 // update a soroban project to a loam project
 fn update_workspace_cargo_toml(cargo_path: &Path) -> Result<(), Error> {
-    let cargo_toml_str = read_to_string(&cargo_path).map_err(|e| {
+    let cargo_toml_str = read_to_string(cargo_path).map_err(|e| {
         eprintln!("Error reading Cargo.toml file in: {cargo_path:?}");
         e
     })?;
@@ -92,7 +92,7 @@ loam-subcontract-core = "0.7.5""#,
         e
     })?;
 
-    write(&cargo_path, doc.to_string()).map_err(|e| {
+    write(cargo_path, doc.to_string()).map_err(|e| {
         eprintln!("Error writing to Cargo.toml file in: {cargo_path:?}");
         e
     })?;
