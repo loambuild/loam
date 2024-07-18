@@ -227,13 +227,7 @@ export default new Client.Client({{
 
     async fn account_exists(account_name: &str) -> Result<bool, Error> {
         // TODO: this is a workaround until generate is changed to not overwrite accounts
-        match cli::keys::fund::Cmd::parse_arg_vec(&[account_name])?
-            .run()
-            .await
-        {
-            Ok(()) => Ok(true),
-            Err(_) => Ok(false),
-        }
+        Ok(cli::keys::fund::Cmd::parse_arg_vec(&[account_name])?.run().await.is_ok())
     }
 
     async fn handle_accounts(accounts: Option<&[env_toml::Account]>) -> Result<(), Error> {
