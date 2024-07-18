@@ -227,9 +227,12 @@ export default new Client.Client({{
 
     async fn account_exists(account_name: &str) -> Result<bool, Error> {
         // TODO: this is a workaround until generate is changed to not overwrite accounts
-        match cli::keys::fund::Cmd::parse_arg_vec(&[account_name])?.run().await {
-            Ok(_) => Ok(true),
-            Err(_) => Ok(false)
+        match cli::keys::fund::Cmd::parse_arg_vec(&[account_name])?
+            .run()
+            .await
+        {
+            Ok(()) => Ok(true),
+            Err(_) => Ok(false),
         }
     }
 
@@ -253,8 +256,10 @@ export default new Client.Client({{
 
         for account in accounts {
             if Self::account_exists(&account.name).await? {
-                eprintln!("ℹ️ account {:?} already exists, skipping key creation", account.name);
-
+                eprintln!(
+                    "ℹ️ account {:?} already exists, skipping key creation",
+                    account.name
+                );
             } else {
                 eprintln!("🔐 creating keys for {:?}", account.name);
                 cli::keys::generate::Cmd::parse_arg_vec(&[&account.name])?
