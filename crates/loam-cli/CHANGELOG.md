@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0](https://github.com/loambuild/loam/compare/loam-cli-v0.12.0...loam-cli-v0.13.0) - 2024-07-19
+
+### Fixed
+- *(CLI)* don't overwrite accounts ([#121](https://github.com/loambuild/loam/pull/121))
+- *(CLI)* use Loam SDK deps with `loam init` ([#120](https://github.com/loambuild/loam/pull/120))
+
 ## [0.12.0](https://github.com/loambuild/loam/compare/loam-cli-v0.11.0...loam-cli-v0.12.0) - 2024-07-17
 
 ### Added
