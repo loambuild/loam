@@ -36,5 +36,5 @@ pub trait IsNonFungible {
 #[subcontract]
 pub trait IsInitable {
     /// Initialize the NFT contract with the given admin and name
-    fn nft_init(&self, admin: loam_sdk::soroban_sdk::Address, name: loam_sdk::soroban_sdk::Bytes);
+    fn nft_init(&self, name: loam_sdk::soroban_sdk::Bytes);
 }

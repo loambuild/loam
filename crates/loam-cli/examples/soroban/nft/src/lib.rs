@@ -14,3 +14,11 @@ use subcontract::{Initable, NonFungible};
     Initable(MyNonFungibleToken)
 )]
 pub struct Contract;
+
+impl Contract {
+    pub(crate) fn require_auth() {
+        Contract::admin_get()
+            .expect("No admin! Call 'admin_set' first.")
+            .require_auth();
+    }
+}
