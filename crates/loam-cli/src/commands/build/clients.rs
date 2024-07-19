@@ -225,6 +225,14 @@ export default new Client.Client({{
         Ok(())
     }
 
+    async fn account_exists(account_name: &str) -> Result<bool, Error> {
+        // TODO: this is a workaround until generate is changed to not overwrite accounts
+        Ok(cli::keys::fund::Cmd::parse_arg_vec(&[account_name])?
+            .run()
+            .await
+            .is_ok())
+    }
+
     async fn handle_accounts(accounts: Option<&[env_toml::Account]>) -> Result<(), Error> {
         let Some(accounts) = accounts else {
             return Err(Error::NeedAtLeastOneAccount);
@@ -244,10 +252,17 @@ export default new Client.Client({{
         };
 
         for account in accounts {
-            eprintln!("🔐 creating keys for {:?}", account.name);
-            cli::keys::generate::Cmd::parse_arg_vec(&[&account.name])?
-                .run()
-                .await?;
+            if Self::account_exists(&account.name).await? {
+                eprintln!(
+                    "ℹ️ account {:?} already exists, skipping key creation",
+                    account.name
+                );
+            } else {
+                eprintln!("🔐 creating keys for {:?}", account.name);
+                cli::keys::generate::Cmd::parse_arg_vec(&[&account.name])?
+                    .run()
+                    .await?;
+            }
         }
 
         std::env::set_var("STELLAR_ACCOUNT", &default_account);

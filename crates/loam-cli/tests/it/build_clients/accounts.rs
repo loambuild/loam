@@ -25,6 +25,11 @@ soroban_token_contract.client = false
         assert!(env.cwd.join(".soroban/identity/alice.toml").exists());
         assert!(env.cwd.join(".soroban/identity/bob.toml").exists());
 
+        // check that they dont get overwritten if build is run again
+        let stderr = env.loam("build").assert().success().stderr_as_str();
+        assert!(stderr.contains("account \"alice\" already exists"));
+        assert!(stderr.contains("account \"bob\" already exists"));
+
         // check that they're actually funded
         let stderr = env
             .soroban("keys")
