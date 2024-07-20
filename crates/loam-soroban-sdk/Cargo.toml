@@ -1,6 +1,6 @@
 [package]
 name = "loam-soroban-sdk"
-version = "0.6.12"
+version = "0.6.13"
 edition = "2021"
 description = "A wrapper around the soroban-sdk, providing some soroban specific traits"
 license = "Apache-2.0"
