@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.1](https://github.com/loambuild/loam/compare/loam-cli-v0.13.0...loam-cli-v0.13.1) - 2024-07-20
+
+### Other
+- update stellar deps ([#118](https://github.com/loambuild/loam/pull/118))
+
 ## [0.13.0](https://github.com/loambuild/loam/compare/loam-cli-v0.12.0...loam-cli-v0.13.0) - 2024-07-19
 
 ### Fixed

@@ -2653,7 +2653,7 @@ dependencies = [
 
 [[package]]
 name = "loam-cli"
-version = "0.13.0"
+version = "0.13.1"
 dependencies = [
  "assert_cmd",
  "assert_fs",
@@ -2691,7 +2691,7 @@ dependencies = [
 
 [[package]]
 name = "loam-sdk"
-version = "0.6.12"
+version = "0.6.13"
 dependencies = [
  "loam-sdk-macro",
  "loam-soroban-sdk",
@@ -2716,7 +2716,7 @@ dependencies = [
 
 [[package]]
 name = "loam-soroban-sdk"
-version = "0.6.12"
+version = "0.6.13"
 dependencies = [
  "loam-sdk-macro",
  "soroban-sdk",

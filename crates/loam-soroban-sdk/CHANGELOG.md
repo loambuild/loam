@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.13](https://github.com/loambuild/loam/compare/loam-soroban-sdk-v0.6.12...loam-soroban-sdk-v0.6.13) - 2024-07-20
+
+### Other
+- update stellar deps ([#118](https://github.com/loambuild/loam/pull/118))
+
 ## [0.6.12](https://github.com/loambuild/loam-sdk/compare/loam-soroban-sdk-v0.6.11...loam-soroban-sdk-v0.6.12) - 2024-07-15
 
 ### Other
