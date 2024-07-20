@@ -1,5 +1,5 @@
 use clap::Parser;
-use notify::{self, RecursiveMode, Watcher as NotifyWatcher};
+use notify::{self, RecursiveMode, Watcher as _};
 use std::{
     env, fs,
     path::{Path, PathBuf},
