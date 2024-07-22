@@ -41,15 +41,10 @@ network-passphrase = "Standalone Network ; February 2017"
             assert!(stderr.contains(&format!("instantiating \"{c}\" smart contract")));
             assert!(stderr.contains(&format!("binding \"{c}\" contract")));
             assert!(stderr.contains(&format!("importing \"{c}\" contract")));
-        }
 
-        // check that contracts are actually deployed, bound, and imported
-        for contract in contracts {
-            assert!(env.cwd.join(format!("packages/{contract}")).exists());
-            assert!(env
-                .cwd
-                .join(format!("src/contracts/{contract}.ts"))
-                .exists());
+            // check that contracts are actually deployed, bound, and imported
+            assert!(env.cwd.join(format!("packages/{c}")).exists());
+            assert!(env.cwd.join(format!("src/contracts/{c}.ts")).exists());
         }
     });
 }
@@ -84,15 +79,10 @@ network-passphrase = "Standalone Network ; February 2017"
             assert!(stderr.contains(&format!("instantiating \"{c}\" smart contract")));
             assert!(stderr.contains(&format!("binding \"{c}\" contract")));
             assert!(stderr.contains(&format!("importing \"{c}\" contract")));
-        }
 
-        // check that contracts are actually deployed, bound, and imported
-        for contract in contracts {
-            assert!(env.cwd.join(format!("packages/{contract}")).exists());
-            assert!(env
-                .cwd
-                .join(format!("src/contracts/{contract}.ts"))
-                .exists());
+            // check that contracts are actually deployed, bound, and imported
+            assert!(env.cwd.join(format!("packages/{c}")).exists());
+            assert!(env.cwd.join(format!("src/contracts/{c}.ts")).exists());
         }
     });
 }
