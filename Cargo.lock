@@ -2724,14 +2724,14 @@ dependencies = [
 
 [[package]]
 name = "loam-subcontract-core"
-version = "0.7.5"
+version = "0.7.6"
 dependencies = [
  "loam-sdk",
 ]
 
 [[package]]
 name = "loam-subcontract-ft"
-version = "0.6.10"
+version = "0.6.11"
 dependencies = [
  "loam-sdk",
 ]
