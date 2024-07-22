@@ -10,6 +10,15 @@ Loam CLI comes with three main commands:
   * Build frontend clients. If the project contains an `environments.toml` file, `loam build` will match the environment specified by the `LOAM_ENV` environment variable (for `loam build`, the default is `production`) to a predictable starting state. It will turn the contracts you depend on (contract dependencies) into frontend packages (NPM dependencies), getting your frontend app to the point where it is ready to build or run with its own dev server. This is done in as low-intrusive a way as possible (for example, if contracts are already deployed, are they using the correct Wasm hash? Do they need to have their TTL extended? It will update these things, rather than re-deploy every time.)
 * `loam dev` - Monitors `contracts/*` and `environments.toml` for changes and re-runs `loam build` as needed. It also defaults to `LOAM_ENV=development`, rather than `production`.
 
+## Getting started with `loam init`
+1. Install loam cli: `cargo install loam-cli`
+1. To create a loam project, run `loam init <PROJECT_PATH>`. This will create a [Loam frontend](https://github.com/loambuild/template?tab=readme-ov-file) project at the provided `<PROJECT_PATH>`.
+1. In your project directory run the following commands to get up and running with a loam project with two example contracts:
+* `cp .env.example .env`
+* `npm install`
+* `npm run dev`
+
+
 ## `loam dev` and `loam build` in Depth
 
 `loam dev` and `loam build` essentially work the same, except that one is for testing and another for production.
