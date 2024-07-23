@@ -170,16 +170,28 @@ impl Args {
         hash: &str,
         network: &Network,
     ) -> Result<bool, Error> {
-        let hash_vec = cli::contract::fetch::Cmd {
+        let result = cli::contract::fetch::Cmd {
             contract_id: contract_id.to_string(),
             out_file: None,
             locator: Self::get_config_locator(),
             network: Self::get_network_args(network),
         }
         .run_against_rpc_server(None, None)
-        .await?;
-        let ctrct_hash = contract_hash(&hash_vec)?;
-        Ok(hex::encode(ctrct_hash) == hash)
+        .await;
+
+        match result {
+            Ok(result) => {
+                let ctrct_hash = contract_hash(&result)?;
+                Ok(hex::encode(ctrct_hash) == hash)
+            }
+            Err(e) => {
+                if e.to_string().contains("Contract not found") {
+                    Ok(false)
+                } else {
+                    Err(Error::ContractFetch(e))
+                }
+            }
+        }
     }
 
     fn save_contract_alias(
