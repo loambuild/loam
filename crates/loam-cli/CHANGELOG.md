@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.2](https://github.com/loambuild/loam/compare/loam-cli-v0.13.1...loam-cli-v0.13.2) - 2024-07-23
+
+### Fixed
+- *(CLI)* explain how to use loam init ([#126](https://github.com/loambuild/loam/pull/126))
+
+### Other
+- wip ([#131](https://github.com/loambuild/loam/pull/131))
+- *(CLI)* simplify tests ([#129](https://github.com/loambuild/loam/pull/129))
+
 ## [0.13.1](https://github.com/loambuild/loam/compare/loam-cli-v0.13.0...loam-cli-v0.13.1) - 2024-07-20
 
 ### Other
