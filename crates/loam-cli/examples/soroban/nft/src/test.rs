@@ -30,10 +30,7 @@ fn test_nft() {
     let admin = Address::generate(&env);
 
     // test admin_get and admin_set
-    match client.admin_get() {
-        Some(_) => assert!(false, "Admin already set"),
-        None => assert!(true),
-    }
+    assert!(client.admin_get().is_none(), "Admin already set");
     client
         .mock_auths(&[MockAuth {
             address: &admin,
@@ -46,10 +43,7 @@ fn test_nft() {
         }])
         .admin_set(&admin);
 
-    match client.admin_get() {
-        Some(a) => assert_eq!(a, admin),
-        None => assert!(false, "No admin set"),
-    }
+    assert!(matches!(client.admin_get(), Some(admin)), "No admin set");
 
     // test nft_init
     let name = Bytes::from_slice(env, "nftexample".as_bytes());
