@@ -2,7 +2,7 @@
 use crate::commands::build::env_toml;
 use regex::Regex;
 use serde_json;
-use shlex;
+use shlex::split;
 use soroban_cli::commands::NetworkRunnable;
 use soroban_cli::utils::contract_hash;
 use soroban_cli::{commands as cli, CommandParser};
@@ -290,7 +290,7 @@ export default new Client.Client({{
     }
 
     async fn handle_contracts(
-        &self,
+        self,
         workspace_root: &std::path::Path,
         contracts: Option<&Map<Box<str>, env_toml::Contract>>,
         package_names: Vec<String>,
@@ -406,15 +406,48 @@ export default new Client.Client({{
         Ok(())
     }
 
+    fn resolve_line(re: &Regex, line: &str, shell: &str, flag: &str) -> Result<String, Error> {
+        let mut result = String::new();
+        let mut last_match = 0;
+        for cap in re.captures_iter(line) {
+            let whole_match = cap.get(0).unwrap();
+            result.push_str(&line[last_match..whole_match.start()]);
+            let cmd = &cap[1];
+            let output = Self::execute_subcommand(shell, flag, cmd)?;
+            result.push_str(&output);
+            last_match = whole_match.end();
+        }
+        result.push_str(&line[last_match..]);
+        Ok(result)
+    }
+
+    fn execute_subcommand(shell: &str, flag: &str, cmd: &str) -> Result<String, Error> {
+        match Command::new(shell).arg(flag).arg(cmd).output() {
+            Ok(output) => {
+                let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+
+                if output.status.success() {
+                    Ok(stdout)
+                } else {
+                    Err(Error::SubCommandExecutionFailure(cmd.to_string(), stderr))
+                }
+            }
+            Err(e) => Err(Error::SubCommandExecutionFailure(
+                cmd.to_string(),
+                e.to_string(),
+            )),
+        }
+    }
+
     async fn run_init_script(
         &self,
         name: &str,
         contract_id: &str,
         init_script: &str,
     ) -> Result<(), Error> {
-        let re = Regex::new(r"\$\((.*?)\)").unwrap();
+        let re = Regex::new(r"\$\((.*?)\)").expect("Invalid regex pattern");
 
-        // Determine the appropriate shell and flag based on the OS
         let (shell, flag) = if cfg!(windows) {
             ("cmd", "/C")
         } else {
@@ -427,61 +460,21 @@ export default new Client.Client({{
                 continue;
             }
 
-            let mut error_message = String::new();
-            let mut failed_subcommand = String::new();
-            // resolve $() patterns
-            let resolved_line = re.replace_all(line, |caps: &regex::Captures| {
-                let cmd = &caps[1];
-                match Command::new(shell).arg(flag).arg(cmd).output() {
-                    Ok(output) => {
-                        let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-                        let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-
-                        if output.status.success() {
-                            stdout
-                        } else {
-                            failed_subcommand = cmd.to_string();
-                            error_message.clone_from(&stderr);
-                            stdout
-                        }
-                    }
-                    Err(e) => {
-                        failed_subcommand = cmd.to_string();
-                        error_message.clone_from(&e.to_string());
-                        e.to_string()
-                    }
-                }
-            });
-
-            // After replace_all, check if there's an error message
-            if !error_message.is_empty() {
-                return Err(Error::SubCommandExecutionFailure(
-                    failed_subcommand,
-                    error_message,
-                ));
-            }
+            // resolve any $() patterns
+            let resolved_line = Self::resolve_line(&re, line, shell, flag)?;
+            let parts = split(&resolved_line)
+                .ok_or_else(|| Error::InitParseFailure(resolved_line.to_string()))?;
+            let (source_account, command_parts): (Vec<_>, Vec<_>) = parts
+                .iter()
+                .partition(|&part| part.starts_with("STELLAR_ACCOUNT="));
 
             let mut args = vec!["--id", contract_id];
-            let mut source_account: Option<&str> = None;
-
-            let parts = shlex::split(&resolved_line)
-                .ok_or_else(|| Error::InitParseFailure(resolved_line.to_string()))?;
-            let mut command_parts = vec!["--"];
-
-            for part in &parts {
-                if let Some(value) = part.strip_prefix("STELLAR_ACCOUNT=") {
-                    source_account = Some(value);
-                } else {
-                    command_parts.push(part);
-                }
+            if let Some(account) = source_account.first() {
+                let account = account.strip_prefix("STELLAR_ACCOUNT=").unwrap();
+                args.extend_from_slice(&["--source-account", account]);
             }
-
-            if let Some(account) = source_account {
-                args.push("--source-account");
-                args.push(account);
-            }
-
-            args.extend(&command_parts);
+            args.extend_from_slice(&["--"]);
+            args.extend(command_parts.iter().map(|s| s.as_str()));
 
             eprintln!("  ↳ Executing: soroban contract invoke {}", args.join(" "));
             let result = cli::contract::invoke::Cmd::parse_arg_vec(&args)?
