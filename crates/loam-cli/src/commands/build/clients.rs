@@ -1,12 +1,15 @@
 #![allow(clippy::struct_excessive_bools)]
 use crate::commands::build::env_toml;
+use regex::Regex;
 use serde_json;
+use shlex;
 use soroban_cli::commands::NetworkRunnable;
 use soroban_cli::utils::contract_hash;
 use soroban_cli::{commands as cli, CommandParser};
 use std::collections::BTreeMap as Map;
 use std::fmt::Debug;
 use std::hash::Hash;
+use std::process::Command;
 use stellar_xdr::curr::Error as xdrError;
 
 use super::env_toml::Network;
@@ -49,6 +52,10 @@ pub enum Error {
     BadContractName(String),
     #[error("⛔ ️Contract update not allowed in production for {0:?}")]
     ContractUpdateNotAllowed(String),
+    #[error("⛔ ️Unable to parse init script: {0:?}")]
+    InitParseFailure(String),
+    #[error("⛔ ️Failed to execute subcommand: {0:?}\n{1:?}")]
+    SubCommandExecutionFailure(String, String),
     #[error(transparent)]
     ContractInstall(#[from] cli::contract::install::Error),
     #[error(transparent)]
@@ -405,23 +412,67 @@ export default new Client.Client({{
         contract_id: &str,
         init_script: &str,
     ) -> Result<(), Error> {
+        let re = Regex::new(r"\$\((.*?)\)").unwrap();
+
+        // Determine the appropriate shell and flag based on the OS
+        let (shell, flag) = if cfg!(windows) {
+            ("cmd", "/C")
+        } else {
+            ("sh", "-c")
+        };
+
         for line in init_script.lines() {
             let line = line.trim();
             if line.is_empty() {
                 continue;
             }
 
+            let mut error_message = String::new();
+            let mut failed_subcommand = String::new();
+            // resolve $() patterns
+            let resolved_line = re.replace_all(line, |caps: &regex::Captures| {
+                let cmd = &caps[1];
+                match Command::new(shell).arg(flag).arg(cmd).output() {
+                    Ok(output) => {
+                        let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                        let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+
+                        if output.status.success() {
+                            stdout
+                        } else {
+                            failed_subcommand = cmd.to_string();
+                            error_message.clone_from(&stderr);
+                            stdout
+                        }
+                    }
+                    Err(e) => {
+                        failed_subcommand = cmd.to_string();
+                        error_message.clone_from(&e.to_string());
+                        e.to_string()
+                    }
+                }
+            });
+
+            // After replace_all, check if there's an error message
+            if error_message != "" {
+                return Err(Error::SubCommandExecutionFailure(
+                    failed_subcommand,
+                    error_message,
+                ));
+            }
+
             let mut args = vec!["--id", contract_id];
             let mut source_account: Option<&str> = None;
 
-            let parts: Vec<&str> = line.split_whitespace().collect();
+            let parts = shlex::split(&resolved_line)
+                .ok_or_else(|| Error::InitParseFailure(resolved_line.to_string()))?;
             let mut command_parts = vec!["--"];
 
             for part in &parts {
                 if let Some(value) = part.strip_prefix("STELLAR_ACCOUNT=") {
                     source_account = Some(value);
                 } else {
-                    command_parts.push(*part);
+                    command_parts.push(part);
                 }
             }
 
