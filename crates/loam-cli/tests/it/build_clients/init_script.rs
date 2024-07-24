@@ -131,7 +131,8 @@ test_init --resolution 300000 --assets '[{"Stellar": "$(stellar contract id asse
         );
 
         // Check for successful initialization message
-        assert!(String::from_utf8_lossy(&output.stderr)
-            .contains("✅ Initialization script for \"soroban_custom_types_contract\" completed successfully"));
+        assert!(String::from_utf8_lossy(&output.stderr).contains(
+            "✅ Initialization script for \"soroban_custom_types_contract\" completed successfully"
+        ));
     })
 }

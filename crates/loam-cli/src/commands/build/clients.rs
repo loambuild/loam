@@ -454,7 +454,7 @@ export default new Client.Client({{
             });
 
             // After replace_all, check if there's an error message
-            if error_message != "" {
+            if !error_message.is_empty() {
                 return Err(Error::SubCommandExecutionFailure(
                     failed_subcommand,
                     error_message,
