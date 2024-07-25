@@ -91,29 +91,35 @@ STELLAR_ACCOUNT=bob mint --amount 2000000 --to bob
 #[test]
 fn init_handles_quotations_and_subcommands_in_script() {
     TestEnv::from("soroban-init-boilerplate", |env| {
-        env.set_environments_toml(
+        let binary_path = env
+            .find_binary("stellar")
+            .expect("Stellar binary not found. Test cannot proceed.");
+
+        let binary_path_str = binary_path.to_string_lossy();
+        env.set_environments_toml(&format!(
             r#"
-development.accounts = [
-{ name = "me" },
-]
+    development.accounts = [
+    {{ name = "me" }},
+    ]
 
-[development.network]
-rpc-url = "http://localhost:8000/rpc"
-network-passphrase = "Standalone Network ; February 2017"
+    [development.network]
+    rpc-url = "http://localhost:8000/rpc"
+    network-passphrase = "Standalone Network ; February 2017"
 
-[development.contracts]
-hello_world.client = false
-soroban_increment_contract.client = false
-soroban_auth_contract.client = false
-soroban_token_contract.client = false
+    [development.contracts]
+    hello_world.client = false
+    soroban_increment_contract.client = false
+    soroban_auth_contract.client = false
+    soroban_token_contract.client = false
 
-[development.contracts.soroban_custom_types_contract]
-client = true
-init = """
-test_init --resolution 300000 --assets '[{"Stellar": "$(stellar contract id asset --asset native)"} ]' --decimals 14 --base '{"Stellar":"$(stellar contract id asset --asset native)"}'
-"""
-"#,
-        );
+    [development.contracts.soroban_custom_types_contract]
+    client = true
+    init = """
+    test_init --resolution 300000 --assets '[{{"Stellar": "$({} contract id asset --asset native)"}} ]' --decimals 14 --base '{{"Stellar":"$({} contract id asset --asset native)"}}'
+    """
+    "#,
+            binary_path_str, binary_path_str
+        ));
 
         let output = env
             .loam_env("development", true)
