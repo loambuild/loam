@@ -102,7 +102,7 @@ fn test_nft() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "No admin! Call 'admin_set' first.")]
 fn test_initializing_without_admin_set() {
     let (env, client, contract_id) = &init();
     let admin = Address::generate(env);
@@ -122,7 +122,7 @@ fn test_initializing_without_admin_set() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Unauthorized function call for address")]
 fn test_minting_by_non_admin() {
     let (env, client, contract_id) = &init();
     let admin = Address::generate(&env);
@@ -195,24 +195,24 @@ fn test_minting_without_contract_being_initialized() {
         .admin_set(&admin);
     assert!(client.admin_get().is_some(), "Admin not set");
 
-    // try to mint
-    let non_admin = Address::generate(env);
+    // try to mint though the contract has not been initialized
+    let owner_1 = Address::generate(env);
     let metadata = Bytes::from_slice(env, "metadata".as_bytes());
     client
         .mock_auths(&[MockAuth {
-            address: &non_admin,
+            address: &admin,
             invoke: &MockAuthInvoke {
                 contract: &contract_id,
                 fn_name: "mint",
-                args: (non_admin.clone(), metadata.clone()).into_val(env),
+                args: (owner_1.clone(), metadata.clone()).into_val(env),
                 sub_invokes: &[],
             },
         }])
-        .mint(&non_admin, &metadata);
+        .mint(&owner_1, &metadata);
 }
 
-// Should this fail? Or is it okay that the getter methods work before initialization?
 #[test]
+#[should_panic]
 fn test_getter_methods_before_initialization() {
     let (env, client, contract_id) = &init();
     let admin = Address::generate(&env);
@@ -236,7 +236,7 @@ fn test_getter_methods_before_initialization() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "You are not the owner of this NFT")]
 fn test_transfer_by_non_owner() {
     let (env, client, contract_id) = &init();
     let admin = Address::generate(&env);
@@ -305,4 +305,77 @@ fn test_transfer_by_non_owner() {
             },
         }])
         .transfer(&nft_id, &owner_2, &owner_2);
+}
+
+#[test]
+#[should_panic(expected = "NFT does not exist")]
+fn test_transferring_a_non_existent_nft() {
+    let (env, client, contract_id) = &init();
+    let admin = Address::generate(&env);
+
+    // set admin
+    assert!(client.admin_get().is_none(), "Admin already set");
+    client
+        .mock_auths(&[MockAuth {
+            address: &admin,
+            invoke: &MockAuthInvoke {
+                contract: &contract_id,
+                fn_name: "admin_set",
+                args: (&admin,).into_val(env),
+                sub_invokes: &[],
+            },
+        }])
+        .admin_set(&admin);
+    assert_eq!(client.admin_get().unwrap(), admin);
+
+    // nft_init
+    let name = Bytes::from_slice(env, "nftexample".as_bytes());
+    client
+        .mock_auths(&[MockAuth {
+            address: &admin,
+            invoke: &MockAuthInvoke {
+                contract: &contract_id,
+                fn_name: "nft_init",
+                args: (name.clone(),).into_val(env),
+                sub_invokes: &[],
+            },
+        }])
+        .nft_init(&name);
+
+    // mint nft1 to owner 1
+    let owner_1 = Address::generate(env);
+    let metadata = Bytes::from_slice(env, "metadata".as_bytes());
+    let nft_id = client
+        .mock_auths(&[MockAuth {
+            address: &admin,
+            invoke: &MockAuthInvoke {
+                contract: &contract_id,
+                fn_name: "mint",
+                args: (owner_1.clone(), metadata.clone()).into_val(env),
+                sub_invokes: &[],
+            },
+        }])
+        .mint(&owner_1, &metadata);
+    assert_eq!(nft_id, 1);
+    assert_eq!(client.get_owner(&nft_id), Some(owner_1.clone()));
+
+    // try to transfer non_existing_nft_id to owner 2
+    let owner_2 = Address::generate(env);
+    let non_existing_nft_id = 0;
+    client
+        .mock_auths(&[MockAuth {
+            address: &owner_1,
+            invoke: &MockAuthInvoke {
+                contract: &contract_id,
+                fn_name: "transfer",
+                args: (
+                    non_existing_nft_id.clone(),
+                    owner_1.clone(),
+                    owner_2.clone(),
+                )
+                    .into_val(env),
+                sub_invokes: &[],
+            },
+        }])
+        .transfer(&non_existing_nft_id, &owner_1, &owner_2);
 }
