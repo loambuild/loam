@@ -43,7 +43,7 @@ fn test_nft() {
         }])
         .admin_set(&admin);
 
-    assert!(matches!(client.admin_get(), Some(admin)), "No admin set");
+    assert_eq!(client.admin_get().unwrap(), admin);
 
     // test nft_init
     let name = Bytes::from_slice(env, "nftexample".as_bytes());
@@ -59,7 +59,6 @@ fn test_nft() {
         }])
         .nft_init(&name);
 
-    // test initial state
     assert_eq!(client.get_total_count(), 0);
     assert!(client.get_nft(&1).is_none());
     assert!(client.get_owner(&1).is_none());
