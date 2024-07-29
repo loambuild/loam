@@ -1,11 +1,13 @@
 #![cfg(test)]
 
+use crate::subcontract::Metadata;
+
 use super::{
     SorobanContract__ as SorobanContract, SorobanContract__Client as SorobanContractClient,
 };
 use loam_sdk::soroban_sdk::{
     testutils::{Address as _, MockAuth, MockAuthInvoke},
-    Address, Bytes, Env, IntoVal,
+    Address, Bytes, Env, IntoVal, String,
 };
 
 extern crate std;
@@ -64,7 +66,7 @@ fn mint_nft(
     contract_id: &Address,
     admin: &Address,
     owner: &Address,
-    metadata: &Bytes,
+    metadata: &Metadata,
 ) -> u128 {
     client
         .mock_auths(&[MockAuth {
@@ -118,7 +120,11 @@ fn test_nft() {
 
     // test mint & getter fns
     let owner_1 = Address::generate(env);
-    let metadata = Bytes::from_slice(env, "metadata".as_bytes());
+    let metadata = Metadata {
+        name: String::from_str(env, "Nft Name"),
+        description: String::from_str(env, "description"),
+        url: String::from_str(env, "url"),
+    };
     let nft_id = mint_nft(env, client, contract_id, &admin, &owner_1, &metadata);
     assert_eq!(nft_id, 1);
     assert_eq!(client.get_nft(&nft_id), Some(metadata));
@@ -162,7 +168,11 @@ fn test_minting_by_non_admin() {
 
     // try to mint from non-admin
     let non_admin = Address::generate(env);
-    let metadata = Bytes::from_slice(env, "metadata".as_bytes());
+    let metadata = Metadata {
+        name: String::from_str(env, "Nft Name"),
+        description: String::from_str(env, "description"),
+        url: String::from_str(env, "url"),
+    };
     mint_nft(env, client, contract_id, &non_admin, &non_admin, &metadata);
 }
 
@@ -180,7 +190,11 @@ fn test_minting_without_contract_being_initialized() {
 
     // try to mint though the contract has not been initialized
     let owner_1 = Address::generate(env);
-    let metadata = Bytes::from_slice(env, "metadata".as_bytes());
+    let metadata = Metadata {
+        name: String::from_str(env, "Nft Name"),
+        description: String::from_str(env, "description"),
+        url: String::from_str(env, "url"),
+    };
     mint_nft(env, client, contract_id, &admin, &owner_1, &metadata);
 }
 
@@ -219,7 +233,11 @@ fn test_transfer_by_non_owner() {
 
     // mint nft to owner 1
     let owner_1 = Address::generate(env);
-    let metadata = Bytes::from_slice(env, "metadata".as_bytes());
+    let metadata = Metadata {
+        name: String::from_str(env, "Nft Name"),
+        description: String::from_str(env, "description"),
+        url: String::from_str(env, "url"),
+    };
     let nft_id = mint_nft(env, client, contract_id, &admin, &owner_1, &metadata);
     assert_eq!(client.get_owner(&nft_id), Some(owner_1.clone()));
 
@@ -244,7 +262,11 @@ fn test_transferring_a_non_existent_nft() {
 
     // mint nft1 to owner 1
     let owner_1 = Address::generate(env);
-    let metadata = Bytes::from_slice(env, "metadata".as_bytes());
+    let metadata = Metadata {
+        name: String::from_str(env, "Nft Name"),
+        description: String::from_str(env, "description"),
+        url: String::from_str(env, "url"),
+    };
     let nft_id = mint_nft(env, client, contract_id, &admin, &owner_1, &metadata);
     assert_eq!(nft_id, 1);
     assert_eq!(client.get_owner(&nft_id), Some(owner_1.clone()));

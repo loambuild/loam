@@ -7,6 +7,7 @@ pub mod subcontract;
 
 use nft::MyNonFungibleToken;
 use subcontract::{Initable, NonFungible};
+use crate::subcontract::Metadata;
 
 #[derive_contract(
     Core(Admin),

@@ -3,7 +3,7 @@ use loam_sdk::{
     IntoKey,
 };
 
-use crate::{subcontract::{IsInitable, IsNonFungible}, Contract};
+use crate::{subcontract::{IsInitable, IsNonFungible, Metadata}, Contract};
 
 #[contracttype]
 #[derive(IntoKey)]
@@ -12,7 +12,7 @@ pub struct MyNonFungibleToken {
     total_count: u128,
     owners_to_nft_ids: Map<Address, Map<u128, ()>>, // the owner's collection
     nft_ids_to_owners: Map<u128, Address>,
-    nft_ids_to_metadata: Map<u128, Bytes>,
+    nft_ids_to_metadata: Map<u128, Metadata>,
 }
 
 impl MyNonFungibleToken {
@@ -42,7 +42,7 @@ impl IsInitable for MyNonFungibleToken {
 }
 
 impl IsNonFungible for MyNonFungibleToken {
-    fn mint(&mut self, owner: Address, metadata: Bytes) -> u128 {
+    fn mint(&mut self, owner: Address, metadata: Metadata) -> u128 {
         Contract::require_auth();
 
         let current_count = self.total_count;
@@ -95,7 +95,7 @@ impl IsNonFungible for MyNonFungibleToken {
         self.owners_to_nft_ids.set(new_owner, new_owner_collection);
     }
 
-    fn get_nft(&self, id: u128) -> Option<Bytes> {
+    fn get_nft(&self, id: u128) -> Option<Metadata> {
         self.nft_ids_to_metadata.get(id)
     }
 

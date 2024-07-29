@@ -1,13 +1,20 @@
-use loam_sdk::{soroban_sdk::Lazy, subcontract};
+use loam_sdk::{
+    soroban_sdk::{self, contracttype, Lazy, String},
+    subcontract,
+};
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+pub struct Metadata {
+    pub(crate) name: String,
+    pub(crate) description: String,
+    pub(crate) url: String,
+}
 
 #[subcontract]
 pub trait IsNonFungible {
     /// Mint a new NFT with the given owner and metadata
-    fn mint(
-        &mut self,
-        owner: loam_sdk::soroban_sdk::Address,
-        metadata: loam_sdk::soroban_sdk::Bytes,
-    ) -> u128;
+    fn mint(&mut self, owner: loam_sdk::soroban_sdk::Address, metadata: Metadata) -> u128;
 
     /// Transfer the NFT with the given ID from current_owner to new_owner
     fn transfer(
@@ -18,7 +25,7 @@ pub trait IsNonFungible {
     );
 
     /// Get the NFT with the given ID
-    fn get_nft(&self, id: u128) -> Option<loam_sdk::soroban_sdk::Bytes>;
+    fn get_nft(&self, id: u128) -> Option<Metadata>;
 
     /// Find the owner of the NFT with the given ID
     fn get_owner(&self, id: u128) -> Option<loam_sdk::soroban_sdk::Address>;
