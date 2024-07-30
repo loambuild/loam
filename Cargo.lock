@@ -2686,6 +2686,7 @@ dependencies = [
  "tokio-stream",
  "toml 0.8.15",
  "toml_edit 0.22.16",
+ "walkdir",
  "wasm-gen",
 ]
 
