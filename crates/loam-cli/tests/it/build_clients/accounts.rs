@@ -8,7 +8,7 @@ fn create_two_accounts() {
 network = { rpc-url = "http://localhost:8000/rpc", network-passphrase = "Standalone Network ; February 2017"}
 
 accounts = [
-    { name = "alice" },
+    "alice",
     { name = "bob" },
 ]
 [production.contracts]
