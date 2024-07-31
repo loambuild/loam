@@ -2,7 +2,6 @@ use assert_cmd::{assert::Assert, Command};
 use assert_fs::TempDir;
 use fs_extra::dir::{copy, CopyOptions};
 use rand::{thread_rng, Rng};
-use std::env;
 use std::error::Error;
 use std::fs;
 use std::future::Future;
@@ -12,7 +11,6 @@ use tokio::process::Command as ProcessCommand;
 use tokio::time::{sleep, timeout};
 use tokio_stream::StreamExt;
 use toml::Value;
-use walkdir::WalkDir;
 
 pub struct TestEnv {
     pub temp_dir: TempDir,
@@ -50,23 +48,6 @@ impl TestEnv {
             cwd: temp_dir.path().join(template),
             temp_dir,
         }
-    }
-
-    pub fn find_binary(&self, name: &str) -> Option<PathBuf> {
-        let exe_path = env::current_exe().ok()?;
-        let project_root = self.find_project_root(&exe_path)?;
-        Some(project_root.join("target").join("bin").join(name))
-    }
-
-    fn find_project_root(&self, start_path: &PathBuf) -> Option<PathBuf> {
-        let mut current = start_path.clone();
-        while let Some(parent) = current.parent() {
-            if parent.join("Cargo.toml").exists() {
-                return Some(parent.to_path_buf());
-            }
-            current = parent.to_path_buf();
-        }
-        None
     }
 
     pub fn from<F: FnOnce(&TestEnv)>(template: &str, f: F) {
