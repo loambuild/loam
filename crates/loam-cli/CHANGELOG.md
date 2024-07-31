@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0](https://github.com/loambuild/loam/compare/loam-cli-v0.13.2...loam-cli-v0.14.0) - 2024-07-31
+
+### Other
+- add ability to pass simple string to define account
+- Fix/support init scripts with quotes ([#134](https://github.com/loambuild/loam/pull/134))
+
 ## [0.13.2](https://github.com/loambuild/loam/compare/loam-cli-v0.13.1...loam-cli-v0.13.2) - 2024-07-23
 
 ### Fixed
