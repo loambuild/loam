@@ -12,9 +12,7 @@ fn contracts_built() {
         env.set_environments_toml(
             format!(
                 r#"
-production.accounts = [
-    {{ name = "alice" }},
-]
+production.accounts = ["alice"]
 
 [production.network]
 rpc-url = "http://localhost:8000/rpc"
