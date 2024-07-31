@@ -1,12 +1,15 @@
 #![allow(clippy::struct_excessive_bools)]
 use crate::commands::build::env_toml;
+use regex::Regex;
 use serde_json;
+use shlex::split;
 use soroban_cli::commands::NetworkRunnable;
 use soroban_cli::utils::contract_hash;
 use soroban_cli::{commands as cli, CommandParser};
 use std::collections::BTreeMap as Map;
 use std::fmt::Debug;
 use std::hash::Hash;
+use std::process::Command;
 use stellar_xdr::curr::Error as xdrError;
 
 use super::env_toml::Network;
@@ -49,6 +52,10 @@ pub enum Error {
     BadContractName(String),
     #[error("⛔ ️Contract update not allowed in production for {0:?}")]
     ContractUpdateNotAllowed(String),
+    #[error("⛔ ️Unable to parse init script: {0:?}")]
+    InitParseFailure(String),
+    #[error("⛔ ️Failed to execute subcommand: {0:?}\n{1:?}")]
+    SubCommandExecutionFailure(String, String),
     #[error(transparent)]
     ContractInstall(#[from] cli::contract::install::Error),
     #[error(transparent)]
@@ -283,7 +290,7 @@ export default new Client.Client({{
     }
 
     async fn handle_contracts(
-        &self,
+        self,
         workspace_root: &std::path::Path,
         contracts: Option<&Map<Box<str>, env_toml::Contract>>,
         package_names: Vec<String>,
@@ -399,38 +406,75 @@ export default new Client.Client({{
         Ok(())
     }
 
+    fn resolve_line(re: &Regex, line: &str, shell: &str, flag: &str) -> Result<String, Error> {
+        let mut result = String::new();
+        let mut last_match = 0;
+        for cap in re.captures_iter(line) {
+            let whole_match = cap.get(0).unwrap();
+            result.push_str(&line[last_match..whole_match.start()]);
+            let cmd = &cap[1];
+            let output = Self::execute_subcommand(shell, flag, cmd)?;
+            result.push_str(&output);
+            last_match = whole_match.end();
+        }
+        result.push_str(&line[last_match..]);
+        Ok(result)
+    }
+
+    fn execute_subcommand(shell: &str, flag: &str, cmd: &str) -> Result<String, Error> {
+        match Command::new(shell).arg(flag).arg(cmd).output() {
+            Ok(output) => {
+                let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+
+                if output.status.success() {
+                    Ok(stdout)
+                } else {
+                    Err(Error::SubCommandExecutionFailure(cmd.to_string(), stderr))
+                }
+            }
+            Err(e) => Err(Error::SubCommandExecutionFailure(
+                cmd.to_string(),
+                e.to_string(),
+            )),
+        }
+    }
+
     async fn run_init_script(
         &self,
         name: &str,
         contract_id: &str,
         init_script: &str,
     ) -> Result<(), Error> {
+        let re = Regex::new(r"\$\((.*?)\)").expect("Invalid regex pattern");
+
+        let (shell, flag) = if cfg!(windows) {
+            ("cmd", "/C")
+        } else {
+            ("sh", "-c")
+        };
+
         for line in init_script.lines() {
             let line = line.trim();
             if line.is_empty() {
                 continue;
             }
 
+            // resolve any $() patterns
+            let resolved_line = Self::resolve_line(&re, line, shell, flag)?;
+            let parts = split(&resolved_line)
+                .ok_or_else(|| Error::InitParseFailure(resolved_line.to_string()))?;
+            let (source_account, command_parts): (Vec<_>, Vec<_>) = parts
+                .iter()
+                .partition(|&part| part.starts_with("STELLAR_ACCOUNT="));
+
             let mut args = vec!["--id", contract_id];
-            let mut source_account: Option<&str> = None;
-
-            let parts: Vec<&str> = line.split_whitespace().collect();
-            let mut command_parts = vec!["--"];
-
-            for part in &parts {
-                if let Some(value) = part.strip_prefix("STELLAR_ACCOUNT=") {
-                    source_account = Some(value);
-                } else {
-                    command_parts.push(*part);
-                }
+            if let Some(account) = source_account.first() {
+                let account = account.strip_prefix("STELLAR_ACCOUNT=").unwrap();
+                args.extend_from_slice(&["--source-account", account]);
             }
-
-            if let Some(account) = source_account {
-                args.push("--source-account");
-                args.push(account);
-            }
-
-            args.extend(&command_parts);
+            args.extend_from_slice(&["--"]);
+            args.extend(command_parts.iter().map(|s| s.as_str()));
 
             eprintln!("  ↳ Executing: soroban contract invoke {}", args.join(" "));
             let result = cli::contract::invoke::Cmd::parse_arg_vec(&args)?
