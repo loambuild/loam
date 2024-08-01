@@ -4,6 +4,7 @@ version = "0.6.13"
 edition = "2021"
 description = "SDK  for writing smart contracts"
 license = "Apache-2.0"
+repository = "https://github.com/loambuild/loam/tree/main/crates/loam-sdk"
 
 
 [lib]
