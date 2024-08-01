@@ -30,7 +30,7 @@ build:
 
 # Setup the project to use a pinned version of the CLI
 setup:
-    -cargo binstall -y --install-path ./target/bin soroban-cli --version {{stellar-version}}
+    -cargo binstall -y --install-path ./target/bin stellar-cli --version {{stellar-version}}
 
 
 # Build loam-cli test contracts to speed up testing
