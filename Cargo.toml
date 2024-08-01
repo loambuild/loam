@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "crates/loam-cli/examples/soroban/*", "test/*"]
+members = ["crates/*", "crates/loam-cli/examples/soroban/*", "stellar_version", "test/*"]
 exclude = ["test/*"]
 
 [workspace.dependencies]

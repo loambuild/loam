@@ -4,6 +4,8 @@ export PATH := './target/bin:' + env_var('PATH')
 export CONFIG_DIR := 'target/'
 # hash := `soroban contract install --wasm ./target/wasm32-unknown-unknown/contracts/example_status_message.wasm`
 
+stellar-version := `cargo run --bin stellar_version`
+
 
 
 [private]
@@ -14,12 +16,13 @@ loam +args:
     @cargo r -- {{args}}
 
 s +args:
-    @cargo bin stellar -- {{args}}
+    @stellar {{args}}
+
 stellar +args:
-    @cargo bin stellar -- {{args}}
+    @stellar {{args}}
 
 build_contract p:
-    cargo bin stellar contract build --profile contracts --package {{p}}
+    stellar contract build --profile contracts --package {{p}}
 
 # build contracts
 build:
@@ -27,7 +30,8 @@ build:
 
 # Setup the project to use a pinned version of the CLI
 setup:
-    cargo install cargo-run-bin
+    -cargo binstall -y --install-path ./target/bin soroban-cli --version {{stellar-version}}
+
 
 # Build loam-cli test contracts to speed up testing
 build-cli-test-contracts:
@@ -38,10 +42,12 @@ test: build build-cli-test-contracts
 
 create: build
     rm -rf .soroban
-    cargo bin stellar keys generate default
-    just stellar contract deploy --wasm ./target/loam/example_core.wasm --alias core 
+    stellar keys generate default
+    just stellar contract deploy --wasm ./target/loam/example_core.wasm --alias core
 
-# Builds contracts. Deploys core subcontract and then redeploys to status message.
+# # Builds contracts. Deploys core subcontract and then redep
+
+# # Builds contracts. Deploys core subcontract and then redeploys to status message.
 
 redeploy:
     ./redeploy.sh
