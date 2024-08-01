@@ -14,12 +14,12 @@ loam +args:
     @cargo r -- {{args}}
 
 s +args:
-    @cargo run-bin stellar -- {{args}}
+    @cargo bin stellar -- {{args}}
 stellar +args:
-    @cargo run-bin stellar -- {{args}}
+    @cargo bin stellar -- {{args}}
 
 build_contract p:
-    cargo run-bin stellar contract build --profile contracts --package {{p}}
+    cargo bin stellar contract build --profile contracts --package {{p}}
 
 # build contracts
 build:
@@ -38,7 +38,7 @@ test: build build-cli-test-contracts
 
 create: build
     rm -rf .soroban
-    cargo run-bin stellar keys generate default
+    cargo bin stellar keys generate default
     just stellar contract deploy --wasm ./target/loam/example_core.wasm --alias core 
 
 # Builds contracts. Deploys core subcontract and then redeploys to status message.
