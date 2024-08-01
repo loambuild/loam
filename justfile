@@ -14,13 +14,12 @@ loam +args:
     @cargo r -- {{args}}
 
 s +args:
-    @stellar {{args}}
-
+    @cargo run-bin stellar -- {{args}}
 stellar +args:
-    @stellar {{args}}
+    @cargo run-bin stellar -- {{args}}
 
 build_contract p:
-    stellar contract build --profile contracts --package {{p}}
+    cargo run-bin stellar contract build --profile contracts --package {{p}}
 
 # build contracts
 build:
@@ -28,7 +27,7 @@ build:
 
 # Setup the project to use a pinned version of the CLI
 setup:
-    -cargo binstall -y --install-path ./target/bin soroban-cli --version 21.0.0
+    cargo install cargo-run-bin
 
 # Build loam-cli test contracts to speed up testing
 build-cli-test-contracts:
@@ -39,12 +38,10 @@ test: build build-cli-test-contracts
 
 create: build
     rm -rf .soroban
-    stellar keys generate default
-    just stellar contract deploy --wasm ./target/loam/example_core.wasm --alias core
+    cargo run-bin stellar keys generate default
+    just stellar contract deploy --wasm ./target/loam/example_core.wasm --alias core 
 
-# # Builds contracts. Deploys core subcontract and then redep
-
-# # Builds contracts. Deploys core subcontract and then redeploys to status message.
+# Builds contracts. Deploys core subcontract and then redeploys to status message.
 
 redeploy:
     ./redeploy.sh
