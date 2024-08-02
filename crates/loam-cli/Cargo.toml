@@ -27,7 +27,7 @@ path = "src/lib.rs"
 doctest = false
 
 [dependencies]
-loam-build = { path = "../loam-build", version = "0.7.2" }
+loam-build = { path = "../loam-build", version = "0.7.3" }
 soroban-cli = "21.2.0"
 clap = { version = "4.1.8", features = [
     "derive",

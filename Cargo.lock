@@ -2644,7 +2644,7 @@ checksum = "78b3ae25bc7c8c38cec158d1f2757ee79e9b3740fbc7ccf0e59e4b08d793fa89"
 
 [[package]]
 name = "loam-build"
-version = "0.7.2"
+version = "0.7.3"
 dependencies = [
  "cargo_metadata 0.18.1",
  "thiserror",
@@ -2692,7 +2692,7 @@ dependencies = [
 
 [[package]]
 name = "loam-sdk"
-version = "0.6.13"
+version = "0.6.14"
 dependencies = [
  "loam-sdk-macro",
  "loam-soroban-sdk",
@@ -2700,7 +2700,7 @@ dependencies = [
 
 [[package]]
 name = "loam-sdk-macro"
-version = "0.8.2"
+version = "0.8.3"
 dependencies = [
  "Inflector",
  "assert_fs",
@@ -2717,7 +2717,7 @@ dependencies = [
 
 [[package]]
 name = "loam-soroban-sdk"
-version = "0.6.13"
+version = "0.6.14"
 dependencies = [
  "loam-sdk-macro",
  "soroban-sdk",
@@ -2725,14 +2725,14 @@ dependencies = [
 
 [[package]]
 name = "loam-subcontract-core"
-version = "0.7.6"
+version = "0.7.7"
 dependencies = [
  "loam-sdk",
 ]
 
 [[package]]
 name = "loam-subcontract-ft"
-version = "0.6.11"
+version = "0.6.12"
 dependencies = [
  "loam-sdk",
 ]
