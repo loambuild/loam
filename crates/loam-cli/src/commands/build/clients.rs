@@ -51,8 +51,8 @@ pub enum Error {
     NeedAtLeastOneAccount,
     #[error("⛔ ️No contract named {0:?}")]
     BadContractName(String),
-    #[error("⛔ ️Contract update not allowed in production for {0:?}")]
-    ContractUpdateNotAllowed(String),
+    #[error("⛔ ️Contract must be identified by its ID in production or staging. Invalid ID: {0:?}")]
+    InvalidContractID(String),
     #[error("⛔ ️Unable to parse init script: {0:?}")]
     InitParseFailure(String),
     #[error("⛔ ️Failed to execute subcommand: {0:?}\n{1:?}")]
@@ -77,8 +77,6 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error(transparent)]
     Json(#[from] serde_json::Error),
-    #[error(transparent)]
-    InvalidContractID(#[from] stellar_strkey::DecodeError),
 }
 
 impl Args {
@@ -333,7 +331,9 @@ export default new Client.Client({{
             if let Some(contracts) = contracts {
                 for (name, _) in contracts.iter().filter(|(_, settings)| settings.client) {
                     // ensure contract names are valid contract IDs
-                    stellar_strkey::Contract::from_string(name.as_ref())?;
+                    if stellar_strkey::Contract::from_string(name.as_ref()).is_err() {
+                        return Err(Error::InvalidContractID(name.to_string()));
+                    }
                     self.generate_contract_bindings(workspace_root, name, name)
                         .await?;
                 }
@@ -389,9 +389,6 @@ export default new Client.Client({{
                     Ok(true) => {
                         eprintln!("✅ Contract {name:?} is up to date");
                         continue;
-                    }
-                    Ok(false) if env == "production" => {
-                        return Err(Error::ContractUpdateNotAllowed(name.to_string()));
                     }
                     Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
                     Err(e) => return Err(e),
