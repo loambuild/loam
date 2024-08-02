@@ -51,7 +51,9 @@ pub enum Error {
     NeedAtLeastOneAccount,
     #[error("⛔ ️No contract named {0:?}")]
     BadContractName(String),
-    #[error("⛔ ️Contract must be identified by its ID in production or staging. Invalid ID: {0:?}")]
+    #[error(
+        "⛔ ️Contract must be identified by its ID in production or staging. Invalid ID: {0:?}"
+    )]
     InvalidContractID(String),
     #[error("⛔ ️Unable to parse init script: {0:?}")]
     InitParseFailure(String),

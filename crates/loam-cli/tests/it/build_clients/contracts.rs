@@ -116,7 +116,6 @@ soroban_token_contract.client = false
     });
 }
 
-
 #[test]
 fn contract_alias_skips_install() {
     TestEnv::from("soroban-init-boilerplate", |env| {
@@ -175,8 +174,7 @@ soroban_token_contract.client = false
         let Some(contract_id) = extract_contract_id(&message) else {
             panic!("Could not find contract ID in stderr");
         };
-        env.set_environments_toml(
-            format!(
+        env.set_environments_toml(format!(
             r#"
 production.accounts = [
     {{ name = "alice" }},
@@ -189,13 +187,11 @@ network-passphrase = "Standalone Network ; February 2017"
 [production.contracts]
 {}.client = true
 "#,
-            contract_id),
-        );
+            contract_id
+        ));
 
         // ensure production can identify via contract ID
-        env
-            .loam_build("production", true)
-            .assert().success();
+        env.loam_build("production", true).assert().success();
 
         env.set_environments_toml(
             r#"
