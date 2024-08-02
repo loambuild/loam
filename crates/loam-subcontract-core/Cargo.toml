@@ -4,6 +4,7 @@ version = "0.7.6"
 edition = "2021"
 description = "Core Subcontract for redeployable contracts"
 license = "Apache-2.0"
+repository = "https://github.com/loambuild/loam/tree/main/crates/loam-subcontract-core"
 
 
 [dependencies]
