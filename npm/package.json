@@ -1,6 +1,6 @@
 {
   "name": "loam-cli",
-  "version": "0.13.2",
+  "version": "0.14.0",
   "description": "An npm installation for [loam](https://github.com/loambuild/loam-sdk).",
   "keywords": [],
   "main": "dist/index.js",

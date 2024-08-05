@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.12](https://github.com/loambuild/loam/compare/loam-subcontract-ft-v0.6.11...loam-subcontract-ft-v0.6.12) - 2024-08-02
+
+### Other
+- add urls to cargo.toml files ([#140](https://github.com/loambuild/loam/pull/140))
+
 ## [0.6.11](https://github.com/loambuild/loam/compare/loam-subcontract-ft-v0.6.10...loam-subcontract-ft-v0.6.11) - 2024-07-20
 
 ### Other
