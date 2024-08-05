@@ -1,5 +1,5 @@
 [package]
-name = "example-calculator"
+name = "example-nft"
 version = "0.0.0"
 authors = ["Stellar Development Foundation <info@stellar.org>"]
 license = "Apache-2.0"
@@ -17,3 +17,6 @@ loam-subcontract-core = { workspace = true }
 
 [dev-dependencies]
 loam-sdk = { workspace = true, features = ["soroban-sdk-testutils"] }
+
+[package.metadata.loam]
+contract = true

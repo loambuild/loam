@@ -1010,6 +1010,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "example-nft"
+version = "0.0.0"
+dependencies = [
+ "loam-sdk",
+ "loam-subcontract-core",
+]
+
+[[package]]
 name = "example-status-message"
 version = "0.0.0"
 dependencies = [
