@@ -984,40 +984,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b90ca2580b73ab6a1f724b76ca11ab632df820fd6040c336200d2c1df7b3c82c"
 
 [[package]]
-name = "example-calculator"
-version = "0.0.0"
-dependencies = [
- "loam-sdk",
- "loam-subcontract-core",
-]
-
-[[package]]
-name = "example-core"
-version = "0.0.0"
-dependencies = [
- "loam-sdk",
- "loam-soroban-sdk",
- "loam-subcontract-core",
-]
-
-[[package]]
-name = "example-ft"
-version = "0.0.0"
-dependencies = [
- "loam-sdk",
- "loam-subcontract-core",
- "loam-subcontract-ft",
-]
-
-[[package]]
-name = "example-status-message"
-version = "0.0.0"
-dependencies = [
- "loam-sdk",
- "loam-subcontract-core",
-]
-
-[[package]]
 name = "faster-hex"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
