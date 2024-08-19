@@ -49,30 +49,27 @@ fn canonicalize_path(path: &Path) -> PathBuf {
 
 #[derive(Clone)]
 struct Watcher {
-    root_env: Arc<PathBuf>,
+    env_toml_dir: Arc<PathBuf>,
+    env_toml_filename: String,
     packages: Arc<Vec<PathBuf>>,
 }
 
 impl Watcher {
-    pub fn new(root_env: &Path, packages: &[PathBuf]) -> Self {
+    pub fn new(env_toml_dir: &Path, env_toml_filename: &str, packages: &[PathBuf]) -> Self {
         Self {
-            root_env: Arc::new(canonicalize_path(root_env)),
-            packages: Arc::new(
-                packages
-                    .iter()
-                    .map(|p: &PathBuf| canonicalize_path(p))
-                    .collect(),
-            ),
+            env_toml_dir: Arc::new(canonicalize_path(env_toml_dir)),
+            env_toml_filename: env_toml_filename.to_string(),
+            packages: Arc::new(packages.iter().map(|p| canonicalize_path(p)).collect()),
         }
     }
 
     pub fn is_watched(&self, path: &Path) -> bool {
         let path = canonicalize_path(path);
-        self.packages.iter().any(|p| path.starts_with(p))
+        self.packages.iter().any(|p| path.starts_with(p)) || self.is_env_toml(&path)
     }
 
     pub fn is_env_toml(&self, path: &Path) -> bool {
-        canonicalize_path(path) == *self.root_env
+        path == self.env_toml_dir.join(&self.env_toml_filename)
     }
 
     pub fn handle_event(&self, event: &notify::Event, tx: &mpsc::Sender<Message>) {
@@ -86,10 +83,10 @@ impl Watcher {
                 if is_temporary_file(path) {
                     return;
                 }
-                if self.is_watched(path) || self.is_env_toml(path) {
+                if self.is_watched(path) {
                     eprintln!("File changed: {path:?}");
                     if let Err(e) = tx.blocking_send(Message::FileChanged) {
-                        eprintln!("Error sending through channel: {e}");
+                        eprintln!("Error sending through channel: {e:?}");
                     }
                 }
             }
@@ -98,7 +95,7 @@ impl Watcher {
 }
 
 fn is_temporary_file(path: &Path) -> bool {
-    const IGNORED_EXTENSIONS: &[&str] = &["tmp", "swp", "swo"];
+    const IGNORED_EXTENSIONS: &[&str] = &["tmp", "swp", "swo", "swx"];
     let file_name = path
         .file_name()
         .expect("Path should have a file name")
@@ -142,7 +139,8 @@ impl Cmd {
             .manifest_path
             .parent()
             .unwrap_or_else(|| Path::new("."));
-        let env_toml_path = workspace_root.join("environments.toml");
+        let env_toml_dir = workspace_root;
+        let env_toml_filename = "environments.toml";
 
         let packages = self
             .build_cmd
@@ -151,7 +149,7 @@ impl Cmd {
             .map(|package| PathBuf::from(package.manifest_path.parent().unwrap().as_str()))
             .collect::<Vec<_>>();
 
-        let watcher = Watcher::new(&env_toml_path, &packages);
+        let watcher = Watcher::new(env_toml_dir, env_toml_filename, &packages);
 
         for package_path in watcher.packages.iter() {
             eprintln!("Watching {}", package_path.display());
@@ -166,7 +164,7 @@ impl Cmd {
             .unwrap();
 
         notify_watcher.watch(
-            &canonicalize_path(&env_toml_path),
+            &canonicalize_path(env_toml_dir),
             RecursiveMode::NonRecursive,
         )?;
         for package_path in packages {
@@ -174,8 +172,7 @@ impl Cmd {
         }
 
         let build_command = self.cloned_build_command();
-        let cmd = build_command.lock().await;
-        if let Err(e) = cmd.run().await {
+        if let Err(e) = build_command.run().await {
             eprintln!("Build error: {e}");
         }
         eprintln!("Watching for changes. Press Ctrl+C to stop.");
@@ -187,7 +184,7 @@ impl Cmd {
                     let mut state = rebuild_state_clone.lock().await;
                     let build_command_inner = build_command.clone();
                     if !*state {
-                        *state= true;
+                        *state = true;
                         tokio::spawn(Self::debounced_rebuild(build_command_inner, Arc::clone(&rebuild_state_clone)));
                     }
                 }
@@ -200,16 +197,12 @@ impl Cmd {
         Ok(())
     }
 
-    async fn debounced_rebuild(
-        build_command: Arc<Mutex<build::Cmd>>,
-        rebuild_state: Arc<Mutex<bool>>,
-    ) {
+    async fn debounced_rebuild(build_command: Arc<build::Cmd>, rebuild_state: Arc<Mutex<bool>>) {
         // Debounce to avoid multiple rapid rebuilds
         time::sleep(std::time::Duration::from_secs(1)).await;
 
         eprintln!("Changes detected. Rebuilding...");
-        let cmd = build_command.lock().await;
-        if let Err(e) = cmd.run().await {
+        if let Err(e) = build_command.run().await {
             eprintln!("Build error: {e}");
         }
         eprintln!("Watching for changes. Press Ctrl+C to stop.");
@@ -218,11 +211,11 @@ impl Cmd {
         *state = false;
     }
 
-    fn cloned_build_command(&mut self) -> Arc<Mutex<build::Cmd>> {
+    fn cloned_build_command(&mut self) -> Arc<build::Cmd> {
         self.build_cmd
             .build_clients_args
             .env
             .get_or_insert(LoamEnv::Development);
-        Arc::new(Mutex::new(self.build_cmd.clone()))
+        Arc::new(self.build_cmd.clone())
     }
 }

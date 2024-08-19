@@ -91,13 +91,19 @@ impl TestEnv {
     ) {
         let timeout_duration = Duration::from_secs(120); // 2 minutes
         let result = timeout(timeout_duration, async {
-            while let Some(line) = lines.next().await {
-                let line = line.expect("Failed to read line");
-                println!("{line}");
-                if line.contains(expected) {
-                    return;
+            loop {
+                match lines.next().await {
+                    Some(Ok(line)) => {
+                        println!("{line}");
+                        if line.contains(expected) {
+                            return;
+                        }
+                    }
+                    Some(Err(e)) => println!("Error reading line: {:?}", e),
+                    None => {
+                        sleep(Duration::from_millis(100)).await;
+                    }
                 }
-                sleep(Duration::from_millis(100)).await;
             }
         })
         .await;
@@ -185,12 +191,15 @@ impl TestEnv {
         PathBuf::from(env!("CARGO_BIN_EXE_loam"))
     }
 
-    pub fn loam_process(&self, cmd: &str) -> ProcessCommand {
+    pub fn loam_process(&self, cmd: &str, additional_args: &[&str]) -> ProcessCommand {
         let bin = Self::cargo_bin_loam();
         println!("{}", bin.display());
         let mut loam = ProcessCommand::new(bin);
         loam.current_dir(&self.cwd);
         loam.arg(cmd);
+        for arg in additional_args {
+            loam.arg(arg);
+        }
         loam
     }
 
