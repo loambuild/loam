@@ -11,6 +11,7 @@ use tokio::time;
 
 use crate::commands::build;
 
+use super::build::env_toml::ENV_FILE;
 use super::build::clients::LoamEnv;
 
 enum Message {
@@ -50,15 +51,13 @@ fn canonicalize_path(path: &Path) -> PathBuf {
 #[derive(Clone)]
 struct Watcher {
     env_toml_dir: Arc<PathBuf>,
-    env_toml_filename: String,
     packages: Arc<Vec<PathBuf>>,
 }
 
 impl Watcher {
-    pub fn new(env_toml_dir: &Path, env_toml_filename: &str, packages: &[PathBuf]) -> Self {
+    pub fn new(env_toml_dir: &Path, packages: &[PathBuf]) -> Self {
         Self {
             env_toml_dir: Arc::new(canonicalize_path(env_toml_dir)),
-            env_toml_filename: env_toml_filename.to_string(),
             packages: Arc::new(packages.iter().map(|p| canonicalize_path(p)).collect()),
         }
     }
@@ -69,7 +68,7 @@ impl Watcher {
     }
 
     pub fn is_env_toml(&self, path: &Path) -> bool {
-        path == self.env_toml_dir.join(&self.env_toml_filename)
+        path == self.env_toml_dir.join(ENV_FILE)
     }
 
     pub fn handle_event(&self, event: &notify::Event, tx: &mpsc::Sender<Message>) {
@@ -140,7 +139,6 @@ impl Cmd {
             .parent()
             .unwrap_or_else(|| Path::new("."));
         let env_toml_dir = workspace_root;
-        let env_toml_filename = "environments.toml";
 
         let packages = self
             .build_cmd
@@ -149,7 +147,7 @@ impl Cmd {
             .map(|package| PathBuf::from(package.manifest_path.parent().unwrap().as_str()))
             .collect::<Vec<_>>();
 
-        let watcher = Watcher::new(env_toml_dir, env_toml_filename, &packages);
+        let watcher = Watcher::new(env_toml_dir, &packages);
 
         for package_path in watcher.packages.iter() {
             eprintln!("Watching {}", package_path.display());
