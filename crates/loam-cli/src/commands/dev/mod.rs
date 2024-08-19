@@ -11,8 +11,8 @@ use tokio::time;
 
 use crate::commands::build;
 
-use super::build::env_toml::ENV_FILE;
 use super::build::clients::LoamEnv;
+use super::build::env_toml::ENV_FILE;
 
 enum Message {
     FileChanged,
