@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "crates/loam-cli/examples/soroban/*", "test/*"]
+members = ["crates/*", "test/*"]
 exclude = ["test/*"]
 
 [workspace.package]
