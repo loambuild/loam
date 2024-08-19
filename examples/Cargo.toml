@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = [
+  "soroban/*",
+]
+
+[workspace.dependencies]
+loam-sdk = { path = "../../crates/loam-sdk" }
+loam-subcontract-core = { path = "../../crates/loam-subcontract-core" }
+loam-soroban-sdk = { path = "../../crates/loam-soroban-sdk" }
+
+cargo_metadata = "0.18.1"
+thiserror = "1.0.38"
