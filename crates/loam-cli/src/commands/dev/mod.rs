@@ -59,28 +59,33 @@ pub struct Watcher {
 impl Watcher {
     pub fn new(env_toml_dir: &Path, packages: &[PathBuf]) -> Self {
         let env_toml_dir: Arc<PathBuf> = Arc::new(canonicalize_path(env_toml_dir));
-        let packages: Arc<Vec<PathBuf>> = Arc::new(packages.iter().map(|p| canonicalize_path(p)).collect());
-        
+        let packages: Arc<Vec<PathBuf>> =
+            Arc::new(packages.iter().map(|p| canonicalize_path(p)).collect());
+
         let mut builder = GitignoreBuilder::new(&*env_toml_dir);
         for package in packages.iter() {
             builder.add(package);
         }
 
         let common_ignores = vec![
-            "*.swp", "*.swo", "*.swx", // Vim swap files
-            "4913", // Vim temp files
+            "*.swp",
+            "*.swo",
+            "*.swx",     // Vim swap files
+            "4913",      // Vim temp files
             ".DS_Store", // macOS
             "Thumbs.db", // Windows
-            "*~", // Backup files
-            "*.bak", // Backup files
-            ".vscode/", // VS Code
-            ".idea/", // IntelliJ
-            "*.tmp", // Temporary files
-            "*.log", // Log files
+            "*~",        // Backup files
+            "*.bak",     // Backup files
+            ".vscode/",  // VS Code
+            ".idea/",    // IntelliJ
+            "*.tmp",     // Temporary files
+            "*.log",     // Log files
         ];
-        
+
         for pattern in common_ignores {
-            builder.add_line(None, pattern).expect("Failed to add ignore pattern");
+            builder
+                .add_line(None, pattern)
+                .expect("Failed to add ignore pattern");
         }
 
         let ignores = Arc::new(builder.build().expect("Failed to build GitIgnore"));
