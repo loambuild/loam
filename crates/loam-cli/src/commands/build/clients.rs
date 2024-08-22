@@ -486,7 +486,7 @@ export default new Client.Client({{
             args.extend_from_slice(&["--"]);
             args.extend(command_parts.iter().map(|s| s.as_str()));
 
-            eprintln!("  ↳ Executing: soroban contract invoke {}", args.join(" "));
+            eprintln!("  ↳ Executing: stellar contract invoke {}", args.join(" "));
             let result = cli::contract::invoke::Cmd::parse_arg_vec(&args)?
                 .run_against_rpc_server(None, None)
                 .await?;
