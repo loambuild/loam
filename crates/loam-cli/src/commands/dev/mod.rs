@@ -80,6 +80,8 @@ impl Watcher {
             ".idea/",    // IntelliJ
             "*.tmp",     // Temporary files
             "*.log",     // Log files
+            ".#*",       // Emacs lock files
+            "#*#",       // Emacs auto-save files
         ];
 
         for pattern in common_ignores {
