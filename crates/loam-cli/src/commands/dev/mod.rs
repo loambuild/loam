@@ -1,4 +1,5 @@
 use clap::Parser;
+use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use notify::{self, RecursiveMode, Watcher as _};
 use std::{
     env, fs,
@@ -14,7 +15,7 @@ use crate::commands::build;
 use super::build::clients::LoamEnv;
 use super::build::env_toml::ENV_FILE;
 
-enum Message {
+pub enum Message {
     FileChanged,
 }
 
@@ -49,22 +50,51 @@ fn canonicalize_path(path: &Path) -> PathBuf {
 }
 
 #[derive(Clone)]
-struct Watcher {
+pub struct Watcher {
     env_toml_dir: Arc<PathBuf>,
     packages: Arc<Vec<PathBuf>>,
+    ignores: Arc<Gitignore>,
 }
 
 impl Watcher {
     pub fn new(env_toml_dir: &Path, packages: &[PathBuf]) -> Self {
+        let env_toml_dir: Arc<PathBuf> = Arc::new(canonicalize_path(env_toml_dir));
+        let packages: Arc<Vec<PathBuf>> = Arc::new(packages.iter().map(|p| canonicalize_path(p)).collect());
+        
+        let mut builder = GitignoreBuilder::new(&*env_toml_dir);
+        for package in packages.iter() {
+            builder.add(package);
+        }
+
+        let common_ignores = vec![
+            "*.swp", "*.swo", "*.swx", // Vim swap files
+            "4913", // Vim temp files
+            ".DS_Store", // macOS
+            "Thumbs.db", // Windows
+            "*~", // Backup files
+            "*.bak", // Backup files
+            ".vscode/", // VS Code
+            ".idea/", // IntelliJ
+            "*.tmp", // Temporary files
+            "*.log", // Log files
+        ];
+        
+        for pattern in common_ignores {
+            builder.add_line(None, pattern).expect("Failed to add ignore pattern");
+        }
+
+        let ignores = Arc::new(builder.build().expect("Failed to build GitIgnore"));
+
         Self {
-            env_toml_dir: Arc::new(canonicalize_path(env_toml_dir)),
-            packages: Arc::new(packages.iter().map(|p| canonicalize_path(p)).collect()),
+            env_toml_dir,
+            packages,
+            ignores,
         }
     }
 
     pub fn is_watched(&self, path: &Path) -> bool {
         let path = canonicalize_path(path);
-        self.packages.iter().any(|p| path.starts_with(p)) || self.is_env_toml(&path)
+        !self.ignores.matched(&path, path.is_dir()).is_ignore()
     }
 
     pub fn is_env_toml(&self, path: &Path) -> bool {
@@ -79,9 +109,6 @@ impl Watcher {
                 | notify::EventKind::Remove(_)
         ) {
             if let Some(path) = event.paths.first() {
-                if is_temporary_file(path) {
-                    return;
-                }
                 if self.is_watched(path) {
                     eprintln!("File changed: {path:?}");
                     if let Err(e) = tx.blocking_send(Message::FileChanged) {
@@ -91,42 +118,6 @@ impl Watcher {
             }
         }
     }
-}
-
-fn is_temporary_file(path: &Path) -> bool {
-    const IGNORED_EXTENSIONS: &[&str] = &["tmp", "swp", "swo", "swx"];
-    let file_name = path
-        .file_name()
-        .expect("Path should have a file name")
-        .to_str()
-        .expect("File name should be valid UTF-8");
-
-    // Vim and vscode temporary files
-    if path
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .map_or(false, |ext| {
-            IGNORED_EXTENSIONS
-                .iter()
-                .any(|&ignored| ext.eq_ignore_ascii_case(ignored))
-        })
-    {
-        return true;
-    }
-
-    // Vim temporary files
-    if file_name.ends_with('~') {
-        return true;
-    }
-
-    // Emacs temporary files
-    if file_name.starts_with('#') && file_name.ends_with('#') {
-        return true;
-    }
-
-    // Add more patterns for other editors as needed
-
-    false
 }
 
 impl Cmd {

@@ -2717,6 +2717,7 @@ dependencies = [
  "fs_extra",
  "heck 0.5.0",
  "hex",
+ "ignore",
  "itertools 0.12.1",
  "loam-build",
  "notify",

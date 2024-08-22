@@ -48,6 +48,7 @@ tokio = { version = "1", features = ["full"] }
 tokio-stream = { version = "0.1", features = ["io-util"] }
 dirs = "5.0.1"
 itertools = "0.12.1"
+ignore = "0.4"
 strsim = "0.11.1"
 heck = "0.5.0"
 pathdiff = "0.2.1"
