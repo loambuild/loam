@@ -36,6 +36,7 @@ impl MyFungibleToken {
         }
     }
 }
+
 impl Default for MyFungibleToken {
     fn default() -> Self {
         Self::new(
@@ -59,18 +60,57 @@ impl IsFungible for MyFungibleToken {
         self.allowances.get(Txn(from, spender)).unwrap_or_default()
     }
 
-    fn increase_allowance(&mut self, from: Address, spender: Address, amount: i128) {
-        let new_allowance = self.allowance(from.clone(), spender.clone()) + amount;
-        self.allowances.set(Txn(from, spender), new_allowance);
-    }
-
-    fn decrease_allowance(&mut self, from: Address, spender: Address, amount: i128) {
-        let new_allowance = self.allowance(from.clone(), spender.clone()) - amount;
-        self.allowances.set(Txn(from, spender), new_allowance);
+    fn approve(&mut self, from: Address, spender: Address, amount: i128, live_until_ledger: u32) {
+        from.require_auth();
+        self.allowances.set(Txn(from, spender), amount);
+        env().ledger().set_expiration_ledger(live_until_ledger);
     }
 
     fn balance(&self, id: Address) -> i128 {
         self.balances.get(id).unwrap_or_default()
+    }
+
+    fn transfer(&mut self, from: Address, to: Address, amount: i128) {
+        from.require_auth();
+        let from_balance = self.balance(from.clone()) - amount;
+        let to_balance = self.balance(to.clone()) + amount;
+        self.balances.set(from, from_balance);
+        self.balances.set(to, to_balance);
+    }
+
+    fn transfer_from(&mut self, spender: Address, from: Address, to: Address, amount: i128) {
+        spender.require_auth();
+        let allowance = self.allowance(from.clone(), spender.clone());
+        if allowance >= amount {
+            self.transfer(from.clone(), to, amount);
+            self.decrease_allowance(from, spender, amount);
+        }
+    }
+
+    fn burn(&mut self, from: Address, amount: i128) {
+        from.require_auth();
+        let balance = self.balance(from.clone()) - amount;
+        self.balances.set(from, balance);
+    }
+
+    fn burn_from(&mut self, spender: Address, from: Address, amount: i128) {
+        spender.require_auth();
+        let allowance = self.allowance(from.clone(), spender.clone());
+        if allowance >= amount {
+            self.burn(from.clone(), amount);
+            self.decrease_allowance(from, spender, amount);
+        }
+    }
+
+    fn increase_allowance(&mut self, from: Address, spender: Address, amount: i128) {
+        from.require_auth();
+        let new_allowance = self.allowance(from.clone(), spender.clone()) + amount;
+        self.allowances.set(Txn(from, spender), new_allowance);
+    }
+    fn decrease_allowance(&mut self, from: Address, spender: Address, amount: i128) {
+        from.require_auth();
+        let new_allowance = self.allowance(from.clone(), spender.clone()) - amount;
+        self.allowances.set(Txn(from, spender), new_allowance);
     }
 
     fn spendable_balance(&self, id: Address) -> i128 {
@@ -81,35 +121,8 @@ impl IsFungible for MyFungibleToken {
         self.authorized.get(id).unwrap_or_default()
     }
 
-    fn transfer(&mut self, from: Address, to: Address, amount: i128) {
-        let from_balance = self.balance(from.clone()) - amount;
-        let to_balance = self.balance(to.clone()) + amount;
-        self.balances.set(from, from_balance);
-        self.balances.set(to, to_balance);
-    }
-
-    fn transfer_from(&mut self, spender: Address, from: Address, to: Address, amount: i128) {
-        let allowance = self.allowance(from.clone(), spender.clone());
-        if allowance >= amount {
-            self.transfer(from.clone(), to, amount);
-            self.decrease_allowance(from, spender, amount);
-        }
-    }
-
-    fn burn(&mut self, from: Address, amount: i128) {
-        let balance = self.balance(from.clone()) - amount;
-        self.balances.set(from, balance);
-    }
-
-    fn burn_from(&mut self, spender: Address, from: Address, amount: i128) {
-        let allowance = self.allowance(from.clone(), spender.clone());
-        if allowance >= amount {
-            self.burn(from.clone(), amount);
-            self.decrease_allowance(from, spender, amount);
-        }
-    }
-
     fn set_authorized(&mut self, id: Address, authorize: bool) {
+        self.admin.require_auth();
         self.authorized.set(id, authorize);
     }
 
@@ -118,24 +131,22 @@ impl IsFungible for MyFungibleToken {
         let balance = self.balance(to.clone()) + amount;
         self.balances.set(to, balance);
     }
+
     fn clawback(&mut self, from: Address, amount: i128) {
+        self.admin.require_auth();
         let balance = self.balance(from.clone()) - amount;
         self.balances.set(from, balance);
-    }
-
-    fn set_admin(&mut self, new_admin: Address) {
-        self.admin = new_admin;
     }
 
     fn decimals(&self) -> u32 {
         self.decimals
     }
 
-    fn name(&self) -> Bytes {
-        self.name.clone()
+    fn name(&self) -> String {
+        String::from_slice(env(), &self.name)
     }
 
-    fn symbol(&self) -> Bytes {
-        self.symbol.clone()
+    fn symbol(&self) -> String {
+        String::from_slice(env(), &self.symbol)
     }
 }
