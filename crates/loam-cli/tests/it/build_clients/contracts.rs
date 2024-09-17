@@ -216,7 +216,6 @@ soroban_token_contract.client = false
             .output()
             .expect("Failed to execute command");
 
-        //println!("stderr: {}", String::from_utf8_lossy(&output4.stderr));
         // ensure contract hash change check works, should throw error in production
         assert!(!output4.status.success());
         assert!(String::from_utf8_lossy(&output4.stderr)
