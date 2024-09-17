@@ -71,6 +71,9 @@ pub struct Contract {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub init: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
 }
 
 impl Environment {

@@ -51,10 +51,10 @@ pub enum Error {
     NeedAtLeastOneAccount,
     #[error("⛔ ️No contract named {0:?}")]
     BadContractName(String),
-    #[error(
-        "⛔ ️Contract must be identified by its ID in production or staging. Invalid ID: {0:?}"
-    )]
+    #[error("⛔ ️Invalid contract ID: {0:?}")]
     InvalidContractID(String),
+    #[error("⛔ ️An ID must be set for a contract in production or staging. E.g. <name>.id = C...")]
+    MissingContractID(String),
     #[error("⛔ ️Unable to parse init script: {0:?}")]
     InitParseFailure(String),
     #[error("⛔ ️Failed to execute subcommand: {0:?}\n{1:?}")]
@@ -331,13 +331,16 @@ export default new Client.Client({{
         let env = self.loam_env(LoamEnv::Production);
         if env == "production" || env == "staging" {
             if let Some(contracts) = contracts {
-                for (name, _) in contracts.iter().filter(|(_, settings)| settings.client) {
-                    // ensure contract names are valid contract IDs
-                    if stellar_strkey::Contract::from_string(name.as_ref()).is_err() {
-                        return Err(Error::InvalidContractID(name.to_string()));
+                for (name, contract) in contracts.iter().filter(|(_, settings)| settings.client) {
+                    if let Some(id) = &contract.id {
+                        if stellar_strkey::Contract::from_string(id).is_err() {
+                            return Err(Error::InvalidContractID(id.to_string()));
+                        }
+                        self.generate_contract_bindings(workspace_root, name, id)
+                            .await?;
+                    } else {
+                        return Err(Error::MissingContractID(name.to_string()));
                     }
-                    self.generate_contract_bindings(workspace_root, name, name)
-                        .await?;
                 }
             }
             return Ok(());

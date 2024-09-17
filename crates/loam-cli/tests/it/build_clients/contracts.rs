@@ -181,7 +181,8 @@ rpc-url = "http://localhost:8000/rpc"
 network-passphrase = "Standalone Network ; February 2017"
 
 [production.contracts]
-{}.client = true
+hello_world.client = true
+hello_world.id = {}
 "#,
             contract_id
         ));
@@ -215,7 +216,7 @@ soroban_token_contract.client = false
         // ensure contract hash change check works, should throw error in production
         assert!(!output4.status.success());
         assert!(String::from_utf8_lossy(&output4.stderr)
-            .contains("️Contract must be identified by its ID in production or staging"));
+            .contains("️An ID must be set for a contract in production or staging"));
     });
 }
 
