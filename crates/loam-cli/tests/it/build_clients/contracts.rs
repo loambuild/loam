@@ -143,7 +143,6 @@ soroban_token_contract.client = false
             .output()
             .expect("Failed to execute command");
 
-        //println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
         // ensure it imports
         assert!(output.status.success());
         assert!(String::from_utf8_lossy(&output.stderr)
