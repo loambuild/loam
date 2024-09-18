@@ -64,7 +64,8 @@ impl From<AccountRepresentation> for Account {
     }
 }
 
-#[derive(Debug, serde::Deserialize, Clone)]
+
+#[derive(Debug, Deserialize, Clone, Default)]
 pub struct Contract {
     #[serde(default = "default_client", skip_serializing_if = "std::ops::Not::not")]
     pub client: bool,
@@ -78,16 +79,6 @@ pub struct Contract {
 
 fn default_client() -> bool {
     true
-}
-
-impl Default for Contract {
-    fn default() -> Self {
-        Contract {
-            client: false,
-            init: None,
-            id: None,
-        }
-    }
 }
 
 impl Environment {
