@@ -44,6 +44,6 @@ soroban_token_contract.client = false
             .assert()
             .success()
             .stderr_as_str();
-        assert!(stderr.contains("Account already exists"));
+        assert!(stderr.is_empty());
     });
 }
