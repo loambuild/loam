@@ -64,7 +64,6 @@ impl From<AccountRepresentation> for Account {
     }
 }
 
-
 #[derive(Debug, Deserialize, Clone, Default)]
 pub struct Contract {
     #[serde(default = "default_client", skip_serializing_if = "std::ops::Not::not")]
