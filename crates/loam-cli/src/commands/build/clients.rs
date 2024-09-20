@@ -95,7 +95,7 @@ impl Args {
         Self::add_network_to_env(&current_env.network)?;
         // Create the '.stellar' directory if it doesn't exist - for saving contract aliases and account aliases
         std::fs::create_dir_all(workspace_root.join(".stellar"))
-            .map_err( soroban_cli::config::locator::Error::Io)?;
+            .map_err(soroban_cli::config::locator::Error::Io)?;
         Self::handle_accounts(current_env.accounts.as_deref()).await?;
         self.handle_contracts(
             workspace_root,
