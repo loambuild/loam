@@ -1,11 +1,11 @@
 #![no_std]
 use loam_sdk::derive_contract;
 use loam_subcontract_core::{admin::Admin, Core};
-use loam_subcontract_ft::{IsFungible, IsSep41, Initable };
+use loam_subcontract_ft::{Sep41, Fungible, Initable };
 
 pub mod ft;
 
 use ft::MyFungibleToken;
 
-#[derive_contract(Core(Admin), IsSep41(MyFungibleToken), IsFungible(MyFungibleToken), Initable(MyFungibleToken))]
+#[derive_contract(Core(Admin), Sep41(MyFungibleToken), Fungible(MyFungibleToken), Initable(MyFungibleToken))]
 pub struct Contract;

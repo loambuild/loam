@@ -3,7 +3,7 @@ use loam_sdk::{
     IntoKey,
 };
 use loam_subcontract_core::Core;
-use loam_subcontract_ft::{IsFungible, IsInitable, IsSep41};
+use loam_subcontract_ft::{IsSep41, IsFungible, IsInitable};
 
 
 use crate::Contract;
@@ -133,8 +133,6 @@ impl IsSep41 for MyFungibleToken {
     fn symbol(&self) -> String {
         self.symbol.clone()
     }
-
-
 }
 
 impl IsFungible for MyFungibleToken {

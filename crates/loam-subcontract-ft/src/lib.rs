@@ -1,5 +1,5 @@
 #![no_std]
-use loam_sdk::{soroban_sdk::{Address, Lazy, String}, subcontract};
+use loam_sdk::{soroban_sdk::Lazy, subcontract};
 
 /// SEP-41: Fungible Token Interface
 ///
@@ -15,62 +15,62 @@ use loam_sdk::{soroban_sdk::{Address, Lazy, String}, subcontract};
 #[subcontract]
 pub trait IsSep41 {
     /// Returns the allowance for `spender` to transfer from `from`.
-    fn allowance(&self, from: Address, spender: Address) -> i128;
+    fn allowance(&self, from: loam_sdk::soroban_sdk::Address, spender: loam_sdk::soroban_sdk::Address) -> i128;
 
     /// Set the allowance by `amount` for `spender` to transfer/burn from `from`.
-    fn approve(&mut self, from: Address, spender: Address, amount: i128, live_until_ledger: u32);
+    fn approve(&mut self, from: loam_sdk::soroban_sdk::Address, spender: loam_sdk::soroban_sdk::Address, amount: i128, live_until_ledger: u32);
 
     /// Returns the balance of `id`.
-    fn balance(&self, id: Address) -> i128;
+    fn balance(&self, id: loam_sdk::soroban_sdk::Address) -> i128;
 
     /// Transfer `amount` from `from` to `to`.
-    fn transfer(&mut self, from: Address, to: Address, amount: i128);
+    fn transfer(&mut self, from: loam_sdk::soroban_sdk::Address, to: loam_sdk::soroban_sdk::Address, amount: i128);
 
     /// Transfer `amount` from `from` to `to`, consuming the allowance of `spender`.
-    fn transfer_from(&mut self, spender: Address, from: Address, to: Address, amount: i128);
+    fn transfer_from(&mut self, spender: loam_sdk::soroban_sdk::Address, from: loam_sdk::soroban_sdk::Address, to: loam_sdk::soroban_sdk::Address, amount: i128);
 
     /// Burn `amount` from `from`.
-    fn burn(&mut self, from: Address, amount: i128);
+    fn burn(&mut self, from: loam_sdk::soroban_sdk::Address, amount: i128);
 
     /// Burn `amount` from `from`, consuming the allowance of `spender`.
-    fn burn_from(&mut self, spender: Address, from: Address, amount: i128);
+    fn burn_from(&mut self, spender: loam_sdk::soroban_sdk::Address, from: loam_sdk::soroban_sdk::Address, amount: i128);
 
     /// Returns the number of decimals used to represent amounts of this token.
     fn decimals(&self) -> u32;
 
     /// Returns the name for this token.
-    fn name(&self) -> String;
+    fn name(&self) -> loam_sdk::soroban_sdk::String;
 
     /// Returns the symbol for this token.
-    fn symbol(&self) -> String;
+    fn symbol(&self) -> loam_sdk::soroban_sdk::String;
+
 }
-/// The `IsFungible` trait defines methods for implementing a fungible token on the Soroban blockchain.
-/// Fungible tokens are assets that can be exchanged for one another, like a standard currency.
+
 #[subcontract]
 pub trait IsFungible: IsSep41 {
     /// Increases the allowance that one address can spend on behalf of another address.
-    fn increase_allowance(&mut self, from: Address, spender: Address, amount: i128);
+    fn increase_allowance(&mut self, from: loam_sdk::soroban_sdk::Address, spender: loam_sdk::soroban_sdk::Address, amount: i128);
 
     /// Decreases the allowance that one address can spend on behalf of another address.
-    fn decrease_allowance(&mut self, from: Address, spender: Address, amount: i128);
+    fn decrease_allowance(&mut self, from: loam_sdk::soroban_sdk::Address, spender: loam_sdk::soroban_sdk::Address, amount: i128);
 
     /// Returns the spendable balance of tokens for a specific address.
-    fn spendable_balance(&self, id: Address) -> i128;
+    fn spendable_balance(&self, id: loam_sdk::soroban_sdk::Address) -> i128;
 
     /// Checks if a specific address is authorized.
-    fn authorized(&self, id: Address) -> bool;
+    fn authorized(&self, id: loam_sdk::soroban_sdk::Address) -> bool;
 
     /// Sets the authorization status of a specific address.
-    fn set_authorized(&mut self, id: Address, authorize: bool);
+    fn set_authorized(&mut self, id: loam_sdk::soroban_sdk::Address, authorize: bool);
 
     /// Mints a specified amount of tokens to a specific address.
-    fn mint(&mut self, to: Address, amount: i128);
+    fn mint(&mut self, to: loam_sdk::soroban_sdk::Address, amount: i128);
 
     /// Retrieves a specified amount of tokens from a specific address (clawback).
-    fn clawback(&mut self, from: Address, amount: i128);
+    fn clawback(&mut self, from: loam_sdk::soroban_sdk::Address, amount: i128);
 
     /// Sets a new admin address.
-    fn set_admin(&mut self, new_admin: Address);
+    fn set_admin(&mut self, new_admin: loam_sdk::soroban_sdk::Address);
 }
 
 #[subcontract]
