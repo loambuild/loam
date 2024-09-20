@@ -4073,7 +4073,9 @@ dependencies = [
 
 [[package]]
 name = "soroban-cli"
-version = "21.3.0"
+version = "21.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3affc4ef5957c2e137255bc0b43c51d78e93a6b0d15fbc795bd136690e750d29"
 dependencies = [
  "async-compression",
  "async-trait",
@@ -4095,6 +4097,7 @@ dependencies = [
  "futures",
  "futures-util",
  "gix",
+ "glob",
  "heck 0.5.0",
  "hex",
  "home",
@@ -4113,6 +4116,7 @@ dependencies = [
  "regex",
  "rpassword",
  "rust-embed",
+ "semver",
  "sep5",
  "serde",
  "serde-aux",
@@ -4283,9 +4287,9 @@ dependencies = [
 
 [[package]]
 name = "soroban-spec"
-version = "21.2.0"
+version = "21.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b411868046bc9aad3d481ef57ec5db34c58016c715bf871d854c8c752872b19"
+checksum = "40917f326155433baf8d6fa36b3006c19139cf0acc01acf4eaf2516b3eaa23e3"
 dependencies = [
  "base64 0.13.1",
  "stellar-xdr",
@@ -4295,7 +4299,9 @@ dependencies = [
 
 [[package]]
 name = "soroban-spec-json"
-version = "21.3.0"
+version = "21.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a13bb2611e28e3b4e6daf7caff90c2956fd842e97297fb308adeddc2f0fbb1ac"
 dependencies = [
  "serde",
  "serde_derive",
@@ -4308,9 +4314,9 @@ dependencies = [
 
 [[package]]
 name = "soroban-spec-rust"
-version = "21.2.0"
+version = "21.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e71e218a6ea10c0f858993d35b168a21ac7185c936c745a34a371d76d24fba0c"
+checksum = "f11343e04efdaf247f0cd9c8517cb093f60bd2490f8ee76c9f86e2c50308d443"
 dependencies = [
  "prettyplease",
  "proc-macro2",
@@ -4324,7 +4330,9 @@ dependencies = [
 
 [[package]]
 name = "soroban-spec-tools"
-version = "21.3.0"
+version = "21.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1503c6e9e9deebefc6823ccd8f44b6714758ea2e4e5600ffc2520e5ccf7a8427"
 dependencies = [
  "base64 0.21.7",
  "ethnum",
@@ -4341,7 +4349,9 @@ dependencies = [
 
 [[package]]
 name = "soroban-spec-typescript"
-version = "21.3.0"
+version = "21.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c34d8a1cd040ab4435160f7f4df845587e92c33fe2ea5c9d23f2af75df67521"
 dependencies = [
  "base64 0.21.7",
  "heck 0.4.1",
