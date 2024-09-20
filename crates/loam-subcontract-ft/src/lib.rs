@@ -15,25 +15,51 @@ use loam_sdk::{soroban_sdk::Lazy, subcontract};
 #[subcontract]
 pub trait IsSep41 {
     /// Returns the allowance for `spender` to transfer from `from`.
-    fn allowance(&self, from: loam_sdk::soroban_sdk::Address, spender: loam_sdk::soroban_sdk::Address) -> i128;
+    fn allowance(
+        &self,
+        from: loam_sdk::soroban_sdk::Address,
+        spender: loam_sdk::soroban_sdk::Address,
+    ) -> i128;
 
     /// Set the allowance by `amount` for `spender` to transfer/burn from `from`.
-    fn approve(&mut self, from: loam_sdk::soroban_sdk::Address, spender: loam_sdk::soroban_sdk::Address, amount: i128, live_until_ledger: u32);
+    fn approve(
+        &mut self,
+        from: loam_sdk::soroban_sdk::Address,
+        spender: loam_sdk::soroban_sdk::Address,
+        amount: i128,
+        live_until_ledger: u32,
+    );
 
     /// Returns the balance of `id`.
     fn balance(&self, id: loam_sdk::soroban_sdk::Address) -> i128;
 
     /// Transfer `amount` from `from` to `to`.
-    fn transfer(&mut self, from: loam_sdk::soroban_sdk::Address, to: loam_sdk::soroban_sdk::Address, amount: i128);
+    fn transfer(
+        &mut self,
+        from: loam_sdk::soroban_sdk::Address,
+        to: loam_sdk::soroban_sdk::Address,
+        amount: i128,
+    );
 
     /// Transfer `amount` from `from` to `to`, consuming the allowance of `spender`.
-    fn transfer_from(&mut self, spender: loam_sdk::soroban_sdk::Address, from: loam_sdk::soroban_sdk::Address, to: loam_sdk::soroban_sdk::Address, amount: i128);
+    fn transfer_from(
+        &mut self,
+        spender: loam_sdk::soroban_sdk::Address,
+        from: loam_sdk::soroban_sdk::Address,
+        to: loam_sdk::soroban_sdk::Address,
+        amount: i128,
+    );
 
     /// Burn `amount` from `from`.
     fn burn(&mut self, from: loam_sdk::soroban_sdk::Address, amount: i128);
 
     /// Burn `amount` from `from`, consuming the allowance of `spender`.
-    fn burn_from(&mut self, spender: loam_sdk::soroban_sdk::Address, from: loam_sdk::soroban_sdk::Address, amount: i128);
+    fn burn_from(
+        &mut self,
+        spender: loam_sdk::soroban_sdk::Address,
+        from: loam_sdk::soroban_sdk::Address,
+        amount: i128,
+    );
 
     /// Returns the number of decimals used to represent amounts of this token.
     fn decimals(&self) -> u32;
@@ -43,16 +69,25 @@ pub trait IsSep41 {
 
     /// Returns the symbol for this token.
     fn symbol(&self) -> loam_sdk::soroban_sdk::String;
-
 }
 
 #[subcontract]
 pub trait IsFungible: IsSep41 {
     /// Increases the allowance that one address can spend on behalf of another address.
-    fn increase_allowance(&mut self, from: loam_sdk::soroban_sdk::Address, spender: loam_sdk::soroban_sdk::Address, amount: i128);
+    fn increase_allowance(
+        &mut self,
+        from: loam_sdk::soroban_sdk::Address,
+        spender: loam_sdk::soroban_sdk::Address,
+        amount: i128,
+    );
 
     /// Decreases the allowance that one address can spend on behalf of another address.
-    fn decrease_allowance(&mut self, from: loam_sdk::soroban_sdk::Address, spender: loam_sdk::soroban_sdk::Address, amount: i128);
+    fn decrease_allowance(
+        &mut self,
+        from: loam_sdk::soroban_sdk::Address,
+        spender: loam_sdk::soroban_sdk::Address,
+        amount: i128,
+    );
 
     /// Returns the spendable balance of tokens for a specific address.
     fn spendable_balance(&self, id: loam_sdk::soroban_sdk::Address) -> i128;
