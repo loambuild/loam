@@ -1,12 +1,12 @@
 #![allow(clippy::struct_excessive_bools)]
 use crate::commands::build::env_toml;
+use indexmap::IndexMap;
 use regex::Regex;
 use serde_json;
 use shlex::split;
 use soroban_cli::commands::NetworkRunnable;
 use soroban_cli::utils::contract_hash;
 use soroban_cli::{commands as cli, CommandParser};
-use std::collections::BTreeMap as Map;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::process::Command;
@@ -292,7 +292,7 @@ export default new Client.Client({{
     async fn handle_contracts(
         self,
         workspace_root: &std::path::Path,
-        contracts: Option<&Map<Box<str>, env_toml::Contract>>,
+        contracts: Option<&IndexMap<Box<str>, env_toml::Contract>>,
         package_names: Vec<String>,
         network: &Network,
     ) -> Result<(), Error> {

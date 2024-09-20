@@ -63,6 +63,7 @@ stellar-xdr = "21.0.0"
 rust-embed = { version = "8.2.0", features = ["debug-embed"] }
 regex = "1.10.5"
 toml_edit = "0.22.16"
+indexmap = { version = "1.9", features = ["serde"] }
 
 [dev-dependencies]
 assert_cmd = "2.0.4"

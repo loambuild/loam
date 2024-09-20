@@ -1,24 +1,26 @@
+use indexmap::IndexMap;
 use serde::Deserialize;
 use std::collections::BTreeMap as Map;
-use std::io;
 use std::path::Path;
+use toml::Value;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("⛔ ️parsing environments.toml: {0}")]
-    ParsingToml(io::Error),
+    ParsingToml(#[from] toml::de::Error),
     #[error("⛔ ️no settings for current LOAM_ENV ({0:?}) found in environments.toml")]
     NoSettingsForCurrentEnv(String),
+    #[error("⛔ ️reading environments.toml as a string: {0}")]
+    ParsingString(#[from] std::io::Error),
 }
 
 type Environments = Map<Box<str>, Environment>;
 
-#[derive(Debug, serde::Deserialize, Clone)]
+#[derive(Debug, Clone)]
 pub struct Environment {
-    #[serde(default, deserialize_with = "deserialize_accounts")]
     pub accounts: Option<Vec<Account>>,
     pub network: Network,
-    pub contracts: Option<Map<Box<str>, Contract>>,
+    pub contracts: Option<IndexMap<Box<str>, Contract>>,
 }
 
 fn deserialize_accounts<'de, D>(deserializer: D) -> Result<Option<Vec<Account>>, D::Error>
@@ -27,6 +29,41 @@ where
 {
     let opt: Option<Vec<AccountRepresentation>> = Option::deserialize(deserializer)?;
     Ok(opt.map(|vec| vec.into_iter().map(Account::from).collect()))
+}
+
+impl<'de> Deserialize<'de> for Environment {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct EnvironmentHelper {
+            #[serde(default, deserialize_with = "deserialize_accounts")]
+            accounts: Option<Vec<Account>>,
+            network: Network,
+            contracts: Option<Value>,
+        }
+
+        let helper = EnvironmentHelper::deserialize(deserializer)?;
+
+        let contracts = if let Some(Value::Table(contracts_table)) = helper.contracts {
+            let mut ordered_contracts = IndexMap::new();
+            for (key, value) in contracts_table {
+                let contract: Contract =
+                    Contract::deserialize(value).map_err(serde::de::Error::custom)?;
+                ordered_contracts.insert(key.into_boxed_str(), contract);
+            }
+            Some(ordered_contracts)
+        } else {
+            None
+        };
+
+        Ok(Environment {
+            accounts: helper.accounts,
+            network: helper.network,
+            contracts,
+        })
+    }
 }
 
 #[derive(Debug, serde::Deserialize, Clone)]
@@ -81,8 +118,8 @@ impl Environment {
             return Ok(None);
         }
 
-        let toml_str = std::fs::read_to_string(env_toml).map_err(Error::ParsingToml)?;
-        let mut parsed_toml: Environments = toml::from_str(&toml_str).unwrap();
+        let toml_str = std::fs::read_to_string(env_toml)?;
+        let mut parsed_toml: Environments = toml::from_str(&toml_str)?;
         let current_env = parsed_toml.remove(loam_env);
         if current_env.is_none() {
             return Err(Error::NoSettingsForCurrentEnv(loam_env.to_string()));
