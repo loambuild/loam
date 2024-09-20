@@ -79,7 +79,10 @@ impl IsSep41 for MyFungibleToken {
     fn approve(&mut self, from: Address, spender: Address, amount: i128, live_until_ledger: u32) {
         from.require_auth();
         let current_ledger = env().ledger().sequence();
-        assert!(!(live_until_ledger < current_ledger && amount != 0), "live_until_ledger must be greater than or equal to the current ledger number");
+        assert!(
+            !(live_until_ledger < current_ledger && amount != 0),
+            "live_until_ledger must be greater than or equal to the current ledger number"
+        );
         self.allowances.set(
             Txn(from, spender),
             Allowance {
