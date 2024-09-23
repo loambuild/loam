@@ -303,27 +303,29 @@ export default new Client.Client({{
         package_names: &[String],
         contracts: Option<&IndexMap<Box<str>, env_toml::Contract>>,
     ) -> Vec<String> {
-        if let Some(contracts) = contracts {
-            let mut reordered = Vec::new();
-            let mut remaining = package_names.to_vec();
+        contracts.map_or_else(
+            || package_names.to_vec(),
+            |contracts| {
+                let mut reordered: Vec<String> = contracts
+                    .keys()
+                    .filter_map(|contract_name| {
+                        package_names
+                            .iter()
+                            .find(|&name| name == contract_name.as_ref())
+                            .cloned()
+                    })
+                    .collect();
 
-            // First, add packages that exist in contracts in the order they appear in contracts
-            for contract_name in contracts.keys() {
-                if let Some(position) = remaining
-                    .iter()
-                    .position(|name| name == contract_name.as_ref())
-                {
-                    reordered.push(remaining.remove(position));
-                }
-            }
+                reordered.extend(
+                    package_names
+                        .iter()
+                        .filter(|name| !contracts.contains_key(name.as_str()))
+                        .cloned(),
+                );
 
-            // Then, add any remaining packages that weren't in contracts
-            reordered.append(&mut remaining);
-
-            reordered
-        } else {
-            package_names.to_vec()
-        }
+                reordered
+            },
+        )
     }
 
     async fn handle_contracts(
