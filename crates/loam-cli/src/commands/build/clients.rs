@@ -424,9 +424,6 @@ export default new Client.Client({{
                         eprintln!("✅ Contract {name:?} is up to date");
                         continue;
                     }
-                    Ok(false) if self.loam_env(LoamEnv::Production) == "production" => {
-                        return Err(Error::ContractUpdateNotAllowed(name.to_string()));
-                    }
                     Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
                     Err(e) => return Err(e),
                 }
