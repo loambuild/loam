@@ -413,21 +413,21 @@ export default new Client.Client({{
                 .to_string();
                 eprintln!("    ↳ hash: {hash}");
 
-            // Check if we have an alias saved for this contract
-            let alias = Self::get_contract_alias(&name, workspace_root)?;
-            if let Some(contract_id) = alias {
-                match self
-                    .contract_hash_matches(&contract_id, &hash, network, workspace_root)
-                    .await
-                {
-                    Ok(true) => {
-                        eprintln!("✅ Contract {name:?} is up to date");
-                        continue;
+                // Check if we have an alias saved for this contract
+                let alias = Self::get_contract_alias(&name, workspace_root)?;
+                if let Some(contract_id) = alias {
+                    match self
+                        .contract_hash_matches(&contract_id, &hash, network, workspace_root)
+                        .await
+                    {
+                        Ok(true) => {
+                            eprintln!("✅ Contract {name:?} is up to date");
+                            continue;
+                        }
+                        Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
+                        Err(e) => return Err(e),
                     }
-                    Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
-                    Err(e) => return Err(e),
                 }
-            }
 
                 eprintln!("🪞 instantiating {name:?} smart contract");
                 let new_contract_id = cli::contract::deploy::wasm::Cmd::parse_arg_vec(&[
