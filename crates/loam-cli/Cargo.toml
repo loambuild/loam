@@ -55,7 +55,7 @@ sha2 = "0.10.7"
 hex = "0.4.3"
 shlex = "1.1.0"
 symlink = "0.1.0"
-toml = { version = "0.8.12", features = ["parse"] }
+toml = { version = "0.8.12", features = ["parse", "preserve_order"] }
 rand = "0.8.5"
 wasm-gen = { version = "0.1.4" }
 notify = "6.1.1"

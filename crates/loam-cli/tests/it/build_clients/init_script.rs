@@ -195,7 +195,9 @@ STELLAR_ACCOUNT=bob mint --amount 2000000 --to bob
         let custom_types_index = stderr
             .find("Running initialization script for \"soroban_custom")
             .expect("Custom types init not found");
-        let token_index = stderr.find("Running initialization script for \"soroban_token").expect("Token init not found");
+        let token_index = stderr
+            .find("Running initialization script for \"soroban_token")
+            .expect("Token init not found");
         assert!(
             custom_types_index < token_index,
             "Custom types should be initialized before token"
@@ -242,7 +244,9 @@ test_init --resolution 300000 --assets '[{{"Stellar": "$({} contract id asset --
         assert!(output.status.success());
 
         // Check order of initialization
-        let token_index = stderr.find("Running initialization script for \"soroban_token").expect("Token init not found");
+        let token_index = stderr
+            .find("Running initialization script for \"soroban_token")
+            .expect("Token init not found");
         let custom_types_index = stderr
             .find("Running initialization script for \"soroban_custom")
             .expect("Custom types init not found");

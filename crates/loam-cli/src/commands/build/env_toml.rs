@@ -2,7 +2,7 @@ use indexmap::IndexMap;
 use serde::Deserialize;
 use std::collections::BTreeMap as Map;
 use std::path::Path;
-use toml::Value;
+use toml::value::Table;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -41,22 +41,24 @@ impl<'de> Deserialize<'de> for Environment {
             #[serde(default, deserialize_with = "deserialize_accounts")]
             accounts: Option<Vec<Account>>,
             network: Network,
-            contracts: Option<Value>,
+            contracts: Option<Table>,
         }
 
         let helper = EnvironmentHelper::deserialize(deserializer)?;
 
-        let contracts = if let Some(Value::Table(contracts_table)) = helper.contracts {
-            let mut ordered_contracts = IndexMap::new();
-            for (key, value) in contracts_table {
-                let contract: Contract =
-                    Contract::deserialize(value).map_err(serde::de::Error::custom)?;
-                ordered_contracts.insert(key.into_boxed_str(), contract);
-            }
-            Some(ordered_contracts)
-        } else {
-            None
-        };
+        let contracts = helper
+            .contracts
+            .map(|contracts_table| {
+                contracts_table
+                    .into_iter()
+                    .map(|(key, value)| {
+                        let contract: Contract =
+                            Contract::deserialize(value).map_err(serde::de::Error::custom)?;
+                        Ok((key.into_boxed_str(), contract))
+                    })
+                    .collect::<Result<IndexMap<_, _>, D::Error>>()
+            })
+            .transpose()?;
 
         Ok(Environment {
             accounts: helper.accounts,

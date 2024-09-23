@@ -299,6 +299,33 @@ export default new Client.Client({{
         Ok(())
     }
 
+    fn reorder_package_names(
+        package_names: &[String],
+        contracts: Option<&IndexMap<Box<str>, env_toml::Contract>>,
+    ) -> Vec<String> {
+        if let Some(contracts) = contracts {
+            let mut reordered = Vec::new();
+            let mut remaining = package_names.to_vec();
+
+            // First, add packages that exist in contracts in the order they appear in contracts
+            for contract_name in contracts.keys() {
+                if let Some(position) = remaining
+                    .iter()
+                    .position(|name| name == contract_name.as_ref())
+                {
+                    reordered.push(remaining.remove(position));
+                }
+            }
+
+            // Then, add any remaining packages that weren't in contracts
+            reordered.append(&mut remaining);
+
+            reordered
+        } else {
+            package_names.to_vec()
+        }
+    }
+
     async fn handle_contracts(
         self,
         workspace_root: &std::path::Path,
@@ -318,7 +345,9 @@ export default new Client.Client({{
                 }
             }
         }
-        for name in package_names {
+        // Reorder package_names based on contracts order
+        let reordered_names = Self::reorder_package_names(&package_names, contracts);
+        for name in reordered_names {
             let settings = match contracts {
                 Some(contracts) => contracts.get(&name as &str),
                 None => None,
