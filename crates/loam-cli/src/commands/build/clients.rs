@@ -65,7 +65,9 @@ pub enum Error {
     #[error(transparent)]
     ContractFetch(#[from] cli::contract::fetch::Error),
     #[error(transparent)]
-    ConfigLocator(#[from] cli::config::locator::Error),
+    ConfigLocator(#[from] soroban_cli::config::locator::Error),
+    #[error(transparent)]
+    ConfigNetwork(#[from] soroban_cli::config::network::Error),
     #[error(transparent)]
     ContractInvoke(#[from] cli::contract::invoke::Error),
     #[error(transparent)]
@@ -91,6 +93,9 @@ impl Args {
         };
 
         Self::add_network_to_env(&current_env.network)?;
+        // Create the '.stellar' directory if it doesn't exist - for saving contract aliases and account aliases
+        std::fs::create_dir_all(workspace_root.join(".stellar"))
+            .map_err(soroban_cli::config::locator::Error::Io)?;
         Self::handle_accounts(current_env.accounts.as_deref()).await?;
         self.handle_contracts(
             workspace_root,
@@ -118,15 +123,15 @@ impl Args {
             Network {
                 name: Some(name), ..
             } => {
-                let cli::network::Network {
+                let soroban_cli::config::network::Network {
                     rpc_url,
                     network_passphrase,
-                } = (cli::network::Args {
+                } = (soroban_cli::config::network::Args {
                     network: Some(name.clone()),
                     rpc_url: None,
                     network_passphrase: None,
                 })
-                .get(&cli::config::locator::Args {
+                .get(&soroban_cli::config::locator::Args {
                     global: false,
                     config_dir: None,
                 })?;
@@ -149,23 +154,26 @@ impl Args {
         Ok(())
     }
 
-    fn get_network_args(network: &Network) -> cli::network::Args {
-        cli::network::Args {
+    fn get_network_args(network: &Network) -> soroban_cli::config::network::Args {
+        soroban_cli::config::network::Args {
             rpc_url: network.rpc_url.clone(),
             network_passphrase: network.network_passphrase.clone(),
             network: network.name.clone(),
         }
     }
 
-    fn get_config_locator() -> cli::config::locator::Args {
-        cli::config::locator::Args {
+    fn get_config_locator(workspace_root: &std::path::Path) -> soroban_cli::config::locator::Args {
+        soroban_cli::config::locator::Args {
             global: false,
-            config_dir: None,
+            config_dir: Some(workspace_root.to_path_buf()),
         }
     }
 
-    fn get_contract_alias(name: &str) -> Result<Option<String>, cli::config::locator::Error> {
-        let config_dir = Self::get_config_locator();
+    fn get_contract_alias(
+        name: &str,
+        workspace_root: &std::path::Path,
+    ) -> Result<Option<String>, soroban_cli::config::locator::Error> {
+        let config_dir = Self::get_config_locator(workspace_root);
         let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
             .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
         config_dir.get_contract_id(name, &network_passphrase)
@@ -176,11 +184,12 @@ impl Args {
         contract_id: &str,
         hash: &str,
         network: &Network,
+        workspace_root: &std::path::Path,
     ) -> Result<bool, Error> {
         let result = cli::contract::fetch::Cmd {
             contract_id: contract_id.to_string(),
             out_file: None,
-            locator: Self::get_config_locator(),
+            locator: Self::get_config_locator(workspace_root),
             network: Self::get_network_args(network),
         }
         .run_against_rpc_server(None, None)
@@ -205,8 +214,9 @@ impl Args {
         name: &str,
         contract_id: &str,
         network: &Network,
-    ) -> Result<(), cli::config::locator::Error> {
-        let config_dir = Self::get_config_locator();
+        workspace_root: &std::path::Path,
+    ) -> Result<(), soroban_cli::config::locator::Error> {
+        let config_dir = Self::get_config_locator(workspace_root);
         let passphrase = network
             .network_passphrase
             .clone()
@@ -338,10 +348,10 @@ export default new Client.Client({{
             eprintln!("    ↳ hash: {hash}");
 
             // Check if we have an alias saved for this contract
-            let alias = Self::get_contract_alias(&name)?;
+            let alias = Self::get_contract_alias(&name, workspace_root)?;
             if let Some(contract_id) = alias {
                 match self
-                    .contract_hash_matches(&contract_id, &hash, network)
+                    .contract_hash_matches(&contract_id, &hash, network, workspace_root)
                     .await
                 {
                     Ok(true) => {
@@ -370,7 +380,7 @@ export default new Client.Client({{
             eprintln!("    ↳ contract_id: {contract_id}");
 
             // Save the alias for future use
-            Self::save_contract_alias(&name, &contract_id, network)?;
+            Self::save_contract_alias(&name, &contract_id, network, workspace_root)?;
 
             // Run init script if we're in development or test environment
             if self.loam_env(LoamEnv::Production) == "development"
