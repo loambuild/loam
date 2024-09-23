@@ -201,3 +201,76 @@ soroban_token_contract.client = false
             .contains("⛔ ️Contract update not allowed in production for \"hello_world\""));
     });
 }
+
+#[test]
+fn contract_redeployed_in_new_directory() {
+    let mut env = TestEnv::new("soroban-init-boilerplate");
+
+    // Initial setup and build
+    env.set_environments_toml(
+        r#"
+development.accounts = [
+    { name = "alice" },
+]
+
+[development.network]
+rpc-url = "http://localhost:8000/rpc"
+network-passphrase = "Standalone Network ; February 2017"
+
+[development.contracts]
+hello_world.client = true
+soroban_custom_types_contract.client = false
+soroban_auth_contract.client = false
+soroban_token_contract.client = false
+"#,
+    );
+
+    let output = env
+        .loam_env("development", false)
+        .output()
+        .expect("Failed to execute command");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    eprintln!("{stderr}");
+    assert!(stderr.contains("installing \"hello_world\" wasm bytecode on-chain"));
+    assert!(stderr.contains("instantiating \"hello_world\" smart contract"));
+    assert!(stderr.contains("Simulating deploy transaction"));
+    assert!(stderr.contains("binding \"hello_world\" contract"));
+
+    // Switch to a new directory
+
+    env.switch_to_new_directory("soroban-init-boilerplate", "new-dir")
+        .expect("should copy files and switch to new dir");
+    // Set up the new directory with the same configuration
+    env.set_environments_toml(
+        r#"
+development.accounts = [
+    { name = "alice" },
+]
+
+[development.network]
+rpc-url = "http://localhost:8000/rpc"
+network-passphrase = "Standalone Network ; February 2017"
+
+[development.contracts]
+hello_world.client = true
+soroban_custom_types_contract.client = false
+soroban_auth_contract.client = false
+soroban_token_contract.client = false
+"#,
+    );
+
+    // Run build in the new directory
+    let output = env
+        .loam_env("development", false)
+        .output()
+        .expect("Failed to execute command");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    eprintln!("{stderr}");
+    assert!(stderr.contains("installing \"hello_world\" wasm bytecode on-chain"));
+    assert!(stderr.contains("instantiating \"hello_world\" smart contract"));
+    assert!(stderr.contains("Simulating deploy transaction"));
+    assert!(stderr.contains("binding \"hello_world\" contract"));
+    // Check that the contract files are created in the new directory
+    assert!(env.cwd.join("packages/hello_world").exists());
+    assert!(env.cwd.join("src/contracts/hello_world.ts").exists());
+}

@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "test/*"]
-exclude = ["test/*"]
+members = ["crates/*", "test/*", "examples/soroban/*"]
+exclude = ["test/*", "examples/soroban/*"]
 
 [workspace.package]
 repository = "https://github.com/loambuild/loam"

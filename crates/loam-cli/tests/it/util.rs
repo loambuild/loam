@@ -232,4 +232,17 @@ impl TestEnv {
     pub fn set_environments_toml(&self, contents: impl AsRef<[u8]>) {
         std::fs::write(self.cwd.join("environments.toml"), contents).unwrap();
     }
+
+    pub fn switch_to_new_directory(
+        &mut self,
+        template: &str,
+        new_dir_name: &str,
+    ) -> std::io::Result<()> {
+        let new_dir = self.temp_dir.path().join(new_dir_name);
+        fs::create_dir_all(&new_dir)?;
+        let template_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+        copy(template_dir.join(template), &new_dir, &CopyOptions::new()).unwrap();
+        self.cwd = new_dir.join(template);
+        Ok(())
+    }
 }

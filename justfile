@@ -28,7 +28,7 @@ build:
 
 # Setup the project to use a pinned version of the CLI
 setup:
-    -cargo binstall -y --install-path ./target/bin soroban-cli --version 21.2.0
+    -cargo binstall -y --install-path ./target/bin soroban-cli --version 21.5.0
 
 # Build loam-cli test contracts to speed up testing
 build-cli-test-contracts:
