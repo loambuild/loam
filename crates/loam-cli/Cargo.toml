@@ -56,7 +56,7 @@ sha2 = "0.10.7"
 hex = "0.4.3"
 shlex = "1.1.0"
 symlink = "0.1.0"
-toml = { version = "0.8.12", features = ["parse"] }
+toml = { version = "0.8.12", features = ["parse", "preserve_order"] }
 rand = "0.8.5"
 wasm-gen = { version = "0.1.4" }
 notify = "6.1.1"
@@ -65,6 +65,7 @@ stellar-xdr = "21.0.0"
 rust-embed = { version = "8.2.0", features = ["debug-embed"] }
 regex = "1.10.5"
 toml_edit = "0.22.16"
+indexmap = { version = "1.9", features = ["serde"] }
 
 [dev-dependencies]
 assert_cmd = "2.0.4"

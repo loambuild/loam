@@ -2717,6 +2717,7 @@ dependencies = [
  "fs_extra",
  "heck 0.5.0",
  "hex",
+ "indexmap 1.9.3",
  "ignore",
  "itertools 0.12.1",
  "loam-build",
@@ -4795,6 +4796,7 @@ version = "0.8.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac2caab0bf757388c6c0ae23b3293fdb463fee59434529014f85e3263b995c28"
 dependencies = [
+ "indexmap 2.2.6",
  "serde",
  "serde_spanned",
  "toml_datetime",
