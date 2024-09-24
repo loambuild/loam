@@ -1,4 +1,5 @@
 use clap::Parser;
+use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use notify::{self, RecursiveMode, Watcher as _};
 use std::{
     env, fs,
@@ -12,8 +13,9 @@ use tokio::time;
 use crate::commands::build;
 
 use super::build::clients::LoamEnv;
+use super::build::env_toml::ENV_FILE;
 
-enum Message {
+pub enum Message {
     FileChanged,
 }
 
@@ -48,31 +50,62 @@ fn canonicalize_path(path: &Path) -> PathBuf {
 }
 
 #[derive(Clone)]
-struct Watcher {
-    root_env: Arc<PathBuf>,
+pub struct Watcher {
+    env_toml_dir: Arc<PathBuf>,
     packages: Arc<Vec<PathBuf>>,
+    ignores: Arc<Gitignore>,
 }
 
 impl Watcher {
-    pub fn new(root_env: &Path, packages: &[PathBuf]) -> Self {
+    pub fn new(env_toml_dir: &Path, packages: &[PathBuf]) -> Self {
+        let env_toml_dir: Arc<PathBuf> = Arc::new(canonicalize_path(env_toml_dir));
+        let packages: Arc<Vec<PathBuf>> =
+            Arc::new(packages.iter().map(|p| canonicalize_path(p)).collect());
+
+        let mut builder = GitignoreBuilder::new(&*env_toml_dir);
+        for package in packages.iter() {
+            builder.add(package);
+        }
+
+        let common_ignores = vec![
+            "*.swp",
+            "*.swo",
+            "*.swx",     // Vim swap files
+            "4913",      // Vim temp files
+            ".DS_Store", // macOS
+            "Thumbs.db", // Windows
+            "*~",        // Backup files
+            "*.bak",     // Backup files
+            ".vscode/",  // VS Code
+            ".idea/",    // IntelliJ
+            "*.tmp",     // Temporary files
+            "*.log",     // Log files
+            ".#*",       // Emacs lock files
+            "#*#",       // Emacs auto-save files
+        ];
+
+        for pattern in common_ignores {
+            builder
+                .add_line(None, pattern)
+                .expect("Failed to add ignore pattern");
+        }
+
+        let ignores = Arc::new(builder.build().expect("Failed to build GitIgnore"));
+
         Self {
-            root_env: Arc::new(canonicalize_path(root_env)),
-            packages: Arc::new(
-                packages
-                    .iter()
-                    .map(|p: &PathBuf| canonicalize_path(p))
-                    .collect(),
-            ),
+            env_toml_dir,
+            packages,
+            ignores,
         }
     }
 
     pub fn is_watched(&self, path: &Path) -> bool {
         let path = canonicalize_path(path);
-        self.packages.iter().any(|p| path.starts_with(p))
+        !self.ignores.matched(&path, path.is_dir()).is_ignore()
     }
 
     pub fn is_env_toml(&self, path: &Path) -> bool {
-        canonicalize_path(path) == *self.root_env
+        path == self.env_toml_dir.join(ENV_FILE)
     }
 
     pub fn handle_event(&self, event: &notify::Event, tx: &mpsc::Sender<Message>) {
@@ -83,54 +116,15 @@ impl Watcher {
                 | notify::EventKind::Remove(_)
         ) {
             if let Some(path) = event.paths.first() {
-                if is_temporary_file(path) {
-                    return;
-                }
-                if self.is_watched(path) || self.is_env_toml(path) {
+                if self.is_watched(path) {
                     eprintln!("File changed: {path:?}");
                     if let Err(e) = tx.blocking_send(Message::FileChanged) {
-                        eprintln!("Error sending through channel: {e}");
+                        eprintln!("Error sending through channel: {e:?}");
                     }
                 }
             }
         }
     }
-}
-
-fn is_temporary_file(path: &Path) -> bool {
-    const IGNORED_EXTENSIONS: &[&str] = &["tmp", "swp", "swo"];
-    let file_name = path
-        .file_name()
-        .expect("Path should have a file name")
-        .to_str()
-        .expect("File name should be valid UTF-8");
-
-    // Vim and vscode temporary files
-    if path
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .map_or(false, |ext| {
-            IGNORED_EXTENSIONS
-                .iter()
-                .any(|&ignored| ext.eq_ignore_ascii_case(ignored))
-        })
-    {
-        return true;
-    }
-
-    // Vim temporary files
-    if file_name.ends_with('~') {
-        return true;
-    }
-
-    // Emacs temporary files
-    if file_name.starts_with('#') && file_name.ends_with('#') {
-        return true;
-    }
-
-    // Add more patterns for other editors as needed
-
-    false
 }
 
 impl Cmd {
@@ -142,7 +136,7 @@ impl Cmd {
             .manifest_path
             .parent()
             .unwrap_or_else(|| Path::new("."));
-        let env_toml_path = workspace_root.join("environments.toml");
+        let env_toml_dir = workspace_root;
 
         let packages = self
             .build_cmd
@@ -151,7 +145,7 @@ impl Cmd {
             .map(|package| PathBuf::from(package.manifest_path.parent().unwrap().as_str()))
             .collect::<Vec<_>>();
 
-        let watcher = Watcher::new(&env_toml_path, &packages);
+        let watcher = Watcher::new(env_toml_dir, &packages);
 
         for package_path in watcher.packages.iter() {
             eprintln!("Watching {}", package_path.display());
@@ -166,7 +160,7 @@ impl Cmd {
             .unwrap();
 
         notify_watcher.watch(
-            &canonicalize_path(&env_toml_path),
+            &canonicalize_path(env_toml_dir),
             RecursiveMode::NonRecursive,
         )?;
         for package_path in packages {
@@ -174,8 +168,7 @@ impl Cmd {
         }
 
         let build_command = self.cloned_build_command();
-        let cmd = build_command.lock().await;
-        if let Err(e) = cmd.run().await {
+        if let Err(e) = build_command.run().await {
             eprintln!("Build error: {e}");
         }
         eprintln!("Watching for changes. Press Ctrl+C to stop.");
@@ -187,7 +180,7 @@ impl Cmd {
                     let mut state = rebuild_state_clone.lock().await;
                     let build_command_inner = build_command.clone();
                     if !*state {
-                        *state= true;
+                        *state = true;
                         tokio::spawn(Self::debounced_rebuild(build_command_inner, Arc::clone(&rebuild_state_clone)));
                     }
                 }
@@ -200,16 +193,12 @@ impl Cmd {
         Ok(())
     }
 
-    async fn debounced_rebuild(
-        build_command: Arc<Mutex<build::Cmd>>,
-        rebuild_state: Arc<Mutex<bool>>,
-    ) {
+    async fn debounced_rebuild(build_command: Arc<build::Cmd>, rebuild_state: Arc<Mutex<bool>>) {
         // Debounce to avoid multiple rapid rebuilds
         time::sleep(std::time::Duration::from_secs(1)).await;
 
         eprintln!("Changes detected. Rebuilding...");
-        let cmd = build_command.lock().await;
-        if let Err(e) = cmd.run().await {
+        if let Err(e) = build_command.run().await {
             eprintln!("Build error: {e}");
         }
         eprintln!("Watching for changes. Press Ctrl+C to stop.");
@@ -218,11 +207,11 @@ impl Cmd {
         *state = false;
     }
 
-    fn cloned_build_command(&mut self) -> Arc<Mutex<build::Cmd>> {
+    fn cloned_build_command(&mut self) -> Arc<build::Cmd> {
         self.build_cmd
             .build_clients_args
             .env
             .get_or_insert(LoamEnv::Development);
-        Arc::new(Mutex::new(self.build_cmd.clone()))
+        Arc::new(self.build_cmd.clone())
     }
 }

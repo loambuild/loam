@@ -3,6 +3,8 @@ use std::collections::BTreeMap as Map;
 use std::io;
 use std::path::Path;
 
+pub const ENV_FILE: &str = "environments.toml";
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("⛔ ️parsing environments.toml: {0}")]
@@ -82,7 +84,7 @@ fn default_client() -> bool {
 
 impl Environment {
     pub fn get(workspace_root: &Path, loam_env: &str) -> Result<Option<Environment>, Error> {
-        let env_toml = workspace_root.join("environments.toml");
+        let env_toml = workspace_root.join(ENV_FILE);
 
         if !env_toml.exists() {
             return Ok(None);
