@@ -11,19 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - *(cli)* build contracts in specified order ([#160](https://github.com/loambuild/loam/pull/160))
-- *(cli)* Build clients in the order specified in env file ([#157](https://github.com/loambuild/loam/pull/157))
-- *(CLI)* enable string for account def in environments.toml ([#137](https://github.com/loambuild/loam/pull/137))
+- *(cli)* enable string for account def in environments.toml ([#137](https://github.com/loambuild/loam/pull/137))
+- *(cli)* require prod/staging contracts to be IDs ([#146](https://github.com/loambuild/loam/pull/146))
 
 ### Fixed
 
-- *(cli)* revert "feat(cli): Build clients in the order specified in env file ([#157](https://github.com/loambuild/loam/pull/157))" ([#159](https://github.com/loambuild/loam/pull/159))
 - *(cli)* make `loam dev` actually rebuild ([#152](https://github.com/loambuild/loam/pull/152))
+- *(cli)* rebind even when contract already deployed in local container ([#156](https://github.com/loambuild/loam/pull/156))
 - move examples back to top-level ([#149](https://github.com/loambuild/loam/pull/149))
 
 ### Other
 
-- Feat/specify contract ([#146](https://github.com/loambuild/loam/pull/146))
-- Fix/alias issue ([#156](https://github.com/loambuild/loam/pull/156))
 - release ([#141](https://github.com/loambuild/loam/pull/141))
 - add urls to cargo.toml files ([#140](https://github.com/loambuild/loam/pull/140))
 
