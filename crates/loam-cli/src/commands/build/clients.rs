@@ -1,12 +1,12 @@
 #![allow(clippy::struct_excessive_bools)]
 use crate::commands::build::env_toml;
-use indexmap::IndexMap;
 use regex::Regex;
 use serde_json;
 use shlex::split;
 use soroban_cli::commands::NetworkRunnable;
 use soroban_cli::utils::contract_hash;
 use soroban_cli::{commands as cli, CommandParser};
+use std::collections::BTreeMap as Map;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::process::Command;
@@ -328,35 +328,6 @@ export default new Client.Client({{
         Ok(())
     }
 
-    fn reorder_package_names(
-        package_names: &[String],
-        contracts: Option<&IndexMap<Box<str>, env_toml::Contract>>,
-    ) -> Vec<String> {
-        contracts.map_or_else(
-            || package_names.to_vec(),
-            |contracts| {
-                let mut reordered: Vec<String> = contracts
-                    .keys()
-                    .filter_map(|contract_name| {
-                        package_names
-                            .iter()
-                            .find(|&name| name == contract_name.as_ref())
-                            .cloned()
-                    })
-                    .collect();
-
-                reordered.extend(
-                    package_names
-                        .iter()
-                        .filter(|name| !contracts.contains_key(name.as_str()))
-                        .cloned(),
-                );
-
-                reordered
-            },
-        )
-    }
-
     async fn handle_production_contracts(
         &self,
         workspace_root: &std::path::Path,
@@ -379,7 +350,7 @@ export default new Client.Client({{
     async fn handle_contracts(
         self,
         workspace_root: &std::path::Path,
-        contracts: Option<&IndexMap<Box<str>, env_toml::Contract>>,
+        contracts: Option<&Map<Box<str>, env_toml::Contract>>,
         package_names: Vec<String>,
         network: &Network,
     ) -> Result<(), Error> {
@@ -404,9 +375,7 @@ export default new Client.Client({{
                 }
             }
         }
-        // Reorder package_names based on contracts order
-        let reordered_names = Self::reorder_package_names(&package_names, contracts);
-        for name in reordered_names {
+        for name in package_names {
             let settings = match contracts {
                 Some(contracts) => contracts.get(&name as &str),
                 None => None,
