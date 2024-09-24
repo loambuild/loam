@@ -13,29 +13,29 @@ fn main() {
 
     // Iterate over all packages in the workspace
     for package in metadata.packages {
-        if package_is_using_soroban_cli(&package) {
-            if let Some(version) = get_soroban_cli_version(&package) {
+        if package_is_using_stellar_cli(&package) {
+            if let Some(version) = get_stellar_cli_version(&package) {
                 println!("{version}");
                 return;
             }
         }
     }
 
-    eprintln!("soroban-cli dependency not found in any crate.");
+    eprintln!("stellar-cli dependency not found in any crate.");
     process::exit(1);
 }
 
-fn package_is_using_soroban_cli(package: &Package) -> bool {
+fn package_is_using_stellar_cli(package: &Package) -> bool {
     package
         .dependencies
         .iter()
-        .any(|dep| dep.name == "soroban-cli")
+        .any(|dep| dep.name == "stellar-cli")
 }
 
-fn get_soroban_cli_version(package: &Package) -> Option<String> {
+fn get_stellar_cli_version(package: &Package) -> Option<String> {
     package
         .dependencies
         .iter()
-        .find(|dep| dep.name == "soroban-cli")
+        .find(|dep| dep.name == "stellar-cli")
         .map(|dep| dep.req.to_string())
 }
