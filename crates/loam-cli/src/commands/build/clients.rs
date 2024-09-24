@@ -360,7 +360,7 @@ export default new Client.Client({{
     async fn handle_production_contracts(
         &self,
         workspace_root: &std::path::Path,
-        contracts: &Map<Box<str>, env_toml::Contract>,
+        contracts: &IndexMap<Box<str>, env_toml::Contract>,
     ) -> Result<(), Error> {
         for (name, contract) in contracts.iter().filter(|(_, settings)| settings.client) {
             if let Some(id) = &contract.id {
