@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.1](https://github.com/loambuild/loam/compare/loam-cli-v0.14.0...loam-cli-v0.14.1) - 2024-09-24
+
+### Added
+
+- *(cli)* build contracts in specified order ([#160](https://github.com/loambuild/loam/pull/160))
+- *(cli)* Build clients in the order specified in env file ([#157](https://github.com/loambuild/loam/pull/157))
+- *(CLI)* enable string for account def in environments.toml ([#137](https://github.com/loambuild/loam/pull/137))
+
+### Fixed
+
+- *(cli)* revert "feat(cli): Build clients in the order specified in env file ([#157](https://github.com/loambuild/loam/pull/157))" ([#159](https://github.com/loambuild/loam/pull/159))
+- *(cli)* make `loam dev` actually rebuild ([#152](https://github.com/loambuild/loam/pull/152))
+- move examples back to top-level ([#149](https://github.com/loambuild/loam/pull/149))
+
+### Other
+
+- Feat/specify contract ([#146](https://github.com/loambuild/loam/pull/146))
+- Fix/alias issue ([#156](https://github.com/loambuild/loam/pull/156))
+- release ([#141](https://github.com/loambuild/loam/pull/141))
+- add urls to cargo.toml files ([#140](https://github.com/loambuild/loam/pull/140))
+
 ## [0.14.0](https://github.com/loambuild/loam/compare/loam-cli-v0.13.2...loam-cli-v0.14.0) - 2024-07-31
 
 ### Other
