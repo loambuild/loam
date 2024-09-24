@@ -1,16 +1,18 @@
 [package]
 name = "loam-sdk-macro"
-version = "0.8.2"
+version = "0.8.3"
 edition = "2021"
 description = "Macros needed by loam-sdk"
 license = "Apache-2.0"
+repository = "https://github.com/loambuild/loam/tree/main/crates/loam-sdk-macro"
 
 
 [lib]
 proc-macro = true
 
 [dependencies]
-loam-build = { path = "../loam-build", version = "0.7.2" }
+loam-build = { path = "../loam-build", version = "0.7.3" }
+
 soroban-sdk = { workspace = true, features = ["testutils"] }
 stellar-strkey = { workspace = true }
 

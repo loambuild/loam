@@ -1,7 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "crates/loam-cli/examples/soroban/*", "test/*"]
-exclude = ["test/*"]
+members = ["crates/*", "test/*", "examples/soroban/*"]
+exclude = ["test/*", "examples/soroban/*"]
+
+[workspace.package]
+repository = "https://github.com/loambuild/loam"
 
 [workspace.dependencies]
 loam-sdk = { path = "./crates/loam-sdk" }
