@@ -13,11 +13,9 @@ fn main() {
 
     // Iterate over all packages in the workspace
     for package in metadata.packages {
-        if package_is_using_stellar_cli(&package) {
-            if let Some(version) = get_stellar_cli_version(&package) {
-                println!("{version}");
-                return;
-            }
+        if let Some(version) = find_stellar_cli_version(&package) {
+            println!("{version}");
+            return;
         }
     }
 
@@ -25,17 +23,10 @@ fn main() {
     process::exit(1);
 }
 
-fn package_is_using_stellar_cli(package: &Package) -> bool {
+fn find_stellar_cli_version(package: &Package) -> Option<String> {
     package
         .dependencies
         .iter()
-        .any(|dep| dep.name == "stellar-cli")
-}
-
-fn get_stellar_cli_version(package: &Package) -> Option<String> {
-    package
-        .dependencies
-        .iter()
-        .find(|dep| dep.name == "stellar-cli")
+        .find(|dep| dep.name == "soroban-cli")
         .map(|dep| dep.req.to_string())
 }
