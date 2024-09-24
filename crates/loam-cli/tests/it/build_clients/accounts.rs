@@ -4,14 +4,14 @@ use crate::util::{AssertExt, TestEnv};
 fn create_two_accounts() {
     TestEnv::from("soroban-init-boilerplate", |env| {
         env.set_environments_toml(r#"
-[production]
+[development]
 network = { rpc-url = "http://localhost:8000/rpc", network-passphrase = "Standalone Network ; February 2017"}
 
 accounts = [
-    { name = "alice" },
+    "alice",
     { name = "bob" },
 ]
-[production.contracts]
+[development.contracts]
 hello_world.client = false
 soroban_increment_contract.client = false
 soroban_custom_types_contract.client = false
@@ -22,8 +22,8 @@ soroban_token_contract.client = false
         let stderr = env.loam("build").assert().success().stderr_as_str();
         assert!(stderr.contains("creating keys for \"alice\""));
         assert!(stderr.contains("creating keys for \"bob\""));
-        assert!(env.cwd.join(".soroban/identity/alice.toml").exists());
-        assert!(env.cwd.join(".soroban/identity/bob.toml").exists());
+        assert!(env.cwd.join(".stellar/identity/alice.toml").exists());
+        assert!(env.cwd.join(".stellar/identity/bob.toml").exists());
 
         // check that they dont get overwritten if build is run again
         let stderr = env.loam("build").assert().success().stderr_as_str();
@@ -44,6 +44,6 @@ soroban_token_contract.client = false
             .assert()
             .success()
             .stderr_as_str();
-        assert!(stderr.contains("Account already exists"));
+        assert!(stderr.is_empty());
     });
 }

@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.3](https://github.com/loambuild/loam/compare/loam-sdk-macro-v0.8.2...loam-sdk-macro-v0.8.3) - 2024-08-02
+
+### Other
+- add urls to cargo.toml files ([#140](https://github.com/loambuild/loam/pull/140))
+
 ## [0.8.2](https://github.com/loambuild/loam-sdk/compare/loam-sdk-macro-v0.8.1...loam-sdk-macro-v0.8.2) - 2024-07-13
 
 ### Other
