@@ -8,7 +8,7 @@ async fn dev_command_watches_for_changes_and_environments_toml() {
     TestEnv::from_async("soroban-init-boilerplate", |env| async {
         Box::pin(async move {
             let mut dev_process = env
-                .loam_process("dev")
+                .loam_process("dev", &["--build-clients"])
                 .current_dir(&env.cwd)
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped())
@@ -36,6 +36,8 @@ async fn dev_command_watches_for_changes_and_environments_toml() {
                 &format!("File changed: {file_changed_path:?}"),
             )
             .await;
+
+            TestEnv::wait_for_output(&mut stderr_lines, &format!("cargo rustc")).await;
 
             TestEnv::wait_for_output(
                 &mut stderr_lines,

@@ -4,6 +4,8 @@ use std::collections::BTreeMap as Map;
 use std::path::Path;
 use toml::value::Table;
 
+pub const ENV_FILE: &str = "environments.toml";
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("⛔ ️parsing environments.toml: {0}")]
@@ -103,18 +105,25 @@ impl From<AccountRepresentation> for Account {
     }
 }
 
-#[derive(Debug, serde::Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Default)]
 pub struct Contract {
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    #[serde(default = "default_client", skip_serializing_if = "std::ops::Not::not")]
     pub client: bool,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub init: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+fn default_client() -> bool {
+    true
 }
 
 impl Environment {
     pub fn get(workspace_root: &Path, loam_env: &str) -> Result<Option<Environment>, Error> {
-        let env_toml = workspace_root.join("environments.toml");
+        let env_toml = workspace_root.join(ENV_FILE);
 
         if !env_toml.exists() {
             return Ok(None);
