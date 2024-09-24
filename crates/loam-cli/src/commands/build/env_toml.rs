@@ -64,13 +64,20 @@ impl From<AccountRepresentation> for Account {
     }
 }
 
-#[derive(Debug, serde::Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Default)]
 pub struct Contract {
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    #[serde(default = "default_client", skip_serializing_if = "std::ops::Not::not")]
     pub client: bool,
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub init: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+}
+
+fn default_client() -> bool {
+    true
 }
 
 impl Environment {
