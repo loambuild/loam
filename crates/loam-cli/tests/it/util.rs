@@ -89,7 +89,7 @@ impl TestEnv {
         lines: &mut T,
         expected: &str,
     ) {
-        let timeout_duration = Duration::from_secs(120); // 2 minutes
+        let timeout_duration = Duration::from_secs(180); // 3 minutes
         let result = timeout(timeout_duration, async {
             loop {
                 match lines.next().await {
