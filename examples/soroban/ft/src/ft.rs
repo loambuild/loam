@@ -3,7 +3,7 @@ use loam_sdk::{
     IntoKey,
 };
 use loam_subcontract_core::Core;
-use loam_subcontract_ft::{IsFungible, IsInitable, IsSep41};
+use loam_subcontract_ft::{IsFungible, IsInitable };
 
 use crate::Contract;
 
@@ -61,7 +61,7 @@ impl IsInitable for MyFungibleToken {
     }
 }
 
-impl IsSep41 for MyFungibleToken {
+impl IsFungible for MyFungibleToken {
     fn allowance(&self, from: Address, spender: Address) -> i128 {
         let allowance = self.allowances.get(Txn(from, spender));
         match allowance {
@@ -139,9 +139,7 @@ impl IsSep41 for MyFungibleToken {
     fn symbol(&self) -> String {
         self.symbol.clone()
     }
-}
 
-impl IsFungible for MyFungibleToken {
     fn increase_allowance(&mut self, from: Address, spender: Address, amount: i128) {
         from.require_auth();
         let current_allowance = self.allowance(from.clone(), spender.clone());

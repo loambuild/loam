@@ -13,7 +13,7 @@ use loam_sdk::{soroban_sdk::Lazy, subcontract};
 ///
 /// For full specification, see: https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0041.md
 #[subcontract]
-pub trait IsSep41 {
+pub trait IsFungible {
     /// Returns the allowance for `spender` to transfer from `from`.
     fn allowance(
         &self,
@@ -69,10 +69,7 @@ pub trait IsSep41 {
 
     /// Returns the symbol for this token.
     fn symbol(&self) -> loam_sdk::soroban_sdk::String;
-}
 
-#[subcontract]
-pub trait IsFungible: IsSep41 {
     /// Increases the allowance that one address can spend on behalf of another address.
     fn increase_allowance(
         &mut self,
