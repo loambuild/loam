@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/*", "test/*", "examples/soroban/*"]
+members = ["crates/*", "test/*", "examples/soroban/*", "stellar_version"]
 exclude = ["test/*", "examples/soroban/*"]
 
 [workspace.package]
@@ -17,6 +17,7 @@ loam-subcontract-ft = { path = "./crates/loam-subcontract-ft" }
 soroban-sdk = { version = "21.2.0" }
 stellar-strkey = "0.0.8"
 
+cargo-run-bin = "1.7.3"
 cargo_metadata = "0.18.1"
 thiserror = "1.0.38"
 sha2 = "0.10.7"
