@@ -1,15 +1,16 @@
 #![allow(clippy::struct_excessive_bools)]
 use crate::commands::build::env_toml;
+use indexmap::IndexMap;
 use regex::Regex;
 use serde_json;
 use shlex::split;
 use soroban_cli::commands::NetworkRunnable;
 use soroban_cli::utils::contract_hash;
 use soroban_cli::{commands as cli, CommandParser};
-use std::collections::BTreeMap as Map;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::process::Command;
+use stellar_strkey;
 use stellar_xdr::curr::Error as xdrError;
 
 use super::env_toml::Network;
@@ -50,8 +51,10 @@ pub enum Error {
     NeedAtLeastOneAccount,
     #[error("⛔ ️No contract named {0:?}")]
     BadContractName(String),
-    #[error("⛔ ️Contract update not allowed in production for {0:?}")]
-    ContractUpdateNotAllowed(String),
+    #[error("⛔ ️Invalid contract ID: {0:?}")]
+    InvalidContractID(String),
+    #[error("⛔ ️An ID must be set for a contract in production or staging. E.g. <name>.id = C...")]
+    MissingContractID(String),
     #[error("⛔ ️Unable to parse init script: {0:?}")]
     InitParseFailure(String),
     #[error("⛔ ️Failed to execute subcommand: {0:?}\n{1:?}")]
@@ -65,7 +68,9 @@ pub enum Error {
     #[error(transparent)]
     ContractFetch(#[from] cli::contract::fetch::Error),
     #[error(transparent)]
-    ConfigLocator(#[from] cli::config::locator::Error),
+    ConfigLocator(#[from] soroban_cli::config::locator::Error),
+    #[error(transparent)]
+    ConfigNetwork(#[from] soroban_cli::config::network::Error),
     #[error(transparent)]
     ContractInvoke(#[from] cli::contract::invoke::Error),
     #[error(transparent)]
@@ -91,6 +96,9 @@ impl Args {
         };
 
         Self::add_network_to_env(&current_env.network)?;
+        // Create the '.stellar' directory if it doesn't exist - for saving contract aliases and account aliases
+        std::fs::create_dir_all(workspace_root.join(".stellar"))
+            .map_err(soroban_cli::config::locator::Error::Io)?;
         Self::handle_accounts(current_env.accounts.as_deref()).await?;
         self.handle_contracts(
             workspace_root,
@@ -118,15 +126,15 @@ impl Args {
             Network {
                 name: Some(name), ..
             } => {
-                let cli::network::Network {
+                let soroban_cli::config::network::Network {
                     rpc_url,
                     network_passphrase,
-                } = (cli::network::Args {
+                } = (soroban_cli::config::network::Args {
                     network: Some(name.clone()),
                     rpc_url: None,
                     network_passphrase: None,
                 })
-                .get(&cli::config::locator::Args {
+                .get(&soroban_cli::config::locator::Args {
                     global: false,
                     config_dir: None,
                 })?;
@@ -149,23 +157,26 @@ impl Args {
         Ok(())
     }
 
-    fn get_network_args(network: &Network) -> cli::network::Args {
-        cli::network::Args {
+    fn get_network_args(network: &Network) -> soroban_cli::config::network::Args {
+        soroban_cli::config::network::Args {
             rpc_url: network.rpc_url.clone(),
             network_passphrase: network.network_passphrase.clone(),
             network: network.name.clone(),
         }
     }
 
-    fn get_config_locator() -> cli::config::locator::Args {
-        cli::config::locator::Args {
+    fn get_config_locator(workspace_root: &std::path::Path) -> soroban_cli::config::locator::Args {
+        soroban_cli::config::locator::Args {
             global: false,
-            config_dir: None,
+            config_dir: Some(workspace_root.to_path_buf()),
         }
     }
 
-    fn get_contract_alias(name: &str) -> Result<Option<String>, cli::config::locator::Error> {
-        let config_dir = Self::get_config_locator();
+    fn get_contract_alias(
+        name: &str,
+        workspace_root: &std::path::Path,
+    ) -> Result<Option<String>, soroban_cli::config::locator::Error> {
+        let config_dir = Self::get_config_locator(workspace_root);
         let network_passphrase = std::env::var("STELLAR_NETWORK_PASSPHRASE")
             .expect("No STELLAR_NETWORK_PASSPHRASE environment variable set");
         config_dir.get_contract_id(name, &network_passphrase)
@@ -176,11 +187,12 @@ impl Args {
         contract_id: &str,
         hash: &str,
         network: &Network,
+        workspace_root: &std::path::Path,
     ) -> Result<bool, Error> {
         let result = cli::contract::fetch::Cmd {
             contract_id: contract_id.to_string(),
             out_file: None,
-            locator: Self::get_config_locator(),
+            locator: Self::get_config_locator(workspace_root),
             network: Self::get_network_args(network),
         }
         .run_against_rpc_server(None, None)
@@ -205,8 +217,9 @@ impl Args {
         name: &str,
         contract_id: &str,
         network: &Network,
-    ) -> Result<(), cli::config::locator::Error> {
-        let config_dir = Self::get_config_locator();
+        workspace_root: &std::path::Path,
+    ) -> Result<(), soroban_cli::config::locator::Error> {
+        let config_dir = Self::get_config_locator(workspace_root);
         let passphrase = network
             .network_passphrase
             .clone()
@@ -252,6 +265,32 @@ export default new Client.Client({{
             .is_ok())
     }
 
+    async fn generate_contract_bindings(
+        self,
+        workspace_root: &std::path::Path,
+        name: &str,
+        contract_id: &str,
+    ) -> Result<(), Error> {
+        eprintln!("🎭 binding {name:?} contract");
+        cli::contract::bindings::typescript::Cmd::parse_arg_vec(&[
+            "--contract-id",
+            contract_id,
+            "--output-dir",
+            workspace_root
+                .join(format!("packages/{name}"))
+                .to_str()
+                .expect("we do not support non-utf8 paths"),
+            "--overwrite",
+        ])?
+        .run()
+        .await?;
+
+        eprintln!("🍽️ importing {name:?} contract");
+        self.write_contract_template(workspace_root, name, contract_id)?;
+
+        Ok(())
+    }
+
     async fn handle_accounts(accounts: Option<&[env_toml::Account]>) -> Result<(), Error> {
         let Some(accounts) = accounts else {
             return Err(Error::NeedAtLeastOneAccount);
@@ -289,16 +328,73 @@ export default new Client.Client({{
         Ok(())
     }
 
+    fn reorder_package_names(
+        package_names: &[String],
+        contracts: Option<&IndexMap<Box<str>, env_toml::Contract>>,
+    ) -> Vec<String> {
+        contracts.map_or_else(
+            || package_names.to_vec(),
+            |contracts| {
+                let mut reordered: Vec<String> = contracts
+                    .keys()
+                    .filter_map(|contract_name| {
+                        package_names
+                            .iter()
+                            .find(|&name| name == contract_name.as_ref())
+                            .cloned()
+                    })
+                    .collect();
+
+                reordered.extend(
+                    package_names
+                        .iter()
+                        .filter(|name| !contracts.contains_key(name.as_str()))
+                        .cloned(),
+                );
+
+                reordered
+            },
+        )
+    }
+
+    async fn handle_production_contracts(
+        &self,
+        workspace_root: &std::path::Path,
+        contracts: &IndexMap<Box<str>, env_toml::Contract>,
+    ) -> Result<(), Error> {
+        for (name, contract) in contracts.iter().filter(|(_, settings)| settings.client) {
+            if let Some(id) = &contract.id {
+                if stellar_strkey::Contract::from_string(id).is_err() {
+                    return Err(Error::InvalidContractID(id.to_string()));
+                }
+                self.generate_contract_bindings(workspace_root, name, id)
+                    .await?;
+            } else {
+                return Err(Error::MissingContractID(name.to_string()));
+            }
+        }
+        Ok(())
+    }
+
     async fn handle_contracts(
         self,
         workspace_root: &std::path::Path,
-        contracts: Option<&Map<Box<str>, env_toml::Contract>>,
+        contracts: Option<&IndexMap<Box<str>, env_toml::Contract>>,
         package_names: Vec<String>,
         network: &Network,
     ) -> Result<(), Error> {
         if package_names.is_empty() {
             return Ok(());
         }
+        let env = self.loam_env(LoamEnv::Production);
+        if env == "production" || env == "staging" {
+            if let Some(contracts) = contracts {
+                self.handle_production_contracts(workspace_root, contracts)
+                    .await?;
+            }
+            return Ok(());
+        }
+
         // ensure contract names are valid
         if let Some(contracts) = contracts {
             for (name, _) in contracts.iter().filter(|(_, settings)| settings.client) {
@@ -308,74 +404,83 @@ export default new Client.Client({{
                 }
             }
         }
-        for name in package_names {
+        // Reorder package_names based on contracts order
+        let reordered_names = Self::reorder_package_names(&package_names, contracts);
+        for name in reordered_names {
             let settings = match contracts {
                 Some(contracts) => contracts.get(&name as &str),
                 None => None,
             };
-            // Skip only if contract is found and its `client` setting is false
-            if let Some(c) = settings {
-                if !c.client {
+            let contract_id = if let Some(settings) = settings {
+                // Skip if contract is found and its `client` setting is false
+                if !settings.client {
                     continue;
                 }
-            }
-            let wasm_path = workspace_root.join(format!("target/loam/{name}.wasm"));
-            if !wasm_path.exists() {
-                return Err(Error::BadContractName(name.to_string()));
-            }
-            eprintln!("📲 installing {name:?} wasm bytecode on-chain...");
-            let hash = cli::contract::install::Cmd::parse_arg_vec(&[
-                "--wasm",
-                wasm_path
-                    .to_str()
-                    .expect("we do not support non-utf8 paths"),
-            ])?
-            .run_against_rpc_server(None, None)
-            .await?
-            .into_result()
-            .expect("no hash returned by 'contract install'")
-            .to_string();
-            eprintln!("    ↳ hash: {hash}");
-
-            // Check if we have an alias saved for this contract
-            let alias = Self::get_contract_alias(&name)?;
-            if let Some(contract_id) = alias {
-                match self
-                    .contract_hash_matches(&contract_id, &hash, network)
-                    .await
-                {
-                    Ok(true) => {
-                        eprintln!("✅ Contract {name:?} is up to date");
-                        continue;
-                    }
-                    Ok(false) if self.loam_env(LoamEnv::Production) == "production" => {
-                        return Err(Error::ContractUpdateNotAllowed(name.to_string()));
-                    }
-                    Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
-                    Err(e) => return Err(e),
+                // If contract ID is set, use it directly
+                settings.id.clone()
+            } else {
+                None
+            };
+            let contract_id = if let Some(id) = contract_id {
+                // If we have a contract ID, use it
+                id
+            } else {
+                // If we don't have a contract ID, proceed with installation and deployment
+                let wasm_path = workspace_root.join(format!("target/loam/{name}.wasm"));
+                if !wasm_path.exists() {
+                    return Err(Error::BadContractName(name.to_string()));
                 }
-            }
+                eprintln!("📲 installing {name:?} wasm bytecode on-chain...");
+                let hash = cli::contract::install::Cmd::parse_arg_vec(&[
+                    "--wasm",
+                    wasm_path
+                        .to_str()
+                        .expect("we do not support non-utf8 paths"),
+                ])?
+                .run_against_rpc_server(None, None)
+                .await?
+                .into_result()
+                .expect("no hash returned by 'contract install'")
+                .to_string();
+                eprintln!("    ↳ hash: {hash}");
 
-            eprintln!("🪞 instantiating {name:?} smart contract");
-            let contract_id = cli::contract::deploy::wasm::Cmd::parse_arg_vec(&[
-                "--alias",
-                &name,
-                "--wasm-hash",
-                &hash,
-            ])?
-            .run_against_rpc_server(None, None)
-            .await?
-            .into_result()
-            .expect("no contract id returned by 'contract deploy'");
-            eprintln!("    ↳ contract_id: {contract_id}");
+                // Check if we have an alias saved for this contract
+                let alias = Self::get_contract_alias(&name, workspace_root)?;
+                if let Some(contract_id) = alias {
+                    match self
+                        .contract_hash_matches(&contract_id, &hash, network, workspace_root)
+                        .await
+                    {
+                        Ok(true) => {
+                            eprintln!("✅ Contract {name:?} is up to date");
+                            continue;
+                        }
+                        Ok(false) => eprintln!("🔄 Updating contract {name:?}"),
+                        Err(e) => return Err(e),
+                    }
+                }
 
-            // Save the alias for future use
-            Self::save_contract_alias(&name, &contract_id, network)?;
+                eprintln!("🪞 instantiating {name:?} smart contract");
+                let new_contract_id = cli::contract::deploy::wasm::Cmd::parse_arg_vec(&[
+                    "--alias",
+                    &name,
+                    "--wasm-hash",
+                    &hash,
+                ])?
+                .run_against_rpc_server(None, None)
+                .await?
+                .into_result()
+                .expect("no contract id returned by 'contract deploy'");
+                eprintln!("    ↳ contract_id: {new_contract_id}");
+
+                // Save the alias for future use
+                Self::save_contract_alias(&name, &new_contract_id, network, workspace_root)?;
+
+                new_contract_id
+            };
 
             // Run init script if we're in development or test environment
-            if self.loam_env(LoamEnv::Production) == "development"
-                || self.loam_env(LoamEnv::Production) == "testing"
-            {
+            if env == "development" || env == "testing" {
                 if let Some(settings) = settings {
                     if let Some(init_script) = &settings.init {
                         eprintln!("🚀 Running initialization script for {name:?}");
@@ -384,23 +489,8 @@ export default new Client.Client({{
                     }
                 }
             }
-
-            eprintln!("🎭 binding {name:?} contract");
-            cli::contract::bindings::typescript::Cmd::parse_arg_vec(&[
-                "--contract-id",
-                &contract_id,
-                "--output-dir",
-                workspace_root
-                    .join(format!("packages/{name}"))
-                    .to_str()
-                    .expect("we do not support non-utf8 paths"),
-                "--overwrite",
-            ])?
-            .run()
-            .await?;
-
-            eprintln!("🍽️ importing {:?} contract", name.clone());
-            self.write_contract_template(workspace_root, &name, &contract_id)?;
+            self.generate_contract_bindings(workspace_root, &name, &contract_id)
+                .await?;
         }
 
         Ok(())
@@ -476,7 +566,7 @@ export default new Client.Client({{
             args.extend_from_slice(&["--"]);
             args.extend(command_parts.iter().map(|s| s.as_str()));
 
-            eprintln!("  ↳ Executing: soroban contract invoke {}", args.join(" "));
+            eprintln!("  ↳ Executing: stellar contract invoke {}", args.join(" "));
             let result = cli::contract::invoke::Cmd::parse_arg_vec(&args)?
                 .run_against_rpc_server(None, None)
                 .await?;

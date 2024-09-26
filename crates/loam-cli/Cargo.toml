@@ -5,7 +5,7 @@ homepage = "https://github.com/loambuild/loam-sdk"
 authors = ["Willem Wyndham <willem@ahalabs.dev>"]
 license = "Apache-2.0"
 readme = "../../README.md"
-version = "0.14.0"
+version = "0.14.2"
 edition = "2021"
 rust-version = "1.70"
 autobins = false
@@ -28,7 +28,7 @@ doctest = false
 
 [dependencies]
 loam-build = { path = "../loam-build", version = "0.7.3" }
-soroban-cli = "21.2.0"
+soroban-cli = "21.5.0"
 clap = { version = "4.1.8", features = [
     "derive",
     "env",
@@ -37,6 +37,9 @@ clap = { version = "4.1.8", features = [
 ] }
 
 cargo_metadata = { workspace = true }
+sha2 = { workspace = true }
+
+
 clap-cargo-extra = "0.3.0"
 
 thiserror = "1.0.31"
@@ -48,21 +51,23 @@ tokio = { version = "1", features = ["full"] }
 tokio-stream = { version = "0.1", features = ["io-util"] }
 dirs = "5.0.1"
 itertools = "0.12.1"
+ignore = "0.4"
 strsim = "0.11.1"
 heck = "0.5.0"
 pathdiff = "0.2.1"
-sha2 = "0.10.7"
 hex = "0.4.3"
 shlex = "1.1.0"
 symlink = "0.1.0"
-toml = { version = "0.8.12", features = ["parse"] }
+toml = { version = "0.8.12", features = ["parse", "preserve_order"] }
 rand = "0.8.5"
 wasm-gen = { version = "0.1.4" }
 notify = "6.1.1"
+stellar-strkey = "0.0.8"
 stellar-xdr = "21.0.0"
 rust-embed = { version = "8.2.0", features = ["debug-embed"] }
 regex = "1.10.5"
 toml_edit = "0.22.16"
+indexmap = { version = "1.9", features = ["serde"] }
 
 [dev-dependencies]
 assert_cmd = "2.0.4"

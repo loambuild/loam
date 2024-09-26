@@ -55,8 +55,9 @@ impl Cmd {
             project_path: self.project_path.to_string_lossy().to_string(),
             with_example: vec![],
             frontend_template: FRONTEND_TEMPLATE.to_string(),
+            overwrite: true,
         }
-        .run()?;
+        .run(&soroban_cli::commands::global::Args::default())?;
 
         // remove soroban hello_world default contract
         remove_dir_all(self.project_path.join("contracts/hello_world/")).map_err(|e| {

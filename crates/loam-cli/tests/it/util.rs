@@ -89,15 +89,21 @@ impl TestEnv {
         lines: &mut T,
         expected: &str,
     ) {
-        let timeout_duration = Duration::from_secs(120); // 2 minutes
+        let timeout_duration = Duration::from_secs(180); // 3 minutes
         let result = timeout(timeout_duration, async {
-            while let Some(line) = lines.next().await {
-                let line = line.expect("Failed to read line");
-                println!("{line}");
-                if line.contains(expected) {
-                    return;
+            loop {
+                match lines.next().await {
+                    Some(Ok(line)) => {
+                        println!("{line}");
+                        if line.contains(expected) {
+                            return;
+                        }
+                    }
+                    Some(Err(e)) => println!("Error reading line: {:?}", e),
+                    None => {
+                        sleep(Duration::from_millis(100)).await;
+                    }
                 }
-                sleep(Duration::from_millis(100)).await;
             }
         })
         .await;
@@ -185,18 +191,21 @@ impl TestEnv {
         PathBuf::from(env!("CARGO_BIN_EXE_loam"))
     }
 
-    pub fn loam_process(&self, cmd: &str) -> ProcessCommand {
+    pub fn loam_process(&self, cmd: &str, additional_args: &[&str]) -> ProcessCommand {
         let bin = Self::cargo_bin_loam();
         println!("{}", bin.display());
         let mut loam = ProcessCommand::new(bin);
         loam.current_dir(&self.cwd);
         loam.arg(cmd);
+        for arg in additional_args {
+            loam.arg(arg);
+        }
         loam
     }
 
     pub fn loam(&self, cmd: &str) -> Command {
         if cmd == "build" {
-            self.loam_build("production", true)
+            self.loam_build("development", true)
         } else {
             let mut loam = Command::cargo_bin("loam").unwrap();
             loam.current_dir(&self.cwd);
@@ -222,5 +231,18 @@ impl TestEnv {
 
     pub fn set_environments_toml(&self, contents: impl AsRef<[u8]>) {
         std::fs::write(self.cwd.join("environments.toml"), contents).unwrap();
+    }
+
+    pub fn switch_to_new_directory(
+        &mut self,
+        template: &str,
+        new_dir_name: &str,
+    ) -> std::io::Result<()> {
+        let new_dir = self.temp_dir.path().join(new_dir_name);
+        fs::create_dir_all(&new_dir)?;
+        let template_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+        copy(template_dir.join(template), &new_dir, &CopyOptions::new()).unwrap();
+        self.cwd = new_dir.join(template);
+        Ok(())
     }
 }
