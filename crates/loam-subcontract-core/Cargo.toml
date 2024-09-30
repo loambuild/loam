@@ -1,6 +1,6 @@
 [package]
 name = "loam-subcontract-core"
-version = "0.7.7"
+version = "0.7.8"
 edition = "2021"
 description = "Core Subcontract for redeployable contracts"
 license = "Apache-2.0"
