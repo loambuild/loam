@@ -245,7 +245,6 @@ export default new Client.Client({{
   networkPassphrase: '{network}',
   contractId: '{contract_id}',
   rpcUrl,{allow_http}
-  publicKey: undefined,
 }});
 "#
         );
