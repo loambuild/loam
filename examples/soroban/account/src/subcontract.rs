@@ -1,8 +1,8 @@
 use loam_sdk::{
     loamstorage,
     soroban_sdk::{
-        self, auth::Context, contracttype, env, symbol_short, Address, BytesN, Env, Lazy, Map,
-        PersistentItem, PersistentMap, Symbol, TryIntoVal, Vec,
+        self, auth::Context, contracttype, env, symbol_short, Address, BytesN, Env, Lazy,
+        Map, PersistentItem, PersistentMap, Symbol, TryIntoVal, Vec,
     },
     subcontract,
 };
@@ -10,6 +10,8 @@ use loam_sdk::{
 use crate::error::Error as AccError;
 
 const TRANSFER_FN: Symbol = symbol_short!("transfer");
+const APPROVE_FN: Symbol = symbol_short!("approve");
+const BURN_FN: Symbol = symbol_short!("burn");
 
 #[contracttype]
 #[derive(Clone)]
@@ -27,7 +29,7 @@ pub struct AccountManager {
 
 #[subcontract]
 pub trait IsAccount {
-    fn init(&mut self, signers: Vec<BytesN<32>>);
+    fn __constructor(&mut self, signers: Vec<BytesN<32>>);
     fn add_limit(&mut self, token: Address, limit: i128);
     fn __check_auth(
         &self,
@@ -38,7 +40,7 @@ pub trait IsAccount {
 }
 
 impl IsAccount for AccountManager {
-    fn init(&mut self, signers: Vec<BytesN<32>>) {
+    fn __constructor(&mut self, signers: Vec<BytesN<32>>) {
         // In reality this would need some additional validation on signers
         // (deduplication etc.).
         let mut signers_set = Map::new(env());
@@ -132,28 +134,35 @@ impl AccountManager {
         all_signed: bool,
         spend_left_per_token: &mut Map<Address, i128>,
     ) -> Result<(), AccError> {
+        // There are no limitations when every signers signs the transaction.
+        if all_signed {
+            return Ok(());
+        }
         let contract_context = match context {
-            Context::Contract(c) if &c.contract == curr_contract && !all_signed => c,
-            Context::Contract(_) => return Err(AccError::NotEnoughSigners),
+            Context::Contract(c) => {
+                // Allow modifying this contract only if every signer has signed for it.
+                if &c.contract == curr_contract {
+                    return Err(AccError::NotEnoughSigners);
+                }
+                c
+            }
+            // Allow creating new contracts only if every signer has signed for it.
             Context::CreateContractHostFn(_) | Context::CreateContractWithCtorHostFn(_) => {
-                return Err(AccError::InvalidContext)
+                return Err(AccError::NotEnoughSigners);
             }
         };
-        // For the account control every signer must sign the invocation.
 
-        // Otherwise, we're only interested in functions that spend tokens.
+        // Besides the checks above we're only interested in functions that spend tokens.
         if contract_context.fn_name != TRANSFER_FN
-            && contract_context.fn_name != Symbol::new(env, "approve")
+            && contract_context.fn_name != APPROVE_FN
+            && contract_context.fn_name != BURN_FN
         {
             return Ok(());
         }
 
-        let spend_left: Option<i128> =
-            if let Some(spend_left) = spend_left_per_token.get(contract_context.contract.clone()) {
-                Some(spend_left)
-            } else {
-                self.limits.get(contract_context.contract.clone())
-            };
+        let spend_left: Option<i128> = spend_left_per_token
+            .get(contract_context.contract.clone())
+            .or_else(|| self.limits.get(contract_context.contract.clone()));
 
         // 'None' means that the contract is outside of the policy.
         if let Some(spend_left) = spend_left {
