@@ -1,12 +1,20 @@
 #![cfg(test)]
 
-use super::subcontract::DataKey;
+use crate::subcontract::TtlContract;
 use crate::{SorobanContract__, SorobanContract__Client};
 use loam_sdk::soroban_sdk::testutils::storage::{Instance, Persistent, Temporary};
 use loam_sdk::soroban_sdk::testutils::Ledger;
-use loam_sdk::soroban_sdk::Env;
+use loam_sdk::soroban_sdk::{Env, Val};
 
 extern crate std;
+
+fn p_key() -> Val {
+    TtlContract::default().p_key()
+}
+
+fn t_key() -> Val {
+    TtlContract::default().t_key()
+}
 
 /// Create an environment with specific values of network settings.
 fn create_env() -> Env {
@@ -50,15 +58,15 @@ fn test_extend_ttl_behavior() {
         // is created the current ledger is counted towards the number of
         // ledgers specified by `min_persistent/temp_entry_ttl`, thus
         // the TTL is 1 ledger less than the respective setting.
-        assert_eq!(env.storage().persistent().get_ttl(&DataKey::MyKey), 499);
+        assert_eq!(env.storage().persistent().get_ttl(&p_key()), 499);
         assert_eq!(env.storage().instance().get_ttl(), 499);
-        assert_eq!(env.storage().temporary().get_ttl(&DataKey::MyKey), 99);
+        assert_eq!(env.storage().temporary().get_ttl(&t_key()), 99);
     });
 
     // Extend persistent entry TTL to 5000 ledgers - now it is 5000.
     client.extend_persistent();
     env.as_contract(&contract_id, || {
-        assert_eq!(env.storage().persistent().get_ttl(&DataKey::MyKey), 5000);
+        assert_eq!(env.storage().persistent().get_ttl(&p_key()), 5000);
     });
 
     // Extend instance TTL to 10000 ledgers - now it is 10000.
@@ -70,7 +78,7 @@ fn test_extend_ttl_behavior() {
     // Extend temporary entry TTL to 7000 ledgers - now it is 7000.
     client.extend_temporary();
     env.as_contract(&contract_id, || {
-        assert_eq!(env.storage().temporary().get_ttl(&DataKey::MyKey), 7000);
+        assert_eq!(env.storage().temporary().get_ttl(&t_key()), 7000);
     });
 
     // Now bump the ledger sequence by 5000 in order to sanity-check
@@ -80,21 +88,21 @@ fn test_extend_ttl_behavior() {
     });
     // Now the TTL of every entry has been reduced by 5000 ledgers.
     env.as_contract(&contract_id, || {
-        assert_eq!(env.storage().persistent().get_ttl(&DataKey::MyKey), 0);
+        assert_eq!(env.storage().persistent().get_ttl(&p_key()), 0);
         assert_eq!(env.storage().instance().get_ttl(), 5000);
-        assert_eq!(env.storage().temporary().get_ttl(&DataKey::MyKey), 2000);
+        assert_eq!(env.storage().temporary().get_ttl(&t_key()), 2000);
     });
     // Extend TTL of all the entries.
     client.extend_persistent();
     client.extend_instance();
     client.extend_temporary();
     env.as_contract(&contract_id, || {
-        assert_eq!(env.storage().persistent().get_ttl(&DataKey::MyKey), 5000);
+        assert_eq!(env.storage().persistent().get_ttl(&p_key()), 5000);
         // Instance TTL hasn't been increased because the remaining TTL
         // (5000 ledgers) is larger than the threshold used by
         // `extend_instance` (2000 ledgers)
         assert_eq!(env.storage().instance().get_ttl(), 5000);
-        assert_eq!(env.storage().temporary().get_ttl(&DataKey::MyKey), 7000);
+        assert_eq!(env.storage().temporary().get_ttl(&t_key()), 7000);
     });
 }
 
@@ -125,7 +133,7 @@ fn test_temp_entry_removal() {
     });
     // Now the entry is no longer present in the environment.
     env.as_contract(&contract_id, || {
-        assert!(!env.storage().temporary().has(&DataKey::MyKey));
+        assert!(!env.storage().temporary().has(&t_key()));
     });
 }
 

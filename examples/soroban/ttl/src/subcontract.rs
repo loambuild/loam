@@ -1,11 +1,21 @@
-use loam_sdk::soroban_sdk::{self, env, InstanceItem, Lazy, PersistentItem, TemporaryItem};
+use loam_sdk::soroban_sdk::{self, InstanceItem, Lazy, PersistentItem, TemporaryItem, Val};
 use loam_sdk::{loamstorage, subcontract};
 
 #[loamstorage]
 pub struct TtlContract {
     p: PersistentItem<u32>,
-    i: InstanceItem<u32>,
-    t: TemporaryItem<u32>,
+    pub i: InstanceItem<u32>,
+    pub t: TemporaryItem<u32>,
+}
+
+impl TtlContract {
+    pub fn p_key(&self) -> Val {
+        self.p.key()
+    }
+
+    pub fn t_key(&self) -> Val {
+        self.t.key()
+    }
 }
 
 #[subcontract]

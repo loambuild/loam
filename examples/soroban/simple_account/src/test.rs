@@ -3,19 +3,21 @@ extern crate std;
 
 use ed25519_dalek::Keypair;
 use ed25519_dalek::Signer;
-use loam_sdk::soroban_sdk::Error;
-use loam_sdk::soroban_sdk::Val;
-use loam_sdk::soroban_sdk::{testutils::BytesN as _, vec, BytesN, Env, IntoVal};
+use loam_sdk::soroban_sdk;
 use rand::thread_rng;
+use soroban_sdk::Error;
+use soroban_sdk::Val;
+use soroban_sdk::{testutils::BytesN as _, vec, BytesN, Env, IntoVal};
 
-use crate::SorobanContract__;
-use crate::SorobanContract__Client;
+use crate::SorobanContract__ as SimpleAccount;
+use crate::SorobanContract__Client as SimpleAccountClient;
+
 fn generate_keypair() -> Keypair {
     Keypair::generate(&mut thread_rng())
 }
 
-fn create_account_contract(e: &Env) -> SorobanContract__Client {
-    SorobanContract__Client::new(e, &e.register(SorobanContract__, ()))
+fn create_account_contract(e: &Env) -> SimpleAccountClient {
+    SimpleAccountClient::new(e, &e.register(SimpleAccount, ()))
 }
 
 fn sign(e: &Env, signer: &Keypair, payload: &BytesN<32>) -> Val {

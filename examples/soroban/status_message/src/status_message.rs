@@ -2,7 +2,7 @@
 // Currently need to import `self` because `contracttype` expects it in the namespace
 use loam_sdk::{
     loamstorage,
-    soroban_sdk::{self, env, Address, Lazy, PersistentMap, String},
+    soroban_sdk::{self,  Address, Lazy, PersistentMap, String},
     subcontract,
 };
 
@@ -15,7 +15,7 @@ pub struct StatusMessage {
 pub trait IsPostable {
     /// Documentation ends up in the contract's metadata and thus the CLI, etc
     fn messages_get(&self, author: loam_sdk::soroban_sdk::Address)
-        -> loam_sdk::soroban_sdk::String;
+        -> Option<loam_sdk::soroban_sdk::String>;
 
     /// Only the author can set the message
     fn messages_set(

@@ -1,6 +1,6 @@
 use loam_sdk::{
     loamstorage,
-    soroban_sdk::{self, contracttype, env, Lazy, PersistentItem},
+    soroban_sdk::{self, contracttype, Lazy, PersistentItem},
     subcontract,
 };
 

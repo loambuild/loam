@@ -103,33 +103,38 @@ where
     V: IntoVal<Env, Val> + TryFromVal<Env, Val>,
     K: LoamKey + Default,
 {
+
+    pub fn key(&self) -> Val {
+        K::default().to_key()
+    }
+
     pub fn get(&self) -> Option<V> {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().persistent().get(&key)
     }
 
     pub fn set(&mut self, value: &V) {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().persistent().set(&key, value);
     }
 
     pub fn has(&self) -> bool {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().persistent().has(&key)
     }
 
     pub fn update(&self, f: impl FnOnce(Option<V>) -> V) -> V {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().persistent().update(&key, f)
     }
 
     pub fn try_update<E>(&self, f: impl FnOnce(Option<V>) -> Result<V, E>) -> Result<V, E> {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().persistent().try_update(&key, f)
     }
 
     pub fn extend_ttl(&self, threshold: u32, extend_to: u32) {
-        let key = K::default().to_key();
+        let key = self.key();
         env()
             .storage()
             .persistent()
@@ -137,7 +142,7 @@ where
     }
 
     pub fn remove(&self) {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().persistent().remove(&key);
     }
 }
@@ -323,28 +328,31 @@ where
     V: IntoVal<Env, Val> + TryFromVal<Env, Val>,
     K: LoamKey + Default,
 {
+    pub fn key(&self) -> Val {
+        K::default().to_key()
+    }
     pub fn get(&self) -> Option<V> {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().instance().get(&key)
     }
 
     pub fn set(&mut self, value: &V) {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().instance().set(&key, value);
     }
 
     pub fn has(&self) -> bool {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().instance().has(&key)
     }
 
     pub fn update(&self, f: impl FnOnce(Option<V>) -> V) -> V {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().instance().update(&key, f)
     }
 
     pub fn try_update<E>(&self, f: impl FnOnce(Option<V>) -> Result<V, E>) -> Result<V, E> {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().instance().try_update(&key, f)
     }
 
@@ -353,7 +361,7 @@ where
     }
 
     pub fn remove(&self) {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().instance().remove(&key);
     }
 }
@@ -373,33 +381,37 @@ where
     V: IntoVal<Env, Val> + TryFromVal<Env, Val>,
     K: LoamKey + Default,
 {
+    pub fn key(&self) -> Val {
+        K::default().to_key()
+    }
+
     pub fn get(&self) -> Option<V> {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().temporary().get(&key)
     }
 
     pub fn set(&mut self, value: &V) {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().temporary().set(&key, value);
     }
 
     pub fn has(&self) -> bool {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().temporary().has(&key)
     }
 
     pub fn update(&self, f: impl FnOnce(Option<V>) -> V) -> V {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().temporary().update(&key, f)
     }
 
     pub fn try_update<E>(&self, f: impl FnOnce(Option<V>) -> Result<V, E>) -> Result<V, E> {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().temporary().try_update(&key, f)
     }
 
     pub fn extend_ttl(&self, threshold: u32, extend_to: u32) {
-        let key = K::default().to_key();
+        let key = self.key();
         env()
             .storage()
             .temporary()
@@ -407,7 +419,7 @@ where
     }
 
     pub fn remove(&self) {
-        let key = K::default().to_key();
+        let key = self.key();
         env().storage().temporary().remove(&key);
     }
 }

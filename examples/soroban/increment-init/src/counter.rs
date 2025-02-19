@@ -14,7 +14,7 @@ pub trait IsCountable {
     /// Increment increments an internal counter, and returns the value.
     fn increment(&mut self) -> u32;
 
-    fn init(&mut self, num: u32);
+    fn __constructor(&mut self, num: u32);
 }
 
 impl IsCountable for Counter {
@@ -26,7 +26,7 @@ impl IsCountable for Counter {
         count
     }
 
-    fn init(&mut self, num: u32) {
+    fn __constructor(&mut self, num: u32) {
         self.count.set(&num);
     }
 }

@@ -35,7 +35,13 @@ build-cli-test-contracts:
     cargo run -- build --manifest-path crates/loam-cli/tests/fixtures/soroban-init-boilerplate/Cargo.toml
 
 test: build build-cli-test-contracts
-    cargo test
+    cargo nextest run --workspace
+
+test-integration:
+    cargo nextest run -E 'package(loam-cli)' --features integration-tests
+
+test-ci: test test-integration
+
 
 create: build
     rm -rf .soroban
