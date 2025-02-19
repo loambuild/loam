@@ -10,7 +10,6 @@ use rand::thread_rng;
 
 use crate::SorobanContract__;
 use crate::SorobanContract__Client;
-
 fn generate_keypair() -> Keypair {
     Keypair::generate(&mut thread_rng())
 }
@@ -51,12 +50,12 @@ fn test_account() {
 
     // Now pass a random bytes array instead of the signature - this should
     // result in an error as this is not a valid signature.
-    /*assert!(env
-    .try_invoke_contract_check_auth::<Error>(
-        &account_contract.address,
-        &payload,
-        BytesN::<64>::random(&env).into(),
-        &vec![&env],
-    )
-    .is_err());*/
+    assert!(env
+        .try_invoke_contract_check_auth::<Error>(
+            &account_contract.address,
+            &payload,
+            BytesN::<64>::random(&env).into(),
+            &vec![&env],
+        )
+        .is_err());
 }
