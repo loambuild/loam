@@ -1,6 +1,8 @@
 use crate::{error::Error, token::example_token as token};
 use loam_sdk::{
-    loamstorage, soroban_sdk::{self, contracttype, env, Address, BytesN, InstanceItem, IntoVal, Lazy}, subcontract
+    loamstorage,
+    soroban_sdk::{self, contracttype, env, Address, BytesN, InstanceItem, IntoVal, Lazy},
+    subcontract,
 };
 use num_integer::Roots;
 
@@ -19,7 +21,6 @@ pub struct LiquidityPool {
 pub struct Storage {
     pool: InstanceItem<LiquidityPool>,
 }
-
 
 impl Default for LiquidityPool {
     fn default() -> Self {

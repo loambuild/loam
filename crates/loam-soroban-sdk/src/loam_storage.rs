@@ -103,7 +103,6 @@ where
     V: IntoVal<Env, Val> + TryFromVal<Env, Val>,
     K: LoamKey + Default,
 {
-
     pub fn key(&self) -> Val {
         K::default().to_key()
     }

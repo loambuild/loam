@@ -2,9 +2,7 @@
 
 use loam_sdk::{
     loamstorage,
-    soroban_sdk::{
-        self, contracttype, env, Address, InstanceItem, PersistentMap, String,
-    },
+    soroban_sdk::{self, contracttype, env, Address, InstanceItem, PersistentMap, String},
 };
 use loam_subcontract_core::Core;
 use loam_subcontract_ft::{IsFungible, IsInitable, IsSep41};

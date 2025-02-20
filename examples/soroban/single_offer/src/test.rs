@@ -12,7 +12,9 @@ fn create_token_contract<'a>(
     e: &Env,
     admin: &Address,
 ) -> (token::Client<'a>, token::StellarAssetClient<'a>) {
-    let sac = e.register_stellar_asset_contract_v2(admin.clone()).address();
+    let sac = e
+        .register_stellar_asset_contract_v2(admin.clone())
+        .address();
     (
         token::Client::new(e, &sac),
         token::StellarAssetClient::new(e, &sac),

@@ -1,5 +1,7 @@
 use loam_sdk::{
-    loamstorage, soroban_sdk::{self,  env, symbol_short,  PersistentItem, Symbol, Lazy}, subcontract
+    loamstorage,
+    soroban_sdk::{self, env, symbol_short, Lazy, PersistentItem, Symbol},
+    subcontract,
 };
 
 const COUNTER: Symbol = symbol_short!("COUNTER");

@@ -1,5 +1,7 @@
 use loam_sdk::{
-    loamstorage, soroban_sdk::{self, contracttype, env, Address, Lazy, PersistentItem}, subcontract
+    loamstorage,
+    soroban_sdk::{self, contracttype, env, Address, Lazy, PersistentItem},
+    subcontract,
 };
 
 use crate::error::Error;
@@ -142,7 +144,7 @@ impl IsSingleOfferTrait for Storage {
     }
 
     fn withdraw(&self, token: Address, amount: i128) -> Result<(), Error> {
-        let SingleOffer { seller, ..} = self.offer.get().unwrap();
+        let SingleOffer { seller, .. } = self.offer.get().unwrap();
         seller.require_auth();
         soroban_sdk::token::Client::new(env(), &token).transfer(
             &env().current_contract_address(),

@@ -5,8 +5,8 @@ use loam_sdk::{
 };
 
 #[loamstorage]
-pub struct Counter{
-    count: PersistentItem<u32>
+pub struct Counter {
+    count: PersistentItem<u32>,
 }
 
 #[subcontract]

@@ -1,5 +1,9 @@
 use loam_sdk::{
-    loamstorage, soroban_sdk::{self, contracttype, env, Address, Bytes, Env, InstanceItem, Lazy, PersistentMap}, subcontract
+    loamstorage,
+    soroban_sdk::{
+        self, contracttype, env, Address, Bytes, Env, InstanceItem, Lazy, PersistentMap,
+    },
+    subcontract,
 };
 
 use crate::error::Error;
@@ -67,11 +71,10 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn require_admin(&self)  {
+    pub fn require_admin(&self) {
         self.admin.get().unwrap().require_auth();
     }
 }
-
 
 #[subcontract]
 pub trait IsTokenTrait {

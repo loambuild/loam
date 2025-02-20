@@ -1,5 +1,7 @@
 use loam_sdk::{
-    loamstorage, soroban_sdk::{self, auth::Context, env, BytesN, InstanceItem, Lazy, Vec}, subcontract,
+    loamstorage,
+    soroban_sdk::{self, auth::Context, env, BytesN, InstanceItem, Lazy, Vec},
+    subcontract,
 };
 
 use crate::error::Error;
@@ -35,7 +37,7 @@ impl IsSimpleAccount for SimpleAccountManager {
         signature_payload: BytesN<32>,
         signature: BytesN<64>,
         _auth_context: Vec<Context>,
-    )-> Result<(), Error> {
+    ) -> Result<(), Error> {
         env().crypto().ed25519_verify(
             &self.owner.get().unwrap(),
             &signature_payload.into(),

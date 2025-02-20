@@ -1,10 +1,12 @@
 use loam_sdk::{
-    loamstorage, soroban_sdk::{self, Lazy, PersistentItem}, subcontract
+    loamstorage,
+    soroban_sdk::{self, Lazy, PersistentItem},
+    subcontract,
 };
 
 #[loamstorage]
-pub struct Counter{
-    count: PersistentItem<u32>
+pub struct Counter {
+    count: PersistentItem<u32>,
 }
 
 #[subcontract]

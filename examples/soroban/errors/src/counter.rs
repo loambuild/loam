@@ -1,5 +1,7 @@
 use loam_sdk::{
-    loamstorage, soroban_sdk::{self, Lazy, PersistentItem}, subcontract, 
+    loamstorage,
+    soroban_sdk::{self, Lazy, PersistentItem},
+    subcontract,
 };
 
 #[subcontract]
@@ -12,7 +14,7 @@ const MAX: u32 = 5;
 
 #[loamstorage]
 pub struct Impl {
-    num: PersistentItem<u32>
+    num: PersistentItem<u32>,
 }
 
 impl IsRiff for Impl {

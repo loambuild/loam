@@ -1,5 +1,5 @@
 use loam_sdk::{
-    soroban_sdk::{self, Lazy, Symbol, Vec, symbol_short},
+    soroban_sdk::{self, symbol_short, Lazy, Symbol, Vec},
     subcontract, vec,
 };
 

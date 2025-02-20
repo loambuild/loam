@@ -5,7 +5,9 @@
 //! account(s) claim it before or after provided time point.
 //! For simplicity, the contract only supports invoker-based auth.
 use loam_sdk::{
-    loamstorage, soroban_sdk::{self, contracttype, env, Address, Env, Lazy, PersistentItem, Vec}, subcontract
+    loamstorage,
+    soroban_sdk::{self, contracttype, env, Address, Env, Lazy, PersistentItem, Vec},
+    subcontract,
 };
 
 use crate::error::Error;
