@@ -1,4 +1,9 @@
 #[cfg(feature = "integration-tests")]
 mod build_clients;
-#[cfg(feature = "integration-tests")]
+
+#[cfg(not(feature = "integration-tests"))]
+mod unit;
+
 mod util;
+
+

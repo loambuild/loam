@@ -32,7 +32,7 @@ setup:
 
 # Build loam-cli test contracts to speed up testing
 build-cli-test-contracts:
-    cargo run -- build --manifest-path crates/loam-cli/tests/fixtures/soroban-init-boilerplate/Cargo.toml
+    just loam build --manifest-path crates/loam-cli/tests/fixtures/soroban-init-boilerplate/Cargo.toml
 
 test: build
     cargo nextest run --workspace
