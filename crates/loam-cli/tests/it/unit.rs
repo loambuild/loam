@@ -1,6 +1,5 @@
 use crate::util::{AssertExt, TestEnv};
 
-
 #[test]
 fn contract_with_bad_name_prints_useful_error() {
     TestEnv::from("soroban-init-boilerplate", |env| {
