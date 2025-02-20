@@ -22,7 +22,8 @@ jobs:
       
       - name: Run cargo fmt
         run: cargo fmt --all -- --check
-      
+      - name: build since clippy needs contracts to be built
+        run: just build
       - name: Run cargo clippy
         run: cargo clippy --all
       - name: Unit Tests
