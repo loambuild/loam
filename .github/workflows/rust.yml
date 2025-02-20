@@ -18,9 +18,12 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@nextest
       
       - name: Run cargo fmt
         run: cargo fmt --all -- --check
       
       - name: Run cargo clippy
         run: cargo clippy --all
+      - name: Unit Tests
+        run: just test
