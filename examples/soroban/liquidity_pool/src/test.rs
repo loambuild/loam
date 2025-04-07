@@ -133,7 +133,7 @@ fn test() {
     assert_eq!(token2.balance(&user1), 949);
     assert_eq!(token2.balance(&liqpool.address), 51);
 
-    e.budget().reset_unlimited();
+    e.cost_estimate().budget().reset_unlimited();
     liqpool.withdraw(&user1, &100, &197, &51);
 
     assert_eq!(
