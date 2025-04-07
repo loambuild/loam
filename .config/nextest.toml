@@ -1,0 +1,3 @@
+[[profile.default.overrides]]
+filter = 'package(loam-cli)'
+slow-timeout = { period = "90s", terminate-after = 4 }

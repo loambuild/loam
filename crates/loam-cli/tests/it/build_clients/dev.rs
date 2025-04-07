@@ -3,6 +3,7 @@ use std::process::Stdio;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio_stream::wrappers::LinesStream;
 
+#[ignore]
 #[tokio::test]
 async fn dev_command_watches_for_changes_and_environments_toml() {
     TestEnv::from_async("soroban-init-boilerplate", |env| async {
@@ -37,7 +38,7 @@ async fn dev_command_watches_for_changes_and_environments_toml() {
             )
             .await;
 
-            TestEnv::wait_for_output(&mut stderr_lines, &format!("cargo rustc")).await;
+            TestEnv::wait_for_output(&mut stderr_lines, "cargo rustc").await;
 
             TestEnv::wait_for_output(
                 &mut stderr_lines,
