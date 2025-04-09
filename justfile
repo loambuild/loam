@@ -45,8 +45,6 @@ create: build
     stellar keys generate default
     just stellar contract deploy --wasm ./target/loam/example_core.wasm --alias core
 
-# # Builds contracts. Deploys core subcontract and then redep
-
 # # Builds contracts. Deploys core subcontract and then redeploys to status message.
 
 redeploy:

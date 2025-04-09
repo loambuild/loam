@@ -5,7 +5,7 @@
 # b = "build"
 # c = "check"
 # t = "nextest run "
-# r = "run"
+r = "run --quiet --"
 # rr = "run --release"
 # recursive_example = "rr --example recursions"
 # space_example = ["run", "--release", "--", "\"command list\""]

@@ -29,7 +29,7 @@ pub struct AccountManager {
 
 #[subcontract]
 pub trait IsAccount {
-    fn __constructor(&mut self, signers: Vec<BytesN<32>>);
+    fn constructor(&mut self, signers: Vec<BytesN<32>>);
     fn add_limit(&mut self, token: Address, limit: i128);
     fn __check_auth(
         &self,
@@ -40,7 +40,7 @@ pub trait IsAccount {
 }
 
 impl IsAccount for AccountManager {
-    fn __constructor(&mut self, signers: Vec<BytesN<32>>) {
+    fn constructor(&mut self, signers: Vec<BytesN<32>>) {
         // In reality this would need some additional validation on signers
         // (deduplication etc.).
         let mut signers_set = Map::new(env());
