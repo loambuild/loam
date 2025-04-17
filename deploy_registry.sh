@@ -12,6 +12,12 @@ registry="stellar contract invoke --id registry --"
 
 $registry --help
 
+get-version () {
+    cargo pkgid $1 | cut -d'@' -f2
+}
+
+
 for i in $(cargo r build --ls); do
-    echo "Publishing $i to registry"
+    echo "Publishing $i to registry $(get-version $i)"
+
 done
