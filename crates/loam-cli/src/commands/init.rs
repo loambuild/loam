@@ -4,11 +4,11 @@ use soroban_cli::commands::contract::init as soroban_init;
 use std::{
     fs::{self, create_dir_all, metadata, read_to_string, write, Metadata},
     io,
-    path::{Path, PathBuf}, process::Command,
+    path::{Path, PathBuf},
+    process::Command,
 };
 use tempfile::TempDir;
 use toml_edit::{DocumentMut, TomlError};
-
 
 const FRONTEND_TEMPLATE: &str = "https://github.com/loambuild/frontend";
 
@@ -70,7 +70,7 @@ impl Cmd {
             eprintln!("Error creating temp dir for frontend template");
             Error::IoError(e)
         })?;
-        
+
         clone_repo(FRONTEND_TEMPLATE, fe_template_dir.path())?;
         copy_frontend_files(&fe_template_dir, &self.project_path)?;
 
@@ -180,7 +180,6 @@ fn rename_cargo_toml_remove(project: &Path, name: &str) -> Result<(), Error> {
     Ok(())
 }
 
-
 fn clone_repo(repo_url: &str, dest: &Path) -> Result<(), Error> {
     let status = Command::new("git")
         .args(["clone", repo_url, dest.to_str().unwrap()])
@@ -202,7 +201,7 @@ fn clone_repo(repo_url: &str, dest: &Path) -> Result<(), Error> {
 fn copy_frontend_files(temp_dir: &TempDir, project_path: &Path) -> Result<(), Error> {
     fs_extra::dir::copy(
         temp_dir.path(),
-        &project_path,
+        project_path,
         &fs_extra::dir::CopyOptions::new()
             .content_only(true)
             .overwrite(true),

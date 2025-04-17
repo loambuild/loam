@@ -77,7 +77,7 @@ soroban_token_contract.client = false
 #[test]
 fn init_copies_contracts_and_frontend_template() {
     let env = TestEnv::new_empty();
-    
+
     // Run loam init with project path
     let project_path = env.cwd.join("my-project");
     env.loam("init")
@@ -86,9 +86,13 @@ fn init_copies_contracts_and_frontend_template() {
         .success();
     // Verify contract files exist
     assert!(project_path.join("contracts/core/src/lib.rs").exists());
-    assert!(project_path.join("contracts/status_message/src/lib.rs").exists());
+    assert!(project_path
+        .join("contracts/status_message/src/lib.rs")
+        .exists());
     assert!(project_path.join("contracts/core/Cargo.toml").exists());
-    assert!(project_path.join("contracts/status_message/Cargo.toml").exists());
+    assert!(project_path
+        .join("contracts/status_message/Cargo.toml")
+        .exists());
 
     // Verify frontend template files exist
     assert!(project_path.join("package.json").exists());
