@@ -10,7 +10,7 @@ use tempfile::TempDir;
 use toml_edit::{DocumentMut, TomlError};
 
 
-const FRONTEND_TEMPLATE: &str = "https://github.com/AhaLabs/scaffold-stellar-frontend";
+const FRONTEND_TEMPLATE: &str = "https://github.com/loambuild/frontend";
 
 #[derive(RustEmbed)]
 #[folder = "./src/examples/soroban/core"]
@@ -165,7 +165,6 @@ fn copy_file(
     Ok(())
 }
 
-// TODO: import from stellar-cli init (not currently pub there)
 fn file_exists(file_path: &Path) -> bool {
     metadata(file_path)
         .as_ref()
