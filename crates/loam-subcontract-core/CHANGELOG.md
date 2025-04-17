@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0](https://github.com/loambuild/loam/compare/loam-subcontract-core-v0.7.9...loam-subcontract-core-v0.8.0) - 2025-04-17
+
+### Added
+
+- Integrate Smartdeploy as loam registry ([#181](https://github.com/loambuild/loam/pull/181))
+
 ## [0.7.9](https://github.com/loambuild/loam/compare/loam-subcontract-core-v0.7.8...loam-subcontract-core-v0.7.9) - 2025-01-22
 
 ### Other

@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.7](https://github.com/loambuild/loam/compare/loam-sdk-macro-v0.8.6...loam-sdk-macro-v0.8.7) - 2025-04-17
+
+### Fixed
+
+- removes the requirement that `env` be imported ([#186](https://github.com/loambuild/loam/pull/186))
+- ensure that storage keys are unique when exported ([#179](https://github.com/loambuild/loam/pull/179))
+
+### Other
+
+- Add Loam ports of Soroban example contracts ([#174](https://github.com/loambuild/loam/pull/174))
+
 ## [0.8.6](https://github.com/loambuild/loam/compare/loam-sdk-macro-v0.8.5...loam-sdk-macro-v0.8.6) - 2025-01-22
 
 ### Added

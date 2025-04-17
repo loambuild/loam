@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.17](https://github.com/loambuild/loam/compare/loam-sdk-v0.6.16...loam-sdk-v0.6.17) - 2025-04-17
+
+### Added
+
+- add to_string and log that doesn't require a passed `env` ([#180](https://github.com/loambuild/loam/pull/180))
+
+### Other
+
+- Add Loam ports of Soroban example contracts ([#174](https://github.com/loambuild/loam/pull/174))
+
 ## [0.6.16](https://github.com/loambuild/loam/compare/loam-sdk-v0.6.15...loam-sdk-v0.6.16) - 2025-01-22
 
 ### Added
