@@ -49,6 +49,12 @@ impl IsCore for Admin {
         self.admin_get().unwrap().require_auth();
         env().deployer().update_current_contract_wasm(wasm_hash);
     }
+
+    fn __constructor(&mut self, admin: Address) {
+        if self.admin_get().is_none() {
+            self.admin_set(admin);
+        }
+    }
 }
 
 #[subcontract]
@@ -62,4 +68,7 @@ pub trait IsCore {
 
     /// Admin can redeploy the contract with given hash.
     fn redeploy(&self, wasm_hash: loam_sdk::soroban_sdk::BytesN<32>);
+
+    /// Constructor to set the admin
+    fn __constructor(&mut self, admin: loam_sdk::soroban_sdk::Address);
 }

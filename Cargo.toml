@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 default-members = ["crates/*"]
-members = ["crates/*", "test/*", "examples/soroban/*", "examples/soroban/cross_contract/*"]
+members = ["crates/*", "test/*", "examples/soroban/*", "examples/soroban/cross_contract/*", "contracts/*"]
 exclude = ["test/*", "examples/soroban/cross_contract", "examples/soroban/deployer"]
 # include = ["examples/soroban/cross_contract/*", "examples/soroban/deployer/*"]
 
