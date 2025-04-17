@@ -2395,6 +2395,7 @@ dependencies = [
  "stellar-xdr",
  "strsim",
  "symlink",
+ "tempfile",
  "thiserror",
  "tokio",
  "tokio-stream",
