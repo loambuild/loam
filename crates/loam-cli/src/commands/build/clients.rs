@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 use regex::Regex;
 use serde_json;
 use shlex::split;
-use soroban_cli::commands::NetworkRunnable;
+use soroban_cli::commands::{global, NetworkRunnable};
 use soroban_cli::utils::contract_hash;
 use soroban_cli::{commands as cli, CommandParser};
 use std::fmt::Debug;
@@ -60,7 +60,7 @@ pub enum Error {
     #[error("⛔ ️Failed to execute subcommand: {0:?}\n{1:?}")]
     SubCommandExecutionFailure(String, String),
     #[error(transparent)]
-    ContractInstall(#[from] cli::contract::install::Error),
+    ContractInstall(#[from] cli::contract::upload::Error),
     #[error(transparent)]
     ContractDeploy(#[from] cli::contract::deploy::wasm::Error),
     #[error(transparent)]
@@ -193,7 +193,7 @@ impl Args {
         workspace_root: &std::path::Path,
     ) -> Result<bool, Error> {
         let result = cli::contract::fetch::Cmd {
-            contract_id: soroban_cli::config::ContractAddress::ContractId(*contract_id),
+            contract_id: soroban_cli::config::UnresolvedContract::Resolved(*contract_id),
             out_file: None,
             locator: Self::get_config_locator(workspace_root),
             network: Self::get_network_args(network),
@@ -263,7 +263,7 @@ export default new Client.Client({{
     async fn account_exists(account_name: &str) -> Result<bool, Error> {
         // TODO: this is a workaround until generate is changed to not overwrite accounts
         Ok(cli::keys::fund::Cmd::parse_arg_vec(&[account_name])?
-            .run()
+            .run(&global::Args::default())
             .await
             .is_ok())
     }
@@ -434,7 +434,7 @@ export default new Client.Client({{
                     return Err(Error::BadContractName(name.to_string()));
                 }
                 eprintln!("📲 installing {name:?} wasm bytecode on-chain...");
-                let hash = cli::contract::install::Cmd::parse_arg_vec(&[
+                let hash = cli::contract::upload::Cmd::parse_arg_vec(&[
                     "--wasm",
                     wasm_path
                         .to_str()
