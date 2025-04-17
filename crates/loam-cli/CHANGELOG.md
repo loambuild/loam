@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.5](https://github.com/loambuild/loam/compare/loam-cli-v0.14.4...loam-cli-v0.14.5) - 2025-04-17
+
+### Added
+
+- Integrate Smartdeploy as loam registry ([#181](https://github.com/loambuild/loam/pull/181))
+
+### Fixed
+
+- clippy and others warning messages ([#184](https://github.com/loambuild/loam/pull/184))
+
+### Other
+
+- Add Loam ports of Soroban example contracts ([#174](https://github.com/loambuild/loam/pull/174))
+
 ## [0.14.4](https://github.com/loambuild/loam/compare/loam-cli-v0.14.3...loam-cli-v0.14.4) - 2025-01-22
 
 ### Added
