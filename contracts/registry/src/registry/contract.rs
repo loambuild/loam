@@ -2,14 +2,13 @@
 use loam_sdk::{
     loamstorage,
     soroban_sdk::{
-        self, contracttype, env, symbol_short, Address, BytesN, Env, IntoVal,
-        PersistentMap, String, Symbol, Val,
+        self, contracttype, env, symbol_short, Address, BytesN, Env, IntoVal, PersistentMap,
+        String, Symbol, Val,
     },
 };
 
 use crate::{
-    error::Error, registry::Publishable, util::hash_string,
-    version::Version, Contract as Contract_,
+    error::Error, registry::Publishable, util::hash_string, version::Version, Contract as Contract_,
 };
 
 use super::{wasm::Wasm, IsClaimable, IsDeployable, IsDevDeployable};
@@ -85,12 +84,8 @@ impl IsDeployable for Contract {
             .set(deployed_name.clone(), &ContractType::Id(address.clone()));
 
         // Publish a deploy event
-        let version = version.map_or_else(
-            || {
-                Wasm::default().most_recent_version(&contract_name)
-            },
-            Ok,
-        )?;
+        let version =
+            version.map_or_else(|| Wasm::default().most_recent_version(&contract_name), Ok)?;
         let deploy_datas = DeployEventData {
             published_name: contract_name,
             deployed_name,

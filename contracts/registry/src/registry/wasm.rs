@@ -1,4 +1,7 @@
-use loam_sdk::{loamstorage, soroban_sdk::{self, env, Address, PersistentMap, String}};
+use loam_sdk::{
+    loamstorage,
+    soroban_sdk::{self, env, Address, PersistentMap, String},
+};
 
 use crate::{
     error::Error,
@@ -67,7 +70,11 @@ impl Wasm {
 }
 
 impl IsPublishable for Wasm {
-    fn fetch(&self, contract_name: String, version: Option<Version>) -> Result<PublishedWasm, Error> {
+    fn fetch(
+        &self,
+        contract_name: String,
+        version: Option<Version>,
+    ) -> Result<PublishedWasm, Error> {
         self.get(&contract_name, version)
     }
 

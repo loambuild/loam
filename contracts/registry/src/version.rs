@@ -7,8 +7,7 @@ use loam_sdk::soroban_sdk::{self, contracttype, env, log, Env};
 #[derive(Default, Eq, PartialEq, Clone, Debug)]
 pub struct Version(u32, u32, u32);
 
-
-pub const INITAL_VERSION: Version = Version(0,0,1);
+pub const INITAL_VERSION: Version = Version(0, 0, 1);
 
 impl Display for Version {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
