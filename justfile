@@ -11,7 +11,7 @@ path:
     just --list
 
 loam +args:
-    @cargo r -- {{args}}
+    @cargo r {{args}}
 
 s +args:
     @stellar {{args}}
