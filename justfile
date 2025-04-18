@@ -11,7 +11,7 @@ path:
     just --list
 
 loam +args:
-    @cargo r -- {{args}}
+    @cargo r {{args}}
 
 s +args:
     @stellar {{args}}
@@ -42,8 +42,8 @@ test-integration: build-cli-test-contracts
 
 create: build
     rm -rf .soroban
-    stellar keys generate default
-    just stellar contract deploy --wasm ./target/loam/example_core.wasm --alias core
+    -stellar keys generate default
+    just stellar contract deploy --wasm ./target/loam/example_core.wasm --alias core --source-account default -- --admin default
 
 # # Builds contracts. Deploys core subcontract and then redeploys to status message.
 

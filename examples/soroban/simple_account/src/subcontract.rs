@@ -26,7 +26,7 @@ impl IsSimpleAccount for SimpleAccountManager {
     fn init(&mut self, public_key: BytesN<32>) -> Result<(), Error> {
         if self.owner.get().is_some() {
             return Err(Error::OwnerAlreadySet);
-        };
+        }
         self.owner.set(&public_key);
         Ok(())
     }

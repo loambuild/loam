@@ -2,10 +2,12 @@ use clap::Parser;
 use rust_embed::{EmbeddedFile, RustEmbed};
 use soroban_cli::commands::contract::init as soroban_init;
 use std::{
-    fs::{self, create_dir_all, metadata, read_to_string, remove_dir_all, write, Metadata},
+    fs::{self, create_dir_all, metadata, read_to_string, write, Metadata},
     io,
     path::{Path, PathBuf},
+    process::Command,
 };
+use tempfile::TempDir;
 use toml_edit::{DocumentMut, TomlError};
 
 const FRONTEND_TEMPLATE: &str = "https://github.com/loambuild/frontend";
@@ -38,6 +40,10 @@ pub enum Error {
     ConverBytesToStringErr(#[from] std::str::Utf8Error),
     #[error("Failed to parse toml file: {0}")]
     TomlParseError(#[from] TomlError),
+    #[error("Failed to copy frontend files: {0}")]
+    FrontendCopyError(String),
+    #[error("Git clone failed: {0}")]
+    GitCloneError(String),
 }
 
 impl Cmd {
@@ -58,16 +64,19 @@ impl Cmd {
             project_path: self.project_path.to_string_lossy().to_string(),
             name: self.name.clone(),
             with_example: None,
-            frontend_template: Some(FRONTEND_TEMPLATE.to_string()),
             overwrite: true,
+            frontend_template: None,
         }
         .run(&soroban_cli::commands::global::Args::default())?;
 
-        // remove soroban hello_world default contract
-        remove_dir_all(self.project_path.join("contracts/hello_world/")).map_err(|e| {
-            eprintln!("Error removing directory");
-            e
+        // Clone frontend template
+        let fe_template_dir = tempfile::tempdir().map_err(|e| {
+            eprintln!("Error creating temp dir for frontend template");
+            Error::IoError(e)
         })?;
+
+        clone_repo(FRONTEND_TEMPLATE, fe_template_dir.path())?;
+        copy_frontend_files(&fe_template_dir, &self.project_path)?;
 
         copy_example_contracts(&self.project_path)?;
         rename_cargo_toml_remove(&self.project_path, "core")?;
@@ -160,7 +169,6 @@ fn copy_file(
     Ok(())
 }
 
-// TODO: import from stellar-cli init (not currently pub there)
 fn file_exists(file_path: &Path) -> bool {
     metadata(file_path)
         .as_ref()
@@ -173,5 +181,30 @@ fn rename_cargo_toml_remove(project: &Path, name: &str) -> Result<(), Error> {
     let to = from.with_extension("");
     println!("Renaming to {from:?} to {to:?}");
     fs::rename(from, to)?;
+    Ok(())
+}
+
+fn clone_repo(repo_url: &str, dest: &Path) -> Result<(), Error> {
+    let status = Command::new("git")
+        .args(["clone", repo_url, dest.to_str().unwrap()])
+        .status()
+        .map_err(|e| Error::GitCloneError(format!("Failed to execute git clone: {e}")))?;
+
+    if !status.success() {
+        return Err(Error::GitCloneError("Git clone command failed".to_string()));
+    }
+    Ok(())
+}
+
+fn copy_frontend_files(temp_dir: &TempDir, project_path: &Path) -> Result<(), Error> {
+    fs_extra::dir::copy(
+        temp_dir.path(),
+        project_path,
+        &fs_extra::dir::CopyOptions::new()
+            .content_only(true)
+            .overwrite(true),
+    )
+    .map_err(|e| Error::FrontendCopyError(e.to_string()))?;
+
     Ok(())
 }
