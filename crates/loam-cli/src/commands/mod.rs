@@ -43,7 +43,7 @@ impl Root {
             Cmd::Build(build_info) => build_info.run().await?,
             Cmd::UpdateEnv(e) => e.run()?,
             Cmd::Dev(dev_info) => dev_info.run().await?,
-        };
+        }
         Ok(())
     }
 }

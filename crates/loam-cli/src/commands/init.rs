@@ -189,7 +189,6 @@ fn clone_repo(repo_url: &str, dest: &Path) -> Result<(), Error> {
         .args(["clone", repo_url, dest.to_str().unwrap()])
         .status()
         .map_err(|e| {
-            eprintln!("Error executing git clone");
             Error::GitCloneError(format!("Failed to execute git clone: {e}"))
         })?;
 
@@ -208,7 +207,6 @@ fn copy_frontend_files(temp_dir: &TempDir, project_path: &Path) -> Result<(), Er
             .overwrite(true),
     )
     .map_err(|e| {
-        eprintln!("Error copying frontend files");
         Error::FrontendCopyError(e.to_string())
     })?;
 
