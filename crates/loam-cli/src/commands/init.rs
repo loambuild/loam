@@ -188,9 +188,7 @@ fn clone_repo(repo_url: &str, dest: &Path) -> Result<(), Error> {
     let status = Command::new("git")
         .args(["clone", repo_url, dest.to_str().unwrap()])
         .status()
-        .map_err(|e| {
-            Error::GitCloneError(format!("Failed to execute git clone: {e}"))
-        })?;
+        .map_err(|e| Error::GitCloneError(format!("Failed to execute git clone: {e}")))?;
 
     if !status.success() {
         return Err(Error::GitCloneError("Git clone command failed".to_string()));
@@ -206,9 +204,7 @@ fn copy_frontend_files(temp_dir: &TempDir, project_path: &Path) -> Result<(), Er
             .content_only(true)
             .overwrite(true),
     )
-    .map_err(|e| {
-        Error::FrontendCopyError(e.to_string())
-    })?;
+    .map_err(|e| Error::FrontendCopyError(e.to_string()))?;
 
     Ok(())
 }
