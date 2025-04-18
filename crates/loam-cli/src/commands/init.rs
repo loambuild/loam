@@ -40,6 +40,10 @@ pub enum Error {
     ConverBytesToStringErr(#[from] std::str::Utf8Error),
     #[error("Failed to parse toml file: {0}")]
     TomlParseError(#[from] TomlError),
+    #[error("Failed to copy frontend files: {0}")]
+    FrontendCopyError(String),
+    #[error("Git clone failed: {0}")]
+    GitCloneError(String),
 }
 
 impl Cmd {
@@ -186,14 +190,11 @@ fn clone_repo(repo_url: &str, dest: &Path) -> Result<(), Error> {
         .status()
         .map_err(|e| {
             eprintln!("Error executing git clone");
-            Error::IoError(e)
+            Error::GitCloneError(format!("Failed to execute git clone: {e}"))
         })?;
 
     if !status.success() {
-        return Err(Error::IoError(io::Error::new(
-            io::ErrorKind::Other,
-            "Failed to clone repository",
-        )));
+        return Err(Error::GitCloneError("Git clone command failed".to_string()));
     }
     Ok(())
 }
@@ -208,7 +209,7 @@ fn copy_frontend_files(temp_dir: &TempDir, project_path: &Path) -> Result<(), Er
     )
     .map_err(|e| {
         eprintln!("Error copying frontend files");
-        Error::IoError(io::Error::new(io::ErrorKind::Other, e.to_string()))
+        Error::FrontendCopyError(e.to_string())
     })?;
 
     Ok(())
