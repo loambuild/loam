@@ -45,28 +45,24 @@ fn generate_method(trait_item: &syn::TraitItem) -> Option<TokenStream> {
         let sig = &method.sig;
         let name = &sig.ident;
         let output = &sig.output;
-        let self_ty = get_receiver(sig.inputs.iter().next()?)?;
-
+        let self_ty = get_receiver(sig.inputs.iter().next()?);
         let is_result = is_result_type(output);
-        let args_without_self = get_args_without_self(&sig.inputs);
+        let args = &args_to_idents(&sig.inputs, self_ty.is_none());
         let attrs = &method.attrs;
         let return_question_mark = if is_result { Some(quote!(?)) } else { None };
-
+        let Some(self_ty) = self_ty.as_ref() else {
+            return Some(generate_static_method(sig, attrs, name, args));
+        };
         if is_mutable_method(self_ty) {
             Some(generate_mutable_method(
                 sig,
                 attrs,
                 name,
-                &args_without_self,
+                args,
                 return_question_mark.as_ref(),
             ))
         } else {
-            Some(generate_immutable_method(
-                sig,
-                attrs,
-                name,
-                &args_without_self,
-            ))
+            Some(generate_immutable_method(sig, attrs, name, args))
         }
     } else {
         None
@@ -81,10 +77,10 @@ fn get_receiver(arg: &syn::FnArg) -> Option<&syn::Receiver> {
     }
 }
 
-pub fn get_args_without_self(inputs: &Punctuated<FnArg, Token!(,)>) -> Vec<Ident> {
+pub fn args_to_idents(inputs: &Punctuated<FnArg, Token!(,)>, is_static: bool) -> Vec<Ident> {
     inputs
         .iter()
-        .skip(1)
+        .skip(usize::from(!is_static))
         .filter_map(|arg| {
             if let syn::FnArg::Typed(syn::PatType { pat, .. }) = arg {
                 match &**pat {
@@ -100,6 +96,21 @@ pub fn get_args_without_self(inputs: &Punctuated<FnArg, Token!(,)>) -> Vec<Ident
 
 fn is_mutable_method(receiver: &syn::Receiver) -> bool {
     receiver.reference.is_some() && receiver.mutability.is_some()
+}
+fn generate_static_method(
+    sig: &Signature,
+    attrs: &[Attribute],
+    name: &Ident,
+    args_without_self: &[Ident],
+) -> TokenStream {
+    let inputs = sig.inputs.iter();
+    let output = &sig.output;
+    quote! {
+        #(#attrs)*
+        fn #name(#(#inputs),*) #output {
+            Self::Impl::#name(#(#args_without_self),*)
+        }
+    }
 }
 fn generate_immutable_method(
     sig: &Signature,
@@ -192,10 +203,10 @@ pub fn derive_contract_impl(args: TokenStream, trait_impls: Item) -> TokenStream
         .filter_map(|(first, _)| all_traits.get(&format!("Is{first}")))
         .flatten()
         .collect::<Vec<_>>();
-
+    let contract_name = &strukt.ident;
     for (first, second) in idents {
         impls.extend(quote! {
-            impl #first for Contract {
+            impl #first for #contract_name {
                 type Impl = #second;
             }
         });

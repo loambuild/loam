@@ -58,7 +58,7 @@ fn generate_methods(item: &ItemTrait) -> Vec<TokenStream> {
         .filter_map(|item| {
             if let syn::TraitItem::Fn(TraitItemFn { sig, attrs, .. }) = item {
                 let name = &sig.ident;
-                Some(generate_method(sig, attrs, name))
+                Some(generate_method(sig, attrs, name, sig.receiver().is_none()))
             } else {
                 None
             }
@@ -70,15 +70,16 @@ fn generate_method(
     sig: &syn::Signature,
     attrs: &[syn::Attribute],
     name: &syn::Ident,
+    is_static: bool,
 ) -> TokenStream {
     let output = &sig.output;
-    let inputs = sig.inputs.iter().skip(1);
-    let args_without_self = crate::subcontract::get_args_without_self(&sig.inputs);
+    let inputs = sig.inputs.iter().skip(usize::from(!is_static));
+    let args = crate::subcontract::args_to_idents(&sig.inputs, is_static);
     quote! {
         #(#attrs)*
         pub fn #name(env: loam_sdk::soroban_sdk::Env, #(#inputs),*) #output {
             loam_sdk::soroban_sdk::set_env(env);
-            Contract::#name(#(#args_without_self),*)
+            Contract::#name(#(#args),*)
         }
     }
 }

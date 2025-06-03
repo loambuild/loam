@@ -42,6 +42,7 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - run: rustup update
     - run: rustup target add wasm32-unknown-unknown
+    - run:  sudo apt install libdbus-1-dev pkg-config libudev
     - uses: taiki-e/install-action@just
     - uses: taiki-e/install-action@nextest
     - uses: cargo-bins/cargo-binstall@main
