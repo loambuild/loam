@@ -28,7 +28,7 @@ jobs:
       - run: rustup target add wasm32-unknown-unknown
       - uses: taiki-e/install-action@nextest
       - uses: taiki-e/install-action@just
-      
+      - run:  sudo apt install libdbus-1-dev pkg-config      
       - name: Run cargo fmt
         run: cargo fmt --all -- --check
       - name: build since clippy needs contracts to be built
