@@ -4,8 +4,14 @@ use loam_sdk::{
 };
 
 #[contracttype(export = false)]
-#[derive(Default)]
-pub struct Admin(Kind);
+pub struct Admin(Address);
+
+impl Default for Admin {
+    fn default() -> Self {
+        // Admin should always be initialized in the constructor
+        unreachable!()
+    }
+}
 
 fn admin_key() -> Symbol {
     symbol_short!("ADMIN")
@@ -13,47 +19,31 @@ fn admin_key() -> Symbol {
 
 impl Lazy for Admin {
     fn get_lazy() -> Option<Self> {
-        env().storage().instance().get(&admin_key())
+        env().storage().instance().get(&admin_key()).map(Admin)
     }
 
     fn set_lazy(self) {
-        env().storage().instance().set(&admin_key(), &self);
+        env().storage().instance().set(&admin_key(), &self.0);
     }
-}
-
-/// Work around not having `Option` in `contracttype`
-#[contracttype(export = false)]
-#[derive(Default)]
-pub enum Kind {
-    Address(Address),
-    #[default]
-    None,
 }
 
 impl IsCore for Admin {
     fn admin_get(&self) -> Option<Address> {
-        match &self.0 {
-            Kind::Address(address) => Some(address.clone()),
-            Kind::None => None,
-        }
+        Some(self.0.clone())
     }
 
     fn admin_set(&mut self, new_admin: Address) {
-        if let Admin(Kind::Address(admin)) = &self {
-            admin.require_auth();
-        }
-        self.0 = Kind::Address(new_admin);
+        self.0.require_auth();
+        self.0 = new_admin;
     }
 
-    fn redeploy(&self, wasm_hash: BytesN<32>) {
-        self.admin_get().unwrap().require_auth();
+    fn upgrade(&self, wasm_hash: BytesN<32>) {
+        self.0.require_auth();
         env().deployer().update_current_contract_wasm(wasm_hash);
     }
 
-    fn __constructor(&mut self, admin: Address) {
-        if self.admin_get().is_none() {
-            self.admin_set(admin);
-        }
+    fn __constructor(admin: Address) {
+        Self::set_lazy(Self(admin));
     }
 }
 
@@ -66,9 +56,9 @@ pub trait IsCore {
     /// a different account try to become admin
     fn admin_set(&mut self, new_admin: loam_sdk::soroban_sdk::Address);
 
-    /// Admin can redeploy the contract with given hash.
-    fn redeploy(&self, wasm_hash: loam_sdk::soroban_sdk::BytesN<32>);
+    /// Admin can upgrade the contract with given hash.
+    fn upgrade(&self, wasm_hash: loam_sdk::soroban_sdk::BytesN<32>);
 
     /// Constructor to set the admin
-    fn __constructor(&mut self, admin: loam_sdk::soroban_sdk::Address);
+    fn __constructor(admin: loam_sdk::soroban_sdk::Address);
 }
